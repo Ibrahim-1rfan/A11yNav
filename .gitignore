@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+build/
+dist/
+tmp/
+*.spec
+!Klicky.spec
+config/settings.json
+*.log
+klicky_research_pitch(1)(1).pdf
+/deliverables

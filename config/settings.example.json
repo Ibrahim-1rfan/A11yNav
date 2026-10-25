@@ -1,0 +1,18 @@
+{
+  "endpoint": "http://127.0.0.1:1234/v1",
+  "model": "ui-tars-2b-sft",
+  "adapter": "ui_tars",
+  "browser": "default",
+  "engine": "bing",
+  "request_timeout": 45,
+  "task_timeout": 240,
+  "max_actions": 12,
+  "max_retries": 2,
+  "settle_seconds": 1.0,
+  "max_image_edge": 1280,
+  "max_tokens": 512,
+  "temperature": 0,
+  "font_px": 18,
+  "speech": false,
+  "prompt_extra": ""
+}
