@@ -24,6 +24,16 @@ def enable_dpi_awareness():
             ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 
+def foreground_app():
+    """Return (window handle, "edge"/"chrome"/"firefox" or None) for the window the user is in now."""
+    if os.name != "nt":
+        return None, None
+    browser = WindowsBrowser()
+    hwnd = browser.user32.GetForegroundWindow()
+    name = browser.process_name(hwnd) if hwnd else ""
+    return hwnd, next((app for app, exe in EXECUTABLES.items() if exe == name), None)
+
+
 def executable_for(preference):
     if preference == "default":
         return None

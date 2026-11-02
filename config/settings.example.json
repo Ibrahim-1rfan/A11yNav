@@ -14,5 +14,10 @@
   "temperature": 0,
   "font_px": 18,
   "speech": false,
-  "prompt_extra": ""
+  "prompt_extra": "",
+  "profile": "default",
+  "text_model": "",
+  "embed_model": "",
+  "rag_app": "auto",
+  "hotkey": "Ctrl+Alt+K"
 }

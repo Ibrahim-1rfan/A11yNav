@@ -37,6 +37,53 @@ The ring stays in the widget because this workflow uses keyboard/native address 
 does not have a visually grounded click target. It does not pretend to point at a detected control.
 There are no animations, satisfying reduced-motion use without another setting.
 
+## Ask from any app (global shortcut)
+
+While Klicky is running, press **Ctrl+Alt+K** from any application, for example while reading in Chrome.
+Klicky notes which browser was in front, opens its question box with the cursor ready, and answers with
+that browser's guide unless your question names another browser. Press **Escape** to close Klicky and
+return to the window you were in. The shortcut only opens the question box; it never presses keys elsewhere.
+
+If another app already owns Ctrl+Alt+K, Klicky tries Win+Shift+K and then Ctrl+Alt+F9, and the main window
+shows which one is active. A shortcut you choose in Settings → "Shortcut to open Klicky from any app" is
+never replaced; Klicky tells you if it is taken. Leave the field empty to turn the shortcut off.
+
+## Ask how to do something (browser guides)
+
+Type a question instead of a search, for example `How do I make text bigger in Edge?` or
+`How can Chrome read this page aloud?`. A deterministic router sends "search for …" requests to the
+search agent and questions ("how do I…", "where is…", "I can't…", or anything ending in `?`) to the guide assistant.
+
+- Answers come only from the checked guides in `knowledge/browsers/` (zoom and text size, reading mode,
+  read aloud, dark mode and contrast, captions, caret browsing, find on page, tabs, bookmarks, history) for
+  Edge, Chrome and Firefox. Each guide cites the official help page it was checked against.
+- Retrieval runs locally: keyword ranking always works, and an optional LM Studio **embedding model**
+  (Settings → Embedding model) adds semantic matching, fused with reciprocal rank fusion. Vectors are cached
+  under `%LOCALAPPDATA%/Klicky/index/`.
+- An optional local **answer model** (Settings → Answer model, for example a small instruct model such as
+  Qwen2.5-3B-Instruct) rewrites the guide in your profile's style. Every step must cite a provided guide;
+  otherwise Klicky shows the guide as written. With no answer model, the guide is shown as written.
+- Questions with no matching guide get "I don't have a guide for that yet" rather than a made-up answer.
+- The guide assistant only shows text. It never presses keys or controls the browser.
+
+New platforms can be added later as `knowledge/<platform>/*.md` files with the same front matter
+(`title`, `keywords`, `sources`) and one `## <app>` section per application.
+
+## Access profiles
+
+Choose a profile from the main window or Settings. It applies at once and can be changed any time;
+the text size remains adjustable (16–40 px).
+
+| Profile | What changes |
+| --- | --- |
+| Standard | The original dark, large-text layout. |
+| Low vision | 30 px text, yellow-on-black high contrast, 5 px focus outline, larger widget, spoken feedback on, answers of at most 5 steps with key names spelled out. |
+| Cognitive and learning | Calm light colours, extra letter and line spacing, dyslexia-friendly font when installed (OpenDyslexic, Lexend, else Verdana), sentence-case status words, plain-language answers shown one step at a time with Back/Next, and a confirmation before a search starts. |
+| Motor and dexterity | Taller buttons with wide spacing, a larger Stop button, Enter starts (Shift+Enter for a new line), quick-pick examples, slightly slower pacing, and answers that use the fewest key presses. |
+
+Profiles change presentation and wording only. They never widen what the search agent may do.
+Their benefit has not yet been evaluated with users.
+
 ## Requirements
 
 - Windows 10/11, 64-bit; unlocked interactive desktop, standard user session.
@@ -82,8 +129,8 @@ not establish reliable browser reasoning. See `docs/testing_report.md` for live-
 ## Controls and privacy
 
 Use Tab/Shift+Tab to reach controls, Alt+S to start, and Alt+X or Escape to stop while the main
-window has focus. The always-visible widget has a Stop button during tasks. These shortcuts are
-not global hotkeys. Move the mouse to the upper-left screen corner to trigger PyAutoGUI's additional
+window has focus. The always-visible widget has a Stop button during tasks. Only the "open Klicky"
+shortcut is global; Start and Stop shortcuts work inside Klicky's window. Move the mouse to the upper-left screen corner to trigger PyAutoGUI's additional
 fail-safe on its next keyboard action. Do not type or switch apps while Klicky is working; focus loss stops it.
 
 Screenshots are captured only during a user-started task and cropped to the browser rectangle.
@@ -152,5 +199,5 @@ service or automatic background capture is installed.
 - `deliverables/CUA_Implementation_Plan.pdf`: matching rendered plan.
 - `tracker.md`: chronological decisions, failures, fixes and next steps.
 
-Planned only: speech recognition, access-need profiles/memory, multi-model routing, documentation RAG,
-guided and broader autonomous modes, additional apps and participant-based HCI evaluation.
+Planned only: speech recognition, profile memory beyond saved settings, multi-agent routing, documentation
+for platforms other than browsers, broader autonomous modes, additional apps and participant-based HCI evaluation.

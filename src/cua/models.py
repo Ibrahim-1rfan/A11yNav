@@ -97,38 +97,47 @@ def parse_response(text: str, adapter: str) -> Action:
         raise UserError("The model's answer was not a supported action. Check the selected adapter.") from exc
 
 
+def local_request(settings: Settings, path, body=None):
+    """Loopback-only JSON request shared by every model client: no proxies, redirects or oversized replies."""
+    try:
+        with requests.Session() as session:
+            session.trust_env = False
+            response = session.request("GET" if body is None else "POST", settings.endpoint.rstrip("/")+path,
+                                       json=body, timeout=(3, settings.request_timeout), allow_redirects=False)
+            if response.status_code != 200:
+                if response.status_code in {400, 422}:
+                    raise ModelTransportError("The model rejected the image or prompt. Load a vision model with its projector and check the adapter.")
+                if response.status_code in {401,403}:
+                    raise ModelTransportError("The local server requires authorization. Configure it for local access without authentication.")
+                raise ModelTransportError("The model server could not complete the request. Check its memory usage and server log.")
+            if len(response.content) > 1_000_000:
+                raise ModelTransportError("The model returned too much data.")
+            return response.json()
+    except requests.Timeout as exc:
+        raise ModelTransportError("The model request timed out. No automatic retry was sent. Wait for LM Studio to finish or stop its generation before trying again; reduce image size or increase the model timeout in Settings.") from exc
+    except requests.RequestException as exc:
+        raise ModelTransportError("The local model is unavailable. Start the server in LM Studio and check Settings.") from exc
+    except ValueError as exc:
+        raise ModelTransportError("The local server returned unreadable data. Check its API address.") from exc
+
+
+def listed_models(request, stop, timeout):
+    data = bounded_call(lambda: request("/models"), stop, min(8, timeout))
+    try:
+        return [item["id"] for item in data["data"]]
+    except (KeyError, TypeError) as exc:
+        raise UserError("The server did not return a model list.") from exc
+
+
 class LocalModel:
     def __init__(self, settings: Settings):
         self.settings = settings.validate()
 
     def _request(self, path, body=None):
-        try:
-            with requests.Session() as session:
-                session.trust_env = False
-                response = session.request("GET" if body is None else "POST", self.settings.endpoint.rstrip("/")+path,
-                                           json=body, timeout=(3, self.settings.request_timeout), allow_redirects=False)
-                if response.status_code != 200:
-                    if response.status_code in {400, 422}:
-                        raise ModelTransportError("The model rejected the image or prompt. Load a vision model with its projector and check the adapter.")
-                    if response.status_code in {401,403}:
-                        raise ModelTransportError("The local server requires authorization. Configure it for local access without authentication.")
-                    raise ModelTransportError("The model server could not complete the request. Check its memory usage and server log.")
-                if len(response.content) > 1_000_000:
-                    raise ModelTransportError("The model returned too much data.")
-                return response.json()
-        except requests.Timeout as exc:
-            raise ModelTransportError("The model request timed out. No automatic retry was sent. Wait for LM Studio to finish or stop its generation before trying again; reduce image size or increase the model timeout in Settings.") from exc
-        except requests.RequestException as exc:
-            raise ModelTransportError("The local model is unavailable. Start the server in LM Studio and check Settings.") from exc
-        except ValueError as exc:
-            raise ModelTransportError("The local server returned unreadable data. Check its API address.") from exc
+        return local_request(self.settings, path, body)
 
     def health(self, stop):
-        data = bounded_call(lambda: self._request("/models"), stop, min(8, self.settings.request_timeout))
-        try:
-            ids = [item["id"] for item in data["data"]]
-        except (KeyError, TypeError) as exc:
-            raise UserError("The server did not return a model list.") from exc
+        ids = listed_models(self._request, stop, self.settings.request_timeout)
         if self.settings.model not in ids:
             raise UserError("The configured model was not found. Copy its exact identifier from LM Studio into Settings.")
         return ids
@@ -148,3 +157,52 @@ class LocalModel:
         except (KeyError, TypeError, IndexError) as exc:
             raise UserError("The model returned no usable answer.") from exc
         return parse_response(text, self.settings.adapter)
+
+
+class LocalText:
+    """Text-only chat and embeddings for the guidance assistant. Replies are data, never actions."""
+    def __init__(self, settings: Settings):
+        self.settings = settings.validate()
+
+    def _request(self, path, body=None):
+        return local_request(self.settings, path, body)
+
+    def health(self, stop):
+        ids = listed_models(self._request, stop, self.settings.request_timeout)
+        for name, label in ((self.settings.text_model, "answer"), (self.settings.embed_model, "embedding")):
+            if name and name not in ids:
+                raise UserError(f"The {label} model was not found. Copy its exact identifier from LM Studio into Settings.")
+        return ids
+
+    def complete(self, system, prompt, stop, max_tokens=None):
+        if not self.settings.text_model:
+            raise UserError("No answer model is configured.")
+        body = {"model": self.settings.text_model, "temperature": self.settings.temperature,
+                "max_tokens": max_tokens or self.settings.max_tokens, "stream": False,
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}]}
+        data = bounded_call(lambda: self._request("/chat/completions", body), stop, self.settings.request_timeout+1)
+        try:
+            text = data["choices"][0]["message"]["content"]
+        except (KeyError, TypeError, IndexError) as exc:
+            raise UserError("The answer model returned no usable answer.") from exc
+        if not isinstance(text, str) or len(text) > 16000:
+            raise UserError("The answer model returned an invalid or oversized answer.")
+        return text
+
+    def embed(self, texts, stop, batch=16):
+        if not self.settings.embed_model:
+            raise UserError("No embedding model is configured.")
+        vectors = []
+        for start in range(0, len(texts), batch):
+            part = list(texts[start:start+batch])
+            body = {"model": self.settings.embed_model, "input": part}
+            data = bounded_call(lambda: self._request("/embeddings", body), stop, self.settings.request_timeout+1)
+            try:
+                rows = sorted(data["data"], key=lambda row: row.get("index", 0))
+                found = [[float(v) for v in row["embedding"]] for row in rows]
+            except (KeyError, TypeError, ValueError, AttributeError) as exc:
+                raise UserError("The embedding model returned unreadable vectors.") from exc
+            if len(found) != len(part) or any(not v or len(v) != len(found[0]) or not all(math.isfinite(x) for x in v) for v in found):
+                raise UserError("The embedding model returned unreadable vectors.")
+            vectors.extend(found)
+        return vectors

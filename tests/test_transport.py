@@ -17,10 +17,14 @@ def server():
         status=200
         answer="Action: wait()"
         def log_message(self,*args): pass
-        def do_GET(self): self.reply({"data":[{"id":"test"}]})
+        def do_GET(self): self.reply({"data":[{"id":"test"},{"id":"text"},{"id":"embed"}]})
         def do_POST(self):
-            received.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
-            self.reply({"choices":[{"message":{"content":self.answer}}]})
+            body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+            received.append(body)
+            if self.path.endswith("/embeddings"):
+                self.reply({"data":[{"index":i,"embedding":[float(len(t)),1.0]} for i,t in reversed(list(enumerate(body["input"])))]})
+            else:
+                self.reply({"choices":[{"message":{"content":self.answer}}]})
         def reply(self,data):
             body=json.dumps(data).encode()
             self.send_response(self.status)
@@ -35,7 +39,7 @@ def server():
 
 def test_real_http_image_contract(server):
     model,received,_=server
-    assert model.health(threading.Event()) == ["test"]
+    assert model.health(threading.Event()) == ["test","text","embed"]
     frame=preprocess(Image.new("RGB",(800,600)),(0,0,800,600),640)
     assert model.propose(frame,"Wait",threading.Event(),5).kind == "wait"
     assert received[0]["messages"][0]["content"][1]["image_url"]["url"].startswith("data:image/png;base64,")
@@ -51,3 +55,27 @@ def test_http_failure_never_succeeds(server,status):
 def test_wrong_model(server):
     model,_,_=server; model.settings=replace(model.settings,model="missing")
     with pytest.raises(UserError): model.health(threading.Event())
+
+
+def text_client(model):
+    from cua.models import LocalText
+    return LocalText(replace(model.settings,text_model="text",embed_model="embed"))
+
+
+def test_text_and_embedding_contract(server):
+    model,received,handler=server
+    client=text_client(model)
+    assert "text" in client.health(threading.Event())
+    handler.answer="1. Press Ctrl and F. [1]"
+    assert client.complete("system","question",threading.Event()) == "1. Press Ctrl and F. [1]"
+    assert received[-1]["model"] == "text" and received[-1]["messages"][0]["role"] == "system"
+    vectors=client.embed(["a","bbb","cc"],threading.Event(),batch=2)
+    assert vectors == [[1.0,1.0],[3.0,1.0],[2.0,1.0]]
+    assert received[-1] == {"model":"embed","input":["cc"]}
+
+
+def test_missing_text_model_is_reported(server):
+    model,_,_=server
+    client=text_client(model)
+    client.settings=replace(client.settings,text_model="absent")
+    with pytest.raises(UserError): client.health(threading.Event())

@@ -34,6 +34,28 @@ def parse_task(text: str, engine: str) -> SearchTask:
 
 
 @dataclass(frozen=True)
+class HelpQuestion:
+    question: str
+
+
+HELP_START = re.compile(r"\s*(?:please\s+)?(?:how\s+(?:do|can|to|would|should)\b|how\b|where\s+(?:is|are|do|can)\b|what\s+(?:is|are|does)\b|help\s+me\b|can\s+you\s+(?:show|tell|explain)\b|show\s+me\s+how\b|i\s+(?:can't|cannot|can not|want\s+to|need\s+to)\b|is\s+there\s+a\s+way\b)", re.I)
+
+
+def route(text: str, engine: str):
+    """Deterministic routing; no model decides which capability runs."""
+    try:
+        return parse_task(text, engine)
+    except UserError:
+        pass
+    question = " ".join(text.split())
+    if HELP_START.match(question) or question.endswith("?"):
+        if not 3 <= len(question) <= 500:
+            raise UserError("Ask one question of up to 500 characters.")
+        return HelpQuestion(question)
+    raise UserError('Try "Search for accessible computer interfaces" or ask "How do I make text bigger in Edge?"')
+
+
+@dataclass(frozen=True)
 class Action:
     kind: str
     text: str = ""

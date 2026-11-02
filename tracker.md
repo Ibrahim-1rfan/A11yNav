@@ -83,3 +83,25 @@
   a click with box delimiters, not an alternate Enter command. Kept the exact keyboard policy intact.
   Timeout handling is corrected; model instruction-following remains unresolved. The diagnostic now
   catches safe errors so chained parser tracebacks do not reveal response fragments.
+
+## 2 November 2026 — guide assistant and access profiles (branch azhab-dev)
+
+- Added the intelligence layer: ten browser guides in `knowledge/browsers/` for Edge, Chrome and Firefox,
+  written as short procedures and checked against the official Microsoft, Google and Mozilla help pages cited in each file.
+- Added local retrieval (`rag.py`): BM25 keyword ranking with no new dependencies, optional LM Studio embeddings
+  fused by reciprocal rank fusion and cached on disk, a browser filter and a no-match rule.
+- Added `assistant.py`: optional text-model answers that must cite provided guides, with an extractive fallback.
+- Shared the loopback transport as `local_request` and added `LocalText` for chat and embeddings.
+- Added the accessibility layer: low vision, cognitive/learning and motor/dexterity profiles that restyle the UI,
+  shape answer wording and pacing, and add one-step-at-a-time guidance, search confirmation and Enter-to-start.
+- Added a deterministic router so one input handles both searches and questions. The search agent and its
+  policy are unchanged.
+- Not yet done: a live answer-model run, and any evaluation of the profiles with disabled users.
+- Added a global "open Klicky" shortcut (default Ctrl+Alt+K) that remembers the browser in front and answers
+  for it; Escape returns to that window. On this machine Ctrl+Alt+K and Ctrl+Alt+J were already registered by
+  another app (Windows error 1409), so the default now falls back to Win+Shift+K, then Ctrl+Alt+F9. Verified
+  registration and WM_HOTKEY delivery through Qt's native event filter without sending keystrokes; a physical
+  key press from inside a browser has not been tested yet.
+- Layout check found example buttons pushing Stop off-screen at large text sizes; examples now stack, options
+  use a grid and horizontal scrolling is off. Answers scroll into view when they arrive.
+- Tests: 132 passed (69 original plus 63 new).

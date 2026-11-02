@@ -29,6 +29,11 @@ class Settings:
     font_px: int = 18
     speech: bool = False
     prompt_extra: str = ""
+    profile: str = "default"
+    text_model: str = ""
+    embed_model: str = ""
+    rag_app: str = "auto"
+    hotkey: str = "Ctrl+Alt+K"
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -41,21 +46,51 @@ class Settings:
             raise UserError("The server port must be a number between 1 and 65535.") from exc
         if not isinstance(self.model, str) or not self.model.strip() or len(self.model) > 200:
             raise UserError("Enter the model identifier shown in your local server.")
-        for key, choices in {"adapter": {"ui_tars", "json"}, "browser": {"default", "edge", "chrome", "firefox"}, "engine": {"bing", "google", "duckduckgo"}}.items():
+        for key in ("text_model", "embed_model"):
+            value = getattr(self, key)
+            if not isinstance(value, str) or len(value) > 200:
+                raise UserError(f"Enter the {key.replace('_', ' ')} identifier shown in your local server, or leave it empty.")
+        for key, choices in {"adapter": {"ui_tars", "json"}, "browser": {"default", "edge", "chrome", "firefox"}, "engine": {"bing", "google", "duckduckgo"},
+                             "profile": {"default", "low_vision", "cognitive", "motor"}, "rag_app": {"auto", "edge", "chrome", "firefox"}}.items():
             if getattr(self, key) not in choices:
                 raise UserError(f"Unsupported {key} setting.")
         for key, lo, hi, integer in [
             ("request_timeout", 1, 120, False), ("task_timeout", 10, 600, False),
             ("max_actions", 3, 30, True), ("max_retries", 0, 3, True),
             ("settle_seconds", .1, 5, False), ("max_image_edge", 640, 1920, True),
-            ("max_tokens", 128, 2048, True), ("temperature", 0, 1, False), ("font_px", 16, 28, True),
+            ("max_tokens", 128, 2048, True), ("temperature", 0, 1, False), ("font_px", 16, 40, True),
         ]:
             value = getattr(self, key)
             if type(value) not in (int, float) or not math.isfinite(value) or not lo <= value <= hi or (integer and type(value) is not int):
                 raise UserError(f"{key} must be between {lo} and {hi}.")
         if type(self.speech) is not bool or not isinstance(self.prompt_extra, str) or len(self.prompt_extra) > 2000:
             raise UserError("Invalid speech or prompt setting.")
+        if not isinstance(self.hotkey, str):
+            raise UserError("Invalid shortcut setting.")
+        if self.hotkey:
+            parse_hotkey(self.hotkey)
         return self
+
+
+MODIFIERS = {"alt": 0x1, "ctrl": 0x2, "control": 0x2, "shift": 0x4, "win": 0x8}
+
+
+def parse_hotkey(text: str):
+    """Return Windows (modifiers, virtual key) for shortcuts like "Ctrl+Alt+K". Shift alone is not enough."""
+    parts = [p.strip().lower() for p in text.split("+")]
+    *mods, key = parts
+    flags = 0
+    for mod in mods:
+        if mod not in MODIFIERS or flags & MODIFIERS[mod]:
+            raise UserError('Write the shortcut like "Ctrl+Alt+K", using Ctrl, Alt, Shift or Win and one letter, digit or F-key.')
+        flags |= MODIFIERS[mod]
+    if not flags & 0xB:
+        raise UserError("The shortcut needs Ctrl, Alt or Win so it does not interrupt normal typing.")
+    if len(key) == 1 and (key.isascii() and key.isalnum()):
+        return flags, ord(key.upper())
+    if key.startswith("f") and key[1:].isdigit() and 1 <= int(key[1:]) <= 12:
+        return flags, 0x6F + int(key[1:])
+    raise UserError('Write the shortcut like "Ctrl+Alt+K", using Ctrl, Alt, Shift or Win and one letter, digit or F-key.')
 
 
 def settings_path() -> Path:

@@ -28,6 +28,26 @@ search URL rather than typing into a page-specific search field.
 | verification.py | Focus, entered-value and exact engine/query URL checks |
 | controller.py | Observe/act/verify loop, status transitions, finite attempts, deadline and retry policy |
 | speech.py | Optional local speech worker, mute and pending-speech cancellation |
+| profiles.py | Access profiles (standard, low vision, cognitive, motor): theme, fonts, spacing, pacing and answer style |
+| rag.py | Knowledge loading, per-app chunks, BM25, optional embeddings with rank fusion, browser filter, no-match rule |
+| assistant.py | Grounded answers: citation-checked generation with the optional text model, extractive fallback |
+| hotkey.py | Global "open Klicky" shortcut via RegisterHotKey and a Qt native event filter; summons the question box only |
+
+## Guide assistant (intelligence layer)
+
+User question -> deterministic router (`planning.route`) -> retrieval over `knowledge/<platform>/*.md`
+-> optional text model with numbered guides and the profile's style -> citation check -> answer panel and speech.
+The guide assistant has no access to the browser, executor or capture. Guide text and model replies are
+displayed data only. A reply is accepted only when every numbered step cites a guide that was provided;
+anything else falls back to the guide as written. Embedding and text calls reuse the loopback-only
+`local_request` transport and the same cancellable `bounded_call`.
+
+## Access profiles (accessibility layer)
+
+`Settings.profile` selects a `Profile`. The UI derives colours, font, letter spacing, focus outline width,
+button height and spacing from it; the assistant adds its answer style and step limit to the prompt.
+Choosing a profile adopts its suggested text size, speech and pacing, which remain individually adjustable.
+Profiles cannot change the search policy, action budget or permitted actions.
 
 No empty subsystem scaffolds or orchestration frameworks are included. Future perception/retrieval/profile
 interfaces should consume typed observations and proposed steps without bypassing the action policy.

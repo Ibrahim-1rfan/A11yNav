@@ -20,7 +20,7 @@ def test_config_roundtrip(tmp_path):
     with pytest.raises(UserError): load(path)
 
 
-@pytest.mark.parametrize("patch", [{"endpoint":"https://example.com/v1"},{"endpoint":"http://localhost.evil/v1"},{"endpoint":"http://user@localhost/v1"},{"endpoint":"http://localhost/v1?x=1"},{"endpoint":"http://localhost:99999/v1"},{"max_actions":True},{"max_retries":4},{"request_timeout":float('nan')},{"font_px":10},{"adapter":"python"},{"speech":"yes"}])
+@pytest.mark.parametrize("patch", [{"endpoint":"https://example.com/v1"},{"endpoint":"http://localhost.evil/v1"},{"endpoint":"http://user@localhost/v1"},{"endpoint":"http://localhost/v1?x=1"},{"endpoint":"http://localhost:99999/v1"},{"max_actions":True},{"max_retries":4},{"request_timeout":float('nan')},{"font_px":10},{"font_px":41},{"adapter":"python"},{"speech":"yes"}])
 def test_bad_config(patch):
     with pytest.raises(UserError): replace(Settings(),**patch).validate()
 

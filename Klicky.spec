@@ -3,7 +3,7 @@
 from pathlib import Path
 root = Path(SPECPATH)
 a = Analysis([str(root / 'launch.pyw')], pathex=[str(root / 'src')],
-             binaries=[], datas=[], hiddenimports=[
+             binaries=[], datas=[(str(root / 'knowledge'), 'knowledge')], hiddenimports=[
                  'pyttsx3.drivers.sapi5', 'comtypes.gen.UIAutomationClient',
                  'pywinauto.controls.uia_controls', 'pywinauto.controls.win32_controls'],
              hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False)
