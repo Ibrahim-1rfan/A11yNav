@@ -182,7 +182,8 @@ def dock_setup(monkeypatch):
     dock.monitor_factory = lambda: monitors.append(FakeMonitor()) or monitors[-1]
     dock.answer_factory = lambda: build_assistant(Settings())
     pointed = []
-    dock.highlighter = SimpleNamespace(point=lambda step, hwnd: pointed.append((step, hwnd)), clear=lambda: pointed.append(None), cache={})
+    dock.highlighter = SimpleNamespace(point=lambda step, hwnd: pointed.append((step, hwnd)), clear=lambda: pointed.append(None), cache={},
+                                       prefetch=lambda steps, hwnd: None)
     original = dock.set_caption
     monkeypatch.setattr(dock, "set_caption", lambda text: (captions.append(text), original(text)))
     monkeypatch.setattr("cua.dock.ctypes.windll.user32.SetForegroundWindow", focused.append)

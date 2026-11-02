@@ -13,6 +13,9 @@ from PySide6.QtWidgets import QWidget
 
 TEAL = "#1D9E75"
 TARGETS = {
+    # First match wins: "the plus sign ... The cursor appears in the address bar" is about the plus sign.
+    "newtab": (r"\bplus sign\b|\bplus button\b|\bNew tab, the plus\b", "Button", r"^(New tab|New Tab|Open a new tab.*|New tab \(Ctrl\+T\))$",
+               "New tab is up here", "left"),
     "menu": (r"\bthree dots\b|\bSettings and more\b|\bmenu \(three lines|\bMore \(|\bselect More\b|\bopen the menu\b", "Button",
              r"^(Chrome|Google Chrome|Customize and control.*|Settings and more.*|Open application menu|Application menu)$",
              "The menu is up here", "right"),
@@ -100,10 +103,10 @@ class Overlay(QWidget):
     def show_ring(self, rect, text):
         """rect: logical QRect of the control."""
         self.text, self.ring = text, True
-        label = QFontMetrics(self.font).horizontalAdvance(text) + 24
+        label = QFontMetrics(self.font).horizontalAdvance(text) + 24 if text else 0
         width = max(rect.width() + 16, label)
         left = min(rect.x() - 8, rect.right() + 8 - width) if label > rect.width() + 16 else rect.x() - 8
-        self.setGeometry(left, rect.y() - 8, width, rect.height() + 16 + 40)
+        self.setGeometry(left, rect.y() - 8, width, rect.height() + 16 + (40 if text else 0))
         self.ring_rect = QRectF(rect.x() - 8 - left + 1.5, 1.5, rect.width() + 13, rect.height() + 13)
         self.show()
         self.raise_()
@@ -128,6 +131,8 @@ class Overlay(QWidget):
             p.setPen(QPen(teal, 3))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(self.ring_rect, 8, 8)
+            if not self.text:
+                return
             box = QRectF(0, self.ring_rect.bottom() + 6, self.width(), 32)
         else:
             box = QRectF(0, 22, self.width() - 2, 36)
@@ -148,44 +153,74 @@ class Overlay(QWidget):
 
 
 class Highlighter(QObject):
-    """Shows at most one pointer at a time and removes it when asked."""
-    def __init__(self):
+    """Shows at most one pointer at a time and removes it when asked.
+
+    on_located(rect) receives the control's logical rect (or None) so the companion can fly to it.
+    """
+    def __init__(self, on_located=lambda rect: None):
         super().__init__()
+        self.on_located = on_located
+        self.label_rings = True  # the companion pointing makes the ring's text label unnecessary
         self.overlay = Overlay()
-        self.locator, self.request = None, 0
-        self.cache = {}
+        self.cache, self.pending = {}, set()
+        self.wanted = None     # the (hwnd, target) the step being read points at
+        self.locators = set()  # running lookups stay referenced until they finish
+
+    @staticmethod
+    def target(step, hwnd):
+        # Nothing to point at in a minimized browser (Windows parks it near -32000, -32000).
+        return target_for(step) if hwnd and not ctypes.windll.user32.IsIconic(wintypes.HWND(hwnd)) else None
+
+    def prefetch(self, steps, hwnd):
+        """Look up every control an answer mentions as soon as it arrives, so pointing is instant when read."""
+        for step in steps:
+            target = self.target(step, hwnd)
+            if target:
+                self.locate(hwnd, target)
 
     def point(self, step, hwnd):
-        # Nothing to point at in a minimized browser (Windows parks it near -32000, -32000).
-        target = target_for(step) if hwnd and not ctypes.windll.user32.IsIconic(wintypes.HWND(hwnd)) else None
+        target = self.target(step, hwnd)
         if not target:
             self.clear()
             return
-        self.request += 1
-        request = self.request
-        if (hwnd, target) in self.cache:
-            self.show(target, self.cache[(hwnd, target)], hwnd)
+        key = (hwnd, target)
+        self.wanted = key
+        if key in self.cache:
+            self.show(target, self.cache[key], hwnd)
+        else:
+            self.locate(hwnd, target)
+
+    def locate(self, hwnd, target):
+        key = (hwnd, target)
+        if key in self.cache or key in self.pending:
             return
+        self.pending.add(key)
         locator = ControlLocator(hwnd, target)
-        locator.found.connect(lambda t, rect: self.located(request, hwnd, t, rect))
-        self.locator = locator
+        self.locators.add(locator)
+        locator.found.connect(lambda t, rect, key=key: self.located(key, rect))
+        locator.finished.connect(lambda locator=locator: self.locators.discard(locator))
         locator.start()
 
-    def located(self, request, hwnd, target, rect):
-        self.cache[(hwnd, target)] = rect
-        if request == self.request:
-            self.show(target, rect, hwnd)
+    def located(self, key, rect):
+        self.pending.discard(key)
+        self.cache[key] = rect
+        if self.wanted == key:
+            self.show(key[1], rect, key[0])
 
     def show(self, target, rect, hwnd):
         text, side = TARGETS[target][3], TARGETS[target][4]
         if rect:
-            self.overlay.show_ring(to_logical(rect), text.replace(" is up here", " is here"))
+            logical = to_logical(rect)
+            self.overlay.show_ring(logical, text.replace(" is up here", " is here") if self.label_rings else "")
+            self.on_located(logical)
         else:
+            self.on_located(None)
             try:
                 self.overlay.show_callout(to_logical(window_rect(hwnd)), side, text)
             except (AttributeError, OSError):
                 self.overlay.hide()
 
     def clear(self):
-        self.request += 1
+        self.wanted = None
         self.overlay.hide()
+        self.on_located(None)

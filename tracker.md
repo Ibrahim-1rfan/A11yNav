@@ -159,3 +159,14 @@
   and 4 Hz polling with no browser in front brought the whole app to 0.94% of one core. Renders caught duplicated
   steps on a second answer (deleteLater left old labels in the layout) and steps vanishing when a visible card
   re-rendered. Tests: 184 passed. The feel of the follow and squish needs a person's eye.
+
+## 3 November 2026 — companion points at the control being explained
+
+- New guide "Open a new tab or window", checked against Google's and Mozilla's help pages; Microsoft documents only
+  the shortcuts, so Edge's plus-sign button was confirmed by finding it through UI Automation in the real Edge window.
+- While a step is read, the companion flies out of the orb and its tip rests on the real control (New tab, menu,
+  address bar, star, reading mode), with an unlabelled ring; it ignores the user's mouse until the step or card ends.
+  The user's real pointer is never moved. With the companion off, the labelled ring alone is shown.
+- Live on Edge: the answer was read, Edge's + button was found and ringed, and the companion glided from the orb to
+  rest exactly on it. Pointing began 6.1 s after asking, so controls are now looked up as soon as the answer arrives.
+  Also keeps every running lookup thread referenced (an earlier one could be collected mid-run). Tests: 189 passed.

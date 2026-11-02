@@ -222,3 +222,96 @@ def test_hotkey_opens_the_orb_where_the_companion_is(monkeypatch):
     assert dock.anchor == QPoint(400, 500)                                # companion off: opens at the pointer
     dock.close_dock()
     window.close()
+
+
+def test_new_tab_steps_point_at_the_plus_button():
+    from cua.highlighter import target_for
+    assert target_for("Select New tab, the plus sign next to the last tab at the top of the window.") == "newtab"
+    # Firefox's step also mentions the address bar; the plus sign is what the step is about.
+    assert target_for("Select the plus sign on the right side of the last tab. The cursor appears in the address bar.") == "newtab"
+    assert target_for("Or press Ctrl and T to open a new tab from the keyboard.") is None
+
+
+def test_companion_flies_from_the_orb_to_the_control_and_points_at_it(monkeypatch):
+    from cua.companion_asset import TIP
+    app, c, desk, pos = make(monkeypatch)
+    c.suppressed = True                               # the orb is open, so the companion is hidden
+    advance(c, 20)
+    assert c.opacity == 0
+    orb, button = QPoint(600, 500), QPoint(860, 50)
+    c.guide(orb, button)
+    advance(c)
+    assert c.opacity > 0 and abs(c.x + TIP[0] - 600) < 60 and abs(c.y + TIP[1] - 500) < 60  # starts at the orb
+    advance(c, 10)
+    assert 600 < c.x + TIP[0] < 860                  # visibly gliding, not teleporting
+    advance(c, 120)
+    assert (c.x + TIP[0], c.y + TIP[1]) == pytest.approx((860, 50), abs=.2)  # tip rests on the control
+    pos["p"] = QPoint(100, 900)                       # the user's own mouse moving does not pull it away
+    advance(c, 30)
+    assert (c.x + TIP[0], c.y + TIP[1]) == pytest.approx((860, 50), abs=.2)
+    c.stop_guide()
+    advance(c, 20)
+    assert c.opacity == 0                             # orb still open: back to hidden
+
+
+def test_located_control_rings_it_and_sends_the_companion(monkeypatch):
+    from cua.highlighter import Highlighter
+    app = QApplication.instance() or QApplication([])
+    located = []
+    highlighter = Highlighter(located.append)
+    highlighter.label_rings = False
+    highlighter.show("newtab", (839, 0, 887, 62), None)
+    assert located[-1] is not None and highlighter.overlay.isVisible() and highlighter.overlay.text == ""
+    highlighter.clear()
+    assert located[-1] is None and not highlighter.overlay.isVisible()
+
+
+def test_dock_sends_the_companion_while_reading_and_recalls_it_on_close(monkeypatch):
+    from cua.ui import MainWindow
+    app = QApplication.instance() or QApplication([])
+    monkeypatch.setattr("cua.dock.screen_reader_running", lambda: False)
+    window = MainWindow(Settings(hotkey="", voice=False))
+    window.companion.timer.stop()
+    dock = window.dock
+    dock.open_for("chrome", None, listen=False, anchor=QPoint(400, 400))
+    dock.guide_companion(QRect(500, 10, 40, 40))
+    assert window.companion.guiding == QPoint(519, 45)  # lower middle of the control (Qt rects are inclusive)
+    dock.close_dock()
+    assert window.companion.guiding is None
+    window.settings = Settings(hotkey="", voice=False, companion=False)
+    dock.open_for("chrome", None, listen=False, anchor=QPoint(400, 400))
+    dock.guide_companion(QRect(500, 10, 40, 40))
+    assert window.companion.guiding is None              # companion turned off: ring only
+    dock.close_dock()
+    window.close()
+
+
+def test_prefetch_makes_pointing_instant_when_the_step_is_read(monkeypatch):
+    from PySide6.QtCore import QThread, Signal
+    import cua.highlighter as hl
+    lookups = []
+
+    class FakeLocator(QThread):
+        found = Signal(str, object)
+        def __init__(self, hwnd, target):
+            super().__init__()
+            self.target = target
+            lookups.append(target)
+        def run(self):
+            self.found.emit(self.target, (839, 0, 887, 62))
+
+    monkeypatch.setattr(hl, "ControlLocator", FakeLocator)
+    monkeypatch.setattr(hl.ctypes.windll.user32, "IsIconic", lambda hwnd: False)
+    app = QApplication.instance() or QApplication([])
+    located = []
+    highlighter = hl.Highlighter(located.append)
+    step = "Select New tab, the plus sign next to the last tab at the top of the window."
+    highlighter.prefetch([step, "Or press Ctrl and T."], 4242)
+    deadline = time.monotonic() + 2
+    while (4242, "newtab") not in highlighter.cache and time.monotonic() < deadline:
+        app.processEvents(); time.sleep(.01)
+    assert lookups == ["newtab"] and not located        # looked up early, nothing shown yet
+    highlighter.point(step, 4242)
+    assert located and located[-1] is not None           # shown at once from the cache, no second lookup
+    assert lookups == ["newtab"]
+    highlighter.clear()

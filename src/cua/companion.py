@@ -23,6 +23,7 @@ TYPING_HIDE_S = 1.5
 FADE_IN_S, FADE_OUT_S = .2, .25
 SQUISH_S, SQUISH_TO = .14, .75
 MORPH_S = .2
+GUIDE_SPEED = .12                 # a visible glide from the orb to the control being explained
 SETTLED_MS = 50                   # light polling once settled
 AWAY_MS = 250                     # no browser in front
 PAD = 3                           # transparent margin around the 22 px pointer
@@ -121,6 +122,7 @@ class Companion(QWidget):
         self.morph_started = None
         self.squish_started = None
         self.clock = 0.0  # animation time, advanced by each frame's dt
+        self.guiding = None   # logical point the tip should rest on while a step is being explained
         now = time.monotonic()
         self.last_tick = self.last_move = now
         self.typing_until = 0.0
@@ -156,6 +158,21 @@ class Companion(QWidget):
             return
         self.morph_started = self.clock
         self.timer.setInterval(self.frame_ms())
+
+    def guide(self, start, tip):
+        """Fly out of the orb (start) and point the tip at a browser control (tip) while its step is read.
+        This is Klicky's own pointer; the user's real mouse is never moved."""
+        if self.guiding is None and self.opacity <= 0:
+            self.x, self.y = start.x() - TIP[0], start.y() - TIP[1]
+        self.guiding = QPointF(tip)
+        self.morph_started = None
+        self.scale = 1.0
+        self.timer.setInterval(self.frame_ms())
+
+    def stop_guide(self):
+        if self.guiding is not None:
+            self.guiding = None
+            self.timer.setInterval(self.frame_ms())  # fade out (or go back to following) smoothly
 
     def reappear(self):
         """Orb closed: come back at the current pointer (snap, then fade in), never flying back from the orb."""
@@ -204,16 +221,19 @@ class Companion(QWidget):
         self.prev_cursor, self.prev_buttons, self.prev_input = cursor, buttons, last_input
 
         tx, ty = pos.x() + OFFSET[0], pos.y() + OFFSET[1]
+        if self.guiding is not None:
+            # Pointing at a control overrides following the mouse and the usual hiding rules.
+            tx, ty, target = self.guiding.x() - TIP[0], self.guiding.y() - TIP[1], 1.0
         if self.morph_started is not None:
             u = min(1.0, (self.clock - self.morph_started) / MORPH_S)
             self.scale, self.opacity = 1 - u, 1 - u
             if u >= 1:
                 self.morph_started, self.scale = None, 1.0
             target = self.opacity
-        elif self.opacity <= 0 and target > 0:
+        elif self.opacity <= 0 and target > 0 and self.guiding is None:
             self.x, self.y = tx, ty  # first appearance: snap, never fly in from elsewhere
         if self.morph_started is None:
-            speed = 1.0 if self.reduced else SPEEDS.get(s.companion_speed, SPEEDS["normal"])
+            speed = 1.0 if self.reduced else GUIDE_SPEED if self.guiding is not None else SPEEDS.get(s.companion_speed, SPEEDS["normal"])
             self.x, self.y = follow_step(self.x, tx, speed, dt), follow_step(self.y, ty, speed, dt)
             rate = dt / (FADE_IN_S if target > self.opacity else FADE_OUT_S)
             self.opacity = min(target, self.opacity + rate) if target > self.opacity else max(target, self.opacity - rate)

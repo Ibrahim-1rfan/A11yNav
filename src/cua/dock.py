@@ -98,7 +98,7 @@ class Dock(QWidget):
         self.answer, self.colors, self.answered = None, LIGHT, False
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
-        self.highlighter = Highlighter()
+        self.highlighter = Highlighter(self.guide_companion)
         self.anchor = QPoint()
         self.on_closed = lambda: None
         self.panel = SidePanel(self)
@@ -244,6 +244,7 @@ class Dock(QWidget):
 
     def restyle(self):
         p = self.owner.profile
+        self.highlighter.label_rings = not self.settings.companion
         px = max(16, self.settings.font_px)
         cap = max(18, px + 2)
         self.colors = c = palette(p.key)
@@ -420,6 +421,7 @@ class Dock(QWidget):
         self.answer = answer
         self.card.show_answer(answer, self.colors)
         self.card.show()
+        self.highlighter.prefetch(self.card.visible_steps, self.return_hwnd)  # pointing is instant when each step is read
         announce(self, answer.spoken() if answer.grounded else answer.note)
         read = self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
         if read and self.machine.fire("answer_read"):
@@ -450,6 +452,17 @@ class Dock(QWidget):
         self.stop_monitor()
         self.card.set_active(-1)
         self.machine.fire("finished")
+
+    def guide_companion(self, rect):
+        """The companion flies out of the orb to the control being explained, or stops pointing."""
+        companion = getattr(self.owner, "companion", None)
+        if companion is None:
+            return
+        if rect is None or not self.settings.companion or self.state == CLOSED:
+            companion.stop_guide()
+            return
+        # Tip rests on the lower middle of the control so its icon stays visible above the pointer.
+        companion.guide(self.anchor, QPoint(rect.center().x(), rect.bottom() - 4))
 
     def point_at_first_step(self):
         for step in self.card.visible_steps:
