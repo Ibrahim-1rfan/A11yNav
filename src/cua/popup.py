@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QColor, QCursor, QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsDropShadowEffect, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QTextBrowser, QVBoxLayout, QWidget)
+    QLineEdit, QProgressBar, QPushButton, QTextBrowser, QVBoxLayout, QWidget)
 from .config import UserError
 from .models import Cancelled
 from .rag import detect_app
@@ -84,6 +84,8 @@ class AskPopup(QWidget):
         self.context_app, self.return_hwnd = None, None
         self.worker, self.answer, self.step = None, None, 0
         self.max_answer = 600
+        self.listener, self.asked_by_voice = None, False
+        self.voice_factory = None  # tests inject a fake listener here
         outer = QVBoxLayout(self)
         outer.setContentsMargins(28, 20, 28, 36)  # room for the shadow
         self.card = QFrame()
@@ -120,13 +122,27 @@ class AskPopup(QWidget):
         self.input.setObjectName("ask")
         self.input.setAccessibleName("Ask Klicky")
         self.input.returnPressed.connect(self.submit)
+        self.input.textEdited.connect(lambda _: self.stop_listening())  # typing takes over from the microphone
+        self.mic = QPushButton("Speak")
+        self.mic.setObjectName("mic")
+        self.mic.setAccessibleName("Speak your question")
+        self.mic.clicked.connect(self.toggle_listening)
         self.go = QPushButton("Ask")
         self.go.setObjectName("go")
         self.go.setAccessibleName("Ask the question")
         self.go.clicked.connect(self.submit)
         row.addWidget(self.input, 1)
+        row.addWidget(self.mic)
         row.addWidget(self.go)
         layout.addLayout(row)
+        self.level = QProgressBar()
+        self.level.setObjectName("level")
+        self.level.setAccessibleName("Microphone level")
+        self.level.setRange(0, 100)
+        self.level.setTextVisible(False)
+        self.level.setFixedHeight(6)
+        self.level.hide()
+        layout.addWidget(self.level)
 
         self.chips_box = QWidget()
         self.chips = QGridLayout(self.chips_box)
@@ -139,14 +155,15 @@ class AskPopup(QWidget):
             button.setAccessibleName(f"Ask: how do I {text.lower()}")
             button.clicked.connect(lambda _=False, t=text: self.ask_suggestion(t))
             self.chip_buttons.append(button)
-        layout.addWidget(self.chips_box)
 
+        # Status sits right under the input, where the eyes already are; suggestions follow.
         self.status = QLabel()
         self.status.setObjectName("status")
         self.status.setAccessibleName("Klicky status")
         self.status.setWordWrap(True)
         self.status.hide()
         layout.addWidget(self.status)
+        layout.addWidget(self.chips_box)
 
         self.view = QTextBrowser()
         self.view.setObjectName("answer")
@@ -197,6 +214,9 @@ class AskPopup(QWidget):
             f' QPushButton:disabled {{ color:{c["muted"]}; background:{c["disabled"]}; }}'
             f' QPushButton#go {{ background:{c["accent"]}; color:{c["on_accent"]}; font-weight:bold; padding:12px 22px; }}'
             f' QPushButton#suggestion {{ font-size:{max(14, px - 3)}px; }}'
+            f' QPushButton#mic[listening="true"] {{ background:{c["accent"]}; color:{c["on_accent"]}; font-weight:bold; }}'
+            f' QProgressBar#level {{ background:{c["surface"]}; border:none; border-radius:3px; }}'
+            f' QProgressBar#level::chunk {{ background:{c["accent"]}; border-radius:3px; }}'
             f' QTextBrowser#answer {{ background:{c["surface"]}; border-radius:12px; }}'
             f' QScrollBar:vertical {{ background:transparent; width:{max(10, p.focus_px * 2)}px; margin:6px 2px; }}'
             f' QScrollBar::handle:vertical {{ background:{c["border"]}; border-radius:{max(5, p.focus_px)}px; min-height:40px; }}'
@@ -211,7 +231,7 @@ class AskPopup(QWidget):
         if self.answer:
             self.render()
 
-    def open_for(self, app, hwnd):
+    def open_for(self, app, hwnd, listen=True):
         self.context_app, self.return_hwnd = app, hwnd
         self.restyle()
         self.place()
@@ -220,8 +240,87 @@ class AskPopup(QWidget):
         self.activateWindow()
         self.input.setFocus()
         self.input.selectAll()
-        where = f"about {app.title()}" if app else "about your browser"
-        self.owner.speaker.say(f"Ask Klicky {where}.")
+        self.status.hide()
+        if listen and self.voice_ready():
+            self.start_listening()  # the beep is the spoken cue; a greeting would be picked up by the microphone
+        elif not listen:
+            where = f"about {app.title()}" if app else "about your browser"
+            self.owner.speaker.say(f"Ask Klicky {where}.")
+
+    def voice_ready(self):
+        settings = self.owner.settings
+        if not settings.voice:
+            return False
+        if self.voice_factory:
+            return True
+        from .voice import model_installed
+        if model_installed(settings.voice_model):
+            return True
+        self.set_status("inactive", "Type your question. For voice, run scripts\\get_speech_model.bat once.")
+        return False
+
+    @property
+    def listening(self):
+        return bool(self.listener and self.listener.isRunning())
+
+    def toggle_listening(self):
+        if self.listening:
+            self.stop_listening()
+        elif self.voice_ready():
+            self.start_listening()
+
+    def start_listening(self):
+        if self.listening or (self.worker and self.worker.isRunning()):
+            return
+        self.owner.speaker.stop()  # never listen to Klicky's own voice
+        from .voice import VoiceWorker
+        self.listener = self.voice_factory() if self.voice_factory else VoiceWorker(self.owner.settings.voice_model)
+        self.listener.level.connect(lambda value: self.level.setValue(int(value * 100)))
+        self.listener.stage.connect(self.voice_stage)
+        self.listener.heard.connect(self.on_heard)
+        self.listener.failed.connect(lambda message: self.set_status("error", message))
+        self.listener.finished.connect(lambda: self.show_listening(False))
+        self.show_listening(True)
+        self.listener.start()
+
+    def stop_listening(self):
+        if self.listening:
+            self.listener.stop_event.set()
+
+    def show_listening(self, on):
+        self.mic.setText("Stop" if on else "Speak")
+        self.mic.setAccessibleName("Stop listening" if on else "Speak your question")
+        self.mic.setProperty("listening", "true" if on else "false")
+        self.mic.style().unpolish(self.mic)
+        self.mic.style().polish(self.mic)
+        self.level.setValue(0)
+        self.level.setVisible(on)
+        QTimer.singleShot(0, self.adjustSize)
+
+    def voice_stage(self, stage):
+        if stage == "listening":
+            self.set_status("processing", "Listening... ask your question, or just start typing.")
+        elif stage == "transcribing":
+            self.level.hide()
+            self.set_status("processing", "Got it. Working out what you said...")
+        elif stage == "stopped":
+            self.set_status("inactive", "Stopped listening. Type your question or press Speak.")
+
+    def on_heard(self, text):
+        from .planning import parse_task
+        self.input.setText(text)
+        self.asked_by_voice = True
+        try:
+            parse_task(text, self.owner.settings.engine)
+            is_search = True
+        except UserError:
+            is_search = False
+        if is_search:
+            self.hide()
+            self.owner.run_search(text)
+            return
+        # Spoken questions are free-form; let retrieval decide whether a guide matches.
+        self.ask(" ".join(text.split())[:500])
 
     def place(self):
         screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
@@ -237,7 +336,7 @@ class AskPopup(QWidget):
         self.status.setStyleSheet(f"color:{self.profile.states[state]};")
         self.status.setVisible(bool(message))
         if state == "error":
-            self.owner.speaker.say(message)
+            self.owner.speaker.say(message, force=self.asked_by_voice)
         QTimer.singleShot(0, self.adjustSize)
 
     def ask_suggestion(self, text):
@@ -247,6 +346,8 @@ class AskPopup(QWidget):
     def submit(self):
         if self.worker and self.worker.isRunning():
             return
+        self.stop_listening()
+        self.asked_by_voice = False
         from .planning import route, HelpQuestion
         text = self.input.text()
         try:
@@ -286,13 +387,14 @@ class AskPopup(QWidget):
         self.answer, self.step = answer, 0
         self.render()
         p = self.profile
-        self.owner.speaker.say(answer.spoken() if not (p.one_step and answer.grounded) else f"{answer.title}. Step 1. {answer.steps[0]}")
+        self.owner.speaker.say(answer.spoken() if not (p.one_step and answer.grounded) else f"{answer.title}. Step 1. {answer.steps[0]}",
+                               force=self.asked_by_voice)
 
     def show_step(self, index):
         if self.answer and self.answer.steps:
             self.step = max(0, min(index, len(self.answer.steps) - 1))
             self.render()
-            self.owner.speaker.say(f"Step {self.step + 1}. {self.answer.steps[self.step]}")
+            self.owner.speaker.say(f"Step {self.step + 1}. {self.answer.steps[self.step]}", force=self.asked_by_voice)
 
     def render(self):
         text, one_step = answer_html(self.answer, self.profile, self.step)
@@ -321,6 +423,9 @@ class AskPopup(QWidget):
         self.adjustSize()
 
     def escape(self):
+        if self.listening:
+            self.stop_listening()
+            return
         if self.worker and self.worker.isRunning():
             self.worker.stop_event.set()
             return
@@ -328,6 +433,8 @@ class AskPopup(QWidget):
 
     def close_popup(self):
         hwnd, self.return_hwnd = self.return_hwnd, None
+        self.stop_listening()
+        self.owner.speaker.stop()  # closing the popup also silences an answer being read out
         self.hide()
         if hwnd:
             try:

@@ -118,3 +118,13 @@
   screen; Win+Shift+K (the new single default, free on this machine) opens the popup and Escape hides it. The
   corner box appears only while the search agent controls the browser. Closing the window hides Klicky; Quit is
   in the tray menu. Verified live: process running, Win+Shift+K held, no visible Klicky windows. Tests: 134 passed.
+
+## 3 November 2026 — voice questions
+
+- Added local voice input (`voice.py`): microphone capture with an adaptive end-of-speech detector, on-device
+  faster-whisper `base.en` with a browser vocabulary prompt, and a beep cue. The popup listens as soon as it opens,
+  typing takes over, and answers to spoken questions are read aloud. Model download is an explicit script.
+- Verified with Windows text-to-speech audio: without the vocabulary prompt "Chrome" was heard as "crow"; with it,
+  all four test questions were transcribed exactly in about 1 s each and matched the right guide. The model now
+  preloads at startup. Tests: 147 passed; the suite never opens the real microphone. A live spoken test by a person
+  is still to be done.

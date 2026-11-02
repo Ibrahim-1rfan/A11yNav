@@ -4,3 +4,5 @@ requests>=2.32,<3
 PyAutoGUI>=0.9.54,<1
 pywinauto>=0.6.9,<1
 pyttsx3>=2.98,<3
+faster-whisper>=1.1,<2
+sounddevice>=0.5,<1

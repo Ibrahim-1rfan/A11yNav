@@ -34,6 +34,8 @@ class Settings:
     embed_model: str = ""
     rag_app: str = "auto"
     hotkey: str = "Win+Shift+K"
+    voice: bool = True
+    voice_model: str = "base.en"
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -67,6 +69,8 @@ class Settings:
             raise UserError("Invalid speech or prompt setting.")
         if not isinstance(self.hotkey, str):
             raise UserError("Invalid shortcut setting.")
+        if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
+            raise UserError("Invalid voice setting.")
         if self.hotkey:
             parse_hotkey(self.hotkey)
         return self

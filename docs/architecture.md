@@ -33,6 +33,7 @@ search URL rather than typing into a page-specific search field.
 | assistant.py | Grounded answers: citation-checked generation with the optional text model, extractive fallback |
 | hotkey.py | Global "open Klicky" shortcut via RegisterHotKey and a Qt native event filter; summons the Ask popup only |
 | popup.py | Floating Ask popup over the browser, shared answer worker and answer renderer |
+| voice.py | Microphone capture with end-of-speech detection and on-device Whisper; audio stays in memory |
 
 ## Guide assistant (intelligence layer)
 

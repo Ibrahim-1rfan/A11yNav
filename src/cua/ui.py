@@ -98,6 +98,8 @@ class SetupDialog(QDialog):
         self.endpoint, self.model = QLineEdit(settings.endpoint), QLineEdit(settings.model)
         self.text_model, self.embed_model = QLineEdit(settings.text_model), QLineEdit(settings.embed_model)
         self.hotkey = QLineEdit(settings.hotkey)
+        self.listen = QCheckBox("Start listening when the Ask popup opens")
+        self.listen.setChecked(settings.voice)
         self.hotkey.setPlaceholderText("For example Win+Shift+K. Leave empty to turn off.")
         self.text_model.setPlaceholderText("Optional, for example qwen2.5-3b-instruct")
         self.embed_model.setPlaceholderText("Optional, for example text-embedding-nomic-embed-text-v1.5")
@@ -111,7 +113,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -146,7 +148,7 @@ class SetupDialog(QDialog):
         base = self.settings if key == self.settings.profile else profiles.apply_to(self.settings, key)
         return replace(base, endpoint=self.endpoint.text().strip(), model=self.model.text().strip(), adapter=self.adapter.currentText(), browser=self.browser.currentText(), engine=self.engine.currentText(), font_px=self.size.value(), max_actions=self.limit.value(), request_timeout=self.timeout.value(), task_timeout=self.task_timeout.value(), max_image_edge=self.image_edge.value(), max_tokens=self.tokens.value(),
                        text_model=self.text_model.text().strip(), embed_model=self.embed_model.text().strip(), rag_app=self.rag_app.currentText(),
-                       hotkey=self.hotkey.text().strip()).validate()
+                       hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked()).validate()
 
     def update_budget_note(self):
         suggested = 4 * self.timeout.value() + 30
@@ -365,6 +367,9 @@ class MainWindow(QWidget):
         self.hotkey_ok = self.register_hotkey()
         # Nothing stays on screen: Klicky waits in the tray, and the corner box appears only while a search runs.
         self.tray = self.make_tray()
+        if settings.voice:
+            from .voice import preload
+            preload(settings.voice_model)
         self.apply_style()
         if startup_error:
             self.update_status("error", startup_error)

@@ -16,6 +16,10 @@ class Speaker:
 
     def set_enabled(self, enabled):
         self.enabled = bool(enabled)
+        self.stop()
+
+    def stop(self):
+        """Cut off current speech and drop anything queued."""
         self.generation += 1
         while True:
             try:
@@ -23,9 +27,10 @@ class Speaker:
             except Empty:
                 break
 
-    def say(self, message):
-        if self.enabled and not self.queue.full():
-            self.queue.put((self.generation, message))
+    def say(self, message, force=False):
+        """force speaks even with spoken feedback off, e.g. answering a question the user asked by voice."""
+        if (self.enabled or force) and not self.queue.full():
+            self.queue.put((self.generation, message, force))
 
     def close(self):
         self.set_enabled(False)
@@ -45,10 +50,10 @@ class Speaker:
         engine = None
         while not self.closed:
             try:
-                generation, message = self.queue.get(timeout=.1)
+                generation, message, force = self.queue.get(timeout=.1)
             except Empty:
                 continue
-            if not self.enabled or generation != self.generation:
+            if not (self.enabled or force) or generation != self.generation:
                 continue
             try:
                 if engine is None:
@@ -58,7 +63,7 @@ class Speaker:
                 engine.say(message)
                 engine.startLoop(False)
                 while engine.isBusy():
-                    if not self.enabled or generation != self.generation:
+                    if not (self.enabled or force) or generation != self.generation:
                         engine.stop()
                     engine.iterate()
                     threading.Event().wait(.02)

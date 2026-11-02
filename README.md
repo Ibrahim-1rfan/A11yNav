@@ -54,6 +54,23 @@ question names another one. Press **Escape** and the popup disappears, returning
 
 Demo: `launch.pyw --smoke-popup popup.png` opens the popup, answers a sample question and saves a screenshot.
 
+## Voice questions
+
+When the Ask popup opens, Klicky beeps and starts listening. Say your question, for example "how do I make
+the text bigger", and pause: Klicky stops listening by itself, shows what it heard, finds the guide and reads
+the answer aloud. Start typing at any time to switch to the keyboard. **Speak**/**Stop** toggles the microphone;
+the first Escape stops listening or speaking, the next closes the popup.
+
+- Speech recognition is local Whisper (faster-whisper, English `base.en` model, about 145 MB). Audio stays in
+  memory on this PC; it is never saved or sent anywhere. The model loads in the background when Klicky starts.
+- Install the model once with `scripts/get_speech_model.bat` (Klicky never downloads models by itself). Without it,
+  the popup works by typing and says how to enable voice.
+- Answers to spoken questions are read aloud even when Spoken feedback is off.
+- Turn listening off in Settings → "Start listening when the Ask popup opens". Windows must allow desktop apps to
+  use the microphone (Settings → Privacy → Microphone).
+- Checked on this PC with spoken test audio: four questions transcribed word for word in about one second each
+  after the model loaded, each matched to the right guide. Accuracy with your own voice and room still needs trying.
+
 ## Ask how to do something (browser guides)
 
 Type a question instead of a search, for example `How do I make text bigger in Edge?` or
