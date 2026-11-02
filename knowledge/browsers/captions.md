@@ -1,5 +1,6 @@
 ---
 title: Captions for videos and audio
+task: turn on captions for videos
 keywords: captions, subtitles, live caption, deaf, hard of hearing, cannot hear, video text, audio to text, transcript, sound off
 sources:
 - https://support.google.com/chrome/answer/10538231

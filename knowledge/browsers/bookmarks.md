@@ -1,5 +1,6 @@
 ---
 title: Save and open favourite sites (bookmarks and favorites)
+task: save and open your favourite sites
 keywords: bookmark, favorite, favourite, save site, save page, bookmarks bar, favorites bar, star, come back later, saved sites
 sources:
 - https://support.microsoft.com/en-gb/edge/keyboard-shortcuts-in-microsoft-edge

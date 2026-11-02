@@ -1,5 +1,6 @@
 ---
 title: Move through a page with the keyboard (caret browsing)
+task: move through a page with the keyboard
 keywords: caret browsing, text cursor, keyboard only, no mouse, arrow keys, select text, navigate with keyboard, F7, tab through, focus outline
 sources:
 - https://support.microsoft.com/en-us/accessibility/edge/accessibility-features-in-microsoft-edge

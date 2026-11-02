@@ -32,7 +32,13 @@ search URL rather than typing into a page-specific search field.
 | rag.py | Knowledge loading, per-app chunks, BM25, optional embeddings with rank fusion, browser filter, no-match rule |
 | assistant.py | Grounded answers: citation-checked generation with the optional text model, extractive fallback |
 | hotkey.py | Global "open Klicky" shortcut via RegisterHotKey and a Qt native event filter; summons the Ask popup only |
-| popup.py | Floating Ask popup over the browser, shared answer worker and answer renderer |
+| popup.py | Shared answer worker and answer renderer |
+| dock.py | Voice-first dock window: orb, captions, answer card; every behaviour goes through dockstate |
+| dockstate.py | Dock state machine: idle, listening, typing, thinking, speaking, done, error, closed |
+| orb.py | Orb button with voice-reactive rings, thinking breath, speaking pulse; honours reduced motion |
+| answer_card.py | Title, three steps with key chips, active-step highlight, Replay / Slower / More options |
+| tts.py | Per-step read-aloud on Windows SAPI with instant stop; spoken versions of steps |
+| highlighter.py | Rings the browser's real toolbar control through UI Automation, or shows an edge callout |
 | voice.py | Microphone capture with end-of-speech detection and on-device Whisper; audio stays in memory |
 
 ## Guide assistant (intelligence layer)

@@ -132,3 +132,16 @@
   Windows SAPI is still speaking, so Stop was never applied. Speech now drives SAPI directly, waits on a stop
   event instead of polling, and mutes, pauses and purges on Stop. Measured: muted 0 ms after Stop, SAPI finished
   within 115-180 ms (was 700+ ms or never). Guide text is spoken as plain text only (no SAPI markup). Tests: 148 passed.
+
+## 3 November 2026 — voice-first orb redesign
+
+- Replaced the Ask popup with a docked orb (dock, dockstate, orb, answer_card, tts, highlighter). The brief was
+  written for a browser extension; Klicky is a desktop app, so Shadow DOM became a separate frameless window,
+  chrome.storage became settings.json, and on-page pointing became UI Automation on the browser's own toolbar.
+- Live captions come from re-transcribing the audio so far about once a second; microphone levels are now 50 ms.
+- Barge-in learns the echo of Klicky's own voice for 0.6 s and needs sound 2.5x louder for 300 ms (no echo
+  cancellation on desktops). Checked with synthetic levels only; needs a person talking over real speakers.
+- Bugs found by inspecting renders: the app-wide button min-height squashed the orb to 44 px and clipped its rings;
+  word-wrapped captions were under-measured. Minimized browsers reported controls near -32000; pointing now skips them.
+- Live checks: per-step SAPI callbacks in order, stop silent in 156 ms with no late end event; real Whisper captions
+  then exact final text; Chrome's menu button found by UI Automation in 1.0 s. Tests: 161 passed.

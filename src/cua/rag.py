@@ -28,6 +28,7 @@ class Chunk:
     text: str
     keywords: tuple[str, ...]
     sources: tuple[str, ...]
+    task: str = ""
 
     @property
     def source(self):
@@ -77,7 +78,7 @@ def load_corpus(root: Path | None = None) -> list[Chunk]:
             app = heading.strip().lower()
             if text.strip():
                 chunks.append(Chunk(f"{path.parent.name}/{path.stem}#{app}", path.parent.name, app,
-                                    meta.get("title", path.stem), text.strip(), keywords, sources))
+                                    meta.get("title", path.stem), text.strip(), keywords, sources, str(meta.get("task", ""))))
     return chunks
 
 

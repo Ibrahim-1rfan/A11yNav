@@ -11,7 +11,8 @@ from .models import LocalModel, LocalText
 from .browser import WindowsBrowser, foreground_app
 from .controller import Controller
 from .hotkey import GlobalHotkey
-from .popup import AnswerWorker, AskPopup, answer_html
+from .popup import AnswerWorker, answer_html
+from .dock import Dock
 from .perception import ScreenCapture
 from .speech import Speaker
 from . import profiles
@@ -98,8 +99,24 @@ class SetupDialog(QDialog):
         self.endpoint, self.model = QLineEdit(settings.endpoint), QLineEdit(settings.model)
         self.text_model, self.embed_model = QLineEdit(settings.text_model), QLineEdit(settings.embed_model)
         self.hotkey = QLineEdit(settings.hotkey)
-        self.listen = QCheckBox("Start listening when the Ask popup opens")
+        self.listen = QCheckBox("Start listening when Klicky opens")
         self.listen.setChecked(settings.voice)
+        self.read_aloud = QCheckBox("Read answers aloud")
+        self.read_aloud.setChecked(settings.read_aloud)
+        self.barge = QCheckBox("Stop reading when I start talking")
+        self.barge.setChecked(settings.barge_in)
+        self.reader_quiet = QCheckBox("Let my screen reader read answers instead, when one is running")
+        self.reader_quiet.setChecked(settings.screen_reader_quiet)
+        from .tts import list_voices
+        self.tts_voice = QComboBox()
+        self.tts_voice.addItem("Windows default", "")
+        for name in list_voices():
+            self.tts_voice.addItem(name, name)
+        self.tts_voice.setCurrentIndex(max(0, self.tts_voice.findData(settings.tts_voice)))
+        self.speech_rate = QComboBox()
+        for label, rate in (("Slower", .8), ("Normal", 1.0), ("Faster", 1.2)):
+            self.speech_rate.addItem(label, rate)
+        self.speech_rate.setCurrentIndex(min(range(3), key=lambda i: abs(self.speech_rate.itemData(i) - settings.speech_rate)))
         self.hotkey.setPlaceholderText("For example Win+Shift+K. Leave empty to turn off.")
         self.text_model.setPlaceholderText("Optional, for example qwen2.5-3b-instruct")
         self.embed_model.setPlaceholderText("Optional, for example text-embedding-nomic-embed-text-v1.5")
@@ -113,7 +130,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Reading voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -148,7 +165,10 @@ class SetupDialog(QDialog):
         base = self.settings if key == self.settings.profile else profiles.apply_to(self.settings, key)
         return replace(base, endpoint=self.endpoint.text().strip(), model=self.model.text().strip(), adapter=self.adapter.currentText(), browser=self.browser.currentText(), engine=self.engine.currentText(), font_px=self.size.value(), max_actions=self.limit.value(), request_timeout=self.timeout.value(), task_timeout=self.task_timeout.value(), max_image_edge=self.image_edge.value(), max_tokens=self.tokens.value(),
                        text_model=self.text_model.text().strip(), embed_model=self.embed_model.text().strip(), rag_app=self.rag_app.currentText(),
-                       hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked()).validate()
+                       hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked(),
+                       read_aloud=self.read_aloud.isChecked(), barge_in=self.barge.isChecked(),
+                       screen_reader_quiet=self.reader_quiet.isChecked(), tts_voice=self.tts_voice.currentData(),
+                       speech_rate=self.speech_rate.currentData()).validate()
 
     def update_budget_note(self):
         suggested = 4 * self.timeout.value() + 30
@@ -360,8 +380,8 @@ class MainWindow(QWidget):
         layout.addStretch()
         self.escape_shortcut = QShortcut(QKeySequence("Escape"),self)
         self.escape_shortcut.activated.connect(self.stop_task)
-        self.popup = AskPopup(self)
-        self.compact.ask.connect(lambda: self.popup.open_for(self.popup.context_app, self.popup.return_hwnd))
+        self.dock = Dock(self)
+        self.compact.ask.connect(lambda: self.dock.open_for(self.dock.context_app, self.dock.return_hwnd))
         self.hotkey = GlobalHotkey()
         self.hotkey.triggered.connect(self.summon)
         self.hotkey_ok = self.register_hotkey()
@@ -393,7 +413,7 @@ class MainWindow(QWidget):
         painter.end()
         tray = QSystemTrayIcon(QIcon(pixmap), self)
         menu = QMenu()
-        self.tray_ask = menu.addAction("Ask Klicky", lambda: self.popup.open_for(self.popup.context_app, self.popup.return_hwnd))
+        self.tray_ask = menu.addAction("Ask Klicky", lambda: self.dock.open_for(self.dock.context_app, self.dock.return_hwnd))
         menu.addAction("Open Klicky window", self.expand)
         menu.addAction("Settings", lambda: (self.expand(), self.open_settings()))
         menu.addSeparator()
@@ -410,7 +430,8 @@ class MainWindow(QWidget):
             self.worker.wait(3000)
         self.hotkey.unregister()
         self.speaker.close()
-        self.popup.hide()
+        self.dock.close_dock()
+        self.dock.tts.close()
         self.compact.hide()
         if self.tray:
             self.tray.hide()
@@ -435,10 +456,10 @@ class MainWindow(QWidget):
             hwnd, app = foreground_app()
         except Exception:
             hwnd, app = None, None
-        own = {int(self.winId()), int(self.compact.winId()), int(self.popup.winId())}
+        own = {int(self.winId()), int(self.compact.winId()), int(self.dock.winId())}
         if not hwnd or int(hwnd) in own:
-            hwnd, app = self.popup.return_hwnd, self.popup.context_app
-        self.popup.open_for(app, hwnd)
+            hwnd, app = self.dock.return_hwnd, self.dock.context_app
+        self.dock.open_for(app, hwnd)
 
     def run_search(self, text):
         """A search typed into the popup runs through the normal guarded search agent."""
@@ -484,8 +505,8 @@ class MainWindow(QWidget):
         if self.tray:
             self.tray.setToolTip(f"Klicky: press {self.active_hotkey} to ask" if self.active_hotkey else "Klicky")
             self.tray_ask.setText(f"Ask Klicky ({self.active_hotkey})" if self.active_hotkey else "Ask Klicky")
-        if self.popup.isVisible():
-            self.popup.restyle()
+        if self.dock.isVisible():
+            self.dock.restyle()
         if not (self.worker and self.worker.isRunning()):
             self.update_status("inactive", self.status_label.text())
         if self.answer:

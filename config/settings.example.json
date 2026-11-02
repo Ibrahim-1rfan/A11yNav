@@ -19,5 +19,12 @@
   "text_model": "",
   "embed_model": "",
   "rag_app": "auto",
-  "hotkey": "Win+Shift+K"
+  "hotkey": "Win+Shift+K",
+  "voice": true,
+  "voice_model": "base.en",
+  "read_aloud": true,
+  "tts_voice": "",
+  "speech_rate": 1.0,
+  "barge_in": true,
+  "screen_reader_quiet": true
 }

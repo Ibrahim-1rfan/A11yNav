@@ -36,6 +36,11 @@ class Settings:
     hotkey: str = "Win+Shift+K"
     voice: bool = True
     voice_model: str = "base.en"
+    read_aloud: bool = True
+    tts_voice: str = ""
+    speech_rate: float = 1.0
+    barge_in: bool = True
+    screen_reader_quiet: bool = True
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -71,6 +76,12 @@ class Settings:
             raise UserError("Invalid shortcut setting.")
         if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
             raise UserError("Invalid voice setting.")
+        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet")):
+            raise UserError("Invalid read-aloud setting.")
+        if not isinstance(self.tts_voice, str) or len(self.tts_voice) > 200:
+            raise UserError("Invalid reading voice.")
+        if type(self.speech_rate) not in (int, float) or not math.isfinite(self.speech_rate) or not .5 <= self.speech_rate <= 1.5:
+            raise UserError("speech_rate must be between 0.5 and 1.5.")
         if self.hotkey:
             parse_hotkey(self.hotkey)
         return self

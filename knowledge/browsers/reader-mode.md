@@ -1,5 +1,6 @@
 ---
 title: Read a page without clutter (reader mode)
+task: read a page without the clutter
 keywords: reader mode, reader view, reading mode, immersive reader, clutter, distraction, ads, simplify, clean page, easier to read, focus, theme, background colour, line spacing
 sources:
 - https://support.microsoft.com/en-us/edge/use-immersive-reader-in-microsoft-edge

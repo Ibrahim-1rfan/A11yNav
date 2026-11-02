@@ -1,5 +1,6 @@
 ---
 title: Have a page read out loud
+task: have a page read out loud
 keywords: read aloud, read out loud, listen, speak, speech, voice, text to speech, hear, narrate, audio, cannot see
 sources:
 - https://support.microsoft.com/en-us/accessibility/edge/accessibility-features-in-microsoft-edge

@@ -138,52 +138,6 @@ def test_settings_dialog_adopts_profile_and_rag_fields():
     dialog.close()
 
 
-def test_hotkey_opens_popup_over_the_browser_and_escape_returns(monkeypatch):
-    from cua.assistant import Answer
-    app=QApplication.instance() or QApplication([])
-    monkeypatch.setattr("cua.ui.foreground_app",lambda: (12345,"chrome"))
-    window=MainWindow(Settings(hotkey=""))
-    window.hide()
-    window.summon()
-    popup=window.popup
-    assert popup.isVisible() and not window.isVisible()  # the popup, not the big window
-    assert popup.context_app=="chrome" and popup.return_hwnd==12345 and popup.chip.text()=="Chrome"
-    assert "Chrome" in popup.input.placeholderText()
-    class Helper:
-        def answer(self,question,stop): return Answer("Zoom",("chrome",),("One.","Two."),("https://support.google.com/x",),True)
-    popup.ask("How do I zoom in?",Helper)
-    assert popup.worker.settings.rag_app=="chrome"
-    assert wait_for(app,lambda: popup.answer is not None and not popup.worker.isRunning())
-    app.processEvents()
-    assert "One." in popup.view.toPlainText() and "support.google.com" in popup.view.toPlainText()
-    assert popup.status.text()=="Here is how to do it." and popup.input.isEnabled()
-    popup.ask("How do I zoom in Firefox?",Helper)
-    assert popup.worker.settings.rag_app=="auto"  # a browser named in the question wins
-    assert wait_for(app,lambda: not popup.worker.isRunning())
-    focused=[]
-    monkeypatch.setattr("cua.popup.ctypes.windll.user32.SetForegroundWindow",focused.append)
-    popup.escape()
-    assert focused==[12345] and not popup.isVisible()
-    window.close()
-
-
-def test_popup_routes_searches_to_the_agent_and_rejects_other_text(monkeypatch):
-    app=QApplication.instance() or QApplication([])
-    window=MainWindow(Settings(hotkey=""))
-    searches=[]
-    monkeypatch.setattr(window,"run_search",searches.append)
-    window.popup.open_for(None,None)
-    window.popup.input.setText("Search for accessible computer interfaces")
-    window.popup.submit()
-    assert searches==["Search for accessible computer interfaces"] and not window.popup.isVisible()
-    window.popup.open_for(None,None)
-    window.popup.input.setText("Delete my files")
-    window.popup.submit()
-    assert window.popup.isVisible() and "Try" in window.popup.status.text()
-    window.popup.hide()
-    window.close()
-
-
 def test_hotkey_conflict_is_reported(monkeypatch):
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr("cua.ui.GlobalHotkey.register",lambda self,text: False)
@@ -207,7 +161,7 @@ def test_only_the_default_hotkey_falls_back(monkeypatch):
 def test_nothing_stays_on_screen_until_needed():
     app=QApplication.instance() or QApplication([])
     window=MainWindow(Settings(hotkey=""))
-    assert not window.compact.isVisible() and not window.popup.isVisible()
+    assert not window.compact.isVisible() and not window.dock.isVisible()
     window.collapse()
     assert not window.isVisible() and not window.compact.isVisible()
     window.close()

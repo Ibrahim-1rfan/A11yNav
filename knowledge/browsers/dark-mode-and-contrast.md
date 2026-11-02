@@ -1,5 +1,6 @@
 ---
 title: Dark mode, high contrast and page colours
+task: switch to dark mode or high contrast
 keywords: dark mode, dark theme, night, black background, high contrast, contrast, colours, colors, glare, bright, eye strain, light sensitive
 sources:
 - https://support.microsoft.com/en-us/edge/use-the-dark-theme-in-microsoft-edge

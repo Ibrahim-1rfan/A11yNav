@@ -18,6 +18,7 @@ class Answer:
     grounded: bool
     generated: bool = False
     note: str = ""
+    task: str = ""
 
     def spoken(self):
         if not self.grounded:
@@ -66,7 +67,7 @@ def extractive(hits, profile, note=""):
     steps = chunk.steps
     if len(steps) > profile.max_steps:
         steps, note = steps[:profile.max_steps], (note + " More steps are in the source.").strip()
-    return Answer(chunk.title, (chunk.app,), steps, (chunk.source,), True, False, note)
+    return Answer(chunk.title, (chunk.app,), steps, (chunk.source,), True, False, note, chunk.task)
 
 
 class Assistant:
@@ -96,7 +97,7 @@ class Assistant:
             raise Cancelled()
         apps = tuple(dict.fromkeys(c.app for c in chunks))
         sources = tuple(dict.fromkeys(c.source for c in chunks))
-        return Answer(chunks[0].title, apps, steps, sources, True, True)
+        return Answer(chunks[0].title, apps, steps, sources, True, True, "", chunks[0].task)
 
 
 _INDEXES = {}

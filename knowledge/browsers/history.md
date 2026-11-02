@@ -1,5 +1,6 @@
 ---
 title: Find a page you visited before (history)
+task: find a page you visited before
 keywords: history, visited, earlier page, lost page, find old page, recently closed, clear history, delete history, browsing data
 sources:
 - https://support.microsoft.com/en-gb/edge/keyboard-shortcuts-in-microsoft-edge

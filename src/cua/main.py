@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true", help="Show and close the UI without starting automation")
     parser.add_argument("--smoke-image", help="Optional screenshot of the app itself during smoke testing")
-    parser.add_argument("--smoke-popup", help="Open the Ask popup, answer a sample question, save a screenshot and exit")
+    parser.add_argument("--smoke-popup", help="Open the voice dock, answer a typed sample question, save a screenshot and exit")
     args = parser.parse_args()
     enable_dpi_awareness()
     from PySide6.QtCore import QTimer
@@ -36,10 +36,11 @@ def main():
         window.tray.showMessage("Klicky is ready", f"Press {window.active_hotkey} in Chrome or Edge to ask a question.", window.tray.icon(), 5000)
     if args.smoke_popup:
         def popup_finish():
-            window.popup.open_for("chrome", None)
-            window.popup.input.setText("How do I make text bigger?")
-            window.popup.submit()
-            QTimer.singleShot(1500, lambda: (window.popup.grab().save(args.smoke_popup), window.popup.hide(), window.quit_app()))
+            window.dock.tts.volume = 0  # the smoke run reads silently
+            window.dock.open_for("chrome", None, listen=False)
+            window.dock.start_typing("How do I make text bigger?")
+            window.dock.submit_typed()
+            QTimer.singleShot(2500, lambda: (window.dock.grab().save(args.smoke_popup), window.quit_app()))
         QTimer.singleShot(300, popup_finish)
     elif args.smoke:
         def finish():

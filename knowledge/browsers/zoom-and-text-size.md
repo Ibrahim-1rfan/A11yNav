@@ -1,5 +1,6 @@
 ---
 title: Make pages and text bigger (zoom and font size)
+task: make pages and text bigger
 keywords: zoom, bigger, larger, magnify, enlarge, text size, font size, smaller, shrink, reset zoom, default zoom, minimum font, cannot read, too small, tiny, tiny words, hard to see, eyes, squint
 sources:
 - https://support.microsoft.com/en-us/accessibility/edge/accessibility-features-in-microsoft-edge

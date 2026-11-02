@@ -1,5 +1,6 @@
 ---
 title: Find a word on a page
+task: find a word on a page
 keywords: find, search page, find in page, find word, locate text, look for word, ctrl f, highlight, next match
 sources:
 - https://support.microsoft.com/en-gb/edge/keyboard-shortcuts-in-microsoft-edge

@@ -1,5 +1,6 @@
 ---
 title: Tabs, full screen and the address bar from the keyboard
+task: work with tabs from the keyboard
 keywords: new tab, close tab, reopen tab, closed tab by mistake, switch tab, next tab, full screen, address bar, keyboard shortcuts, go to website, type address
 sources:
 - https://support.microsoft.com/en-gb/edge/keyboard-shortcuts-in-microsoft-edge

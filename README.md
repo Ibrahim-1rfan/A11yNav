@@ -40,19 +40,24 @@ There are no animations, satisfying reduced-motion use without another setting.
 ## Ask from any app (global shortcut)
 
 Klicky runs in the background with nothing on screen, just a "K" icon in the system tray. Open Chrome or
-Edge and press **Win+Shift+K**. An **Ask Klicky** popup floats over the browser and asks what you need.
-Type a question (or pick a suggestion such as "Make text bigger") and press Enter; the steps appear in the
-popup with a link to the official help page. Klicky answers for the browser that was in front unless your
-question names another one. Press **Escape** and the popup disappears, returning you to the browser.
+Edge and press **Win+Shift+K**. A small teal **orb** appears at the bottom-centre of the screen and starts
+listening; the browser stays visible and usable. Its rings follow your voice and captions show what it hears.
+Pause, and the orb "breathes" while it finds the answer. A short card appears with up to three steps and is
+**read aloud**, each step highlighted as it is spoken. When a step mentions the browser's menu, address bar,
+star or reading-mode button, Klicky rings the real control, or points to the screen edge where it is.
 
-- The tray icon's menu has Ask, Open window, Settings and **Quit**. Closing the window keeps Klicky running.
-- The small corner box with Stop appears only while the search agent is controlling the browser.
-- A "Search for …" request typed in the popup runs the search agent.
-- If another app owns Win+Shift+K, Klicky uses Ctrl+Alt+F9 and says so in the tray tooltip. A shortcut you
-  choose in Settings is never replaced; Klicky tells you if it is taken. Leave it empty to turn it off.
-- The shortcut only opens the popup; it never presses keys in other apps.
+- **Talk over the answer** to stop it and ask again. **Esc** or clicking the orb stops reading; Esc again closes.
+- **Replay** reads from step 1, **Slower** reads at 80% speed, **More options** shows the remaining steps and source.
+- Start typing at any time to switch to a text box. Without a microphone, typing takes over automatically.
+- Answers are for the browser that was in front unless your question names another one. "Search for …" runs
+  the search agent.
+- The tray menu has Ask, Open window, Settings and **Quit**. If another app owns Win+Shift+K, Klicky uses
+  Ctrl+Alt+F9. Settings has the shortcut, voice listening, **Read answers aloud**, reading voice and speed,
+  barge-in, and "let my screen reader read answers instead".
+- Windows "Show animations" off means no pulsing or scaling; state is shown by colour, icon and caption.
 
-Demo: `launch.pyw --smoke-popup popup.png` opens the popup, answers a sample question and saves a screenshot.
+Demo: `launch.pyw --smoke-popup dock.png` opens the dock, answers a typed sample question silently and saves a
+screenshot of the dock.
 
 ## Voice questions
 
