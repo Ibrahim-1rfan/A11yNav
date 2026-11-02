@@ -105,3 +105,12 @@
 - Layout check found example buttons pushing Stop off-screen at large text sizes; examples now stack, options
   use a grid and horizontal scrolling is off. Answers scroll into view when they arrive.
 - Tests: 132 passed (69 original plus 63 new).
+
+## 3 November 2026 — Ask popup for demos
+
+- The shortcut now opens a floating "Ask Klicky" popup over the browser instead of the main window: question
+  field, suggestions, browser chip, numbered answer with source link, Back/Next for the cognitive profile, Escape
+  returns to the browser. Klicky starts with only the corner widget after the first run; the widget has an Ask button.
+- Screenshots in each profile found clipped input text, a monospace look and answers cut off under a default
+  scrollbar; fixed with Segoe UI in the popup, taller input, a themed scrollbar and content-fitted answers.
+- Tests: 133 passed. A physical shortcut press inside Chrome or Edge is still to be tried by hand.

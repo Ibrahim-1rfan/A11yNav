@@ -1,20 +1,17 @@
 """Accessible Qt interface, persistent stop widget, guided answers and first-run model settings."""
 from dataclasses import replace
-import ctypes
-import html
 import threading
-from urllib.parse import urlsplit
 from PySide6.QtCore import Qt, QThread, Signal, QTimer, QEvent
 from PySide6.QtGui import QFont, QFontDatabase, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
     QPushButton, QTextEdit, QTextBrowser, QCheckBox, QDialog, QFormLayout, QLineEdit, QComboBox,
     QSpinBox, QDialogButtonBox, QMessageBox, QScrollArea)
 from .config import Settings, UserError, save
-from .models import LocalModel, LocalText, Cancelled
+from .models import LocalModel, LocalText
 from .browser import WindowsBrowser, foreground_app
 from .controller import Controller
 from .hotkey import GlobalHotkey
-from .rag import detect_app
+from .popup import AnswerWorker, AskPopup, answer_html
 from .perception import ScreenCapture
 from .speech import Speaker
 from . import profiles
@@ -59,36 +56,6 @@ class TaskWorker(QThread):
             self.outcome.emit("error")
         finally:
             pythoncom.CoUninitialize()
-
-
-class AnswerWorker(QThread):
-    """Finds a guide and optionally rewrites it with the local text model. Never touches the desktop."""
-    status = Signal(str, str)
-    answered = Signal(object)
-
-    def __init__(self, settings, question, factory=None):
-        super().__init__()
-        self.settings, self.question = settings, question
-        self.stop_event = threading.Event()
-        self.factory = factory
-
-    def run(self):
-        try:
-            from .assistant import build_assistant
-            helper = self.factory() if self.factory else build_assistant(self.settings)
-            self.status.emit("processing", "Finding the guide and writing your answer" if self.settings.text_model else "Finding the guide")
-            answer = helper.answer(self.question, self.stop_event)
-            if self.stop_event.is_set():
-                raise Cancelled()
-            self.answered.emit(answer)
-            self.status.emit("success" if answer.grounded else "error",
-                             "Here is how to do it." if answer.grounded else "I don't have a guide for that yet.")
-        except Cancelled:
-            self.status.emit("inactive", "Question stopped")
-        except UserError as exc:
-            self.status.emit("error", str(exc))
-        except Exception:
-            self.status.emit("error", "I could not look up that guide. Please try again.")
 
 
 class CheckWorker(QThread):
@@ -225,6 +192,7 @@ class SetupDialog(QDialog):
 class CompactWidget(QWidget):
     stop = Signal()
     expand = Signal()
+    ask = Signal()
     def __init__(self):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.WindowStaysOnTopHint)
         self.setWindowTitle("Klicky controls")
@@ -238,13 +206,19 @@ class CompactWidget(QWidget):
         layout.addWidget(self.badge)
         layout.addWidget(self.message)
         row = QHBoxLayout()
-        self.open_button, self.stop_button = QPushButton("Open"), QPushButton("Stop")
+        self.ask_button, self.open_button, self.stop_button = QPushButton("Ask"), QPushButton("Open"), QPushButton("Stop")
+        self.ask_button.setObjectName("primary")
+        self.ask_button.setAccessibleName("Ask Klicky a question")
+        self.open_button.setAccessibleName("Open the Klicky window")
+        self.ask_button.clicked.connect(self.ask)
         self.open_button.clicked.connect(self.expand)
         self.stop_button.clicked.connect(self.stop)
         self.stop_button.setEnabled(False)
+        row.addWidget(self.ask_button)
         row.addWidget(self.open_button)
         row.addWidget(self.stop_button)
         layout.addLayout(row)
+        self.idle_message = "Ready"
         self.set_profile(self.profile, 18)
 
     def set_profile(self, profile, font_px):
@@ -383,8 +357,9 @@ class MainWindow(QWidget):
         layout.addWidget(self.voice_note)
         layout.addStretch()
         self.escape_shortcut = QShortcut(QKeySequence("Escape"),self)
-        self.escape_shortcut.activated.connect(self.escape_pressed)
-        self.context_app, self.return_hwnd = None, None
+        self.escape_shortcut.activated.connect(self.stop_task)
+        self.popup = AskPopup(self)
+        self.compact.ask.connect(lambda: self.popup.open_for(self.popup.context_app, self.popup.return_hwnd))
         self.hotkey = GlobalHotkey()
         self.hotkey.triggered.connect(self.summon)
         self.hotkey_ok = self.register_hotkey()
@@ -407,34 +382,20 @@ class MainWindow(QWidget):
         return False
 
     def summon(self):
-        """Global shortcut: remember which browser the user was in, then open the question box."""
+        """Global shortcut: note which browser is in front, then float the Ask popup over it."""
         try:
             hwnd, app = foreground_app()
         except Exception:
             hwnd, app = None, None
-        own = {int(self.winId()), int(self.compact.winId())}
-        if hwnd and int(hwnd) not in own:
-            self.return_hwnd, self.context_app = hwnd, app
-        self.expand()
-        self.input.setFocus()
-        self.input.selectAll()
-        where = f"about {self.context_app.title()}" if self.context_app else "anything about your browser"
-        self.update_status("inactive", f"Ask {where}. Press Escape to go back.")
-        self.speaker.say(f"Klicky is ready. Ask {where}.")
+        own = {int(self.winId()), int(self.compact.winId()), int(self.popup.winId())}
+        if not hwnd or int(hwnd) in own:
+            hwnd, app = self.popup.return_hwnd, self.popup.context_app
+        self.popup.open_for(app, hwnd)
 
-    def escape_pressed(self):
-        if self.worker and self.worker.isRunning():
-            self.stop_task()
-        elif self.return_hwnd:
-            self.go_back()
-
-    def go_back(self):
-        hwnd, self.return_hwnd, self.context_app = self.return_hwnd, None, None
-        self.collapse()
-        try:
-            ctypes.windll.user32.SetForegroundWindow(hwnd)
-        except (AttributeError, OSError):
-            pass
+    def run_search(self, text):
+        """A search typed into the popup runs through the normal guarded search agent."""
+        self.input.setPlainText(text)
+        self.start_task()
 
     @property
     def profile(self):
@@ -469,6 +430,11 @@ class MainWindow(QWidget):
                     f"{self.settings.hotkey} is already used by another app; choose another shortcut in Settings. " if self.settings.hotkey else "")
         self.voice_note.setText(shortcut + "Keyboard: " + ("Enter starts, Shift and Enter adds a new line. " if p.enter_starts else "Alt+S starts. ") + "Alt+X or Escape stops while this window is focused.")
         self.compact.set_profile(p, px)
+        self.compact.idle_message = f"Press {self.active_hotkey} in your browser to ask" if self.active_hotkey else "Ready"
+        if not (self.worker and self.worker.isRunning()):
+            self.compact.status("inactive", self.compact.idle_message)
+        if self.popup.isVisible():
+            self.popup.restyle()
         if not (self.worker and self.worker.isRunning()):
             self.update_status("inactive", self.status_label.text())
         if self.answer:
@@ -534,6 +500,7 @@ class MainWindow(QWidget):
         self.stop.setEnabled(running)
         self.compact.stop_button.setEnabled(running)
         self.compact.open_button.setEnabled(not running)
+        self.compact.ask_button.setEnabled(not running)
 
     def start_task(self):
         if self.worker and self.worker.isRunning():
@@ -563,12 +530,8 @@ class MainWindow(QWidget):
         self.answer = None
         self.answer_view.hide()
         self.step_controls.hide()
-        settings = self.settings
-        # A browser named in the question wins; otherwise use the browser the shortcut was pressed in.
-        if self.context_app and settings.rag_app == "auto" and detect_app(question) is None:
-            settings = replace(settings, rag_app=self.context_app)
         self.set_running(True)
-        self.worker = AnswerWorker(settings, question, factory)
+        self.worker = AnswerWorker(self.settings, question, factory)
         self.worker.status.connect(self.update_status)
         self.worker.answered.connect(self.show_answer)
         self.worker.finished.connect(self.task_finished)
@@ -590,29 +553,13 @@ class MainWindow(QWidget):
         self.speaker.say(f"Step {self.step + 1}. {self.answer.steps[self.step]}")
 
     def render_answer(self):
-        answer, p = self.answer, self.profile
-        line = f'style="line-height:{p.line_height}%"'
-        parts = [f"<h2>{html.escape(answer.title)}</h2>"]
-        if answer.apps:
-            parts.append(f"<p {line}>For {html.escape(', '.join(a.title() for a in answer.apps))}</p>")
-        one_step = p.one_step and answer.grounded and len(answer.steps) > 1
-        if one_step:
-            parts.append(f"<p {line}><b>Step {self.step + 1} of {len(answer.steps)}</b></p><p {line}>{html.escape(answer.steps[self.step])}</p>")
-        elif answer.steps:
-            parts.append("<ol>" + "".join(f"<li {line}>{html.escape(s)}</li>" for s in answer.steps) + "</ol>")
-        if answer.note:
-            parts.append(f"<p {line}><i>{html.escape(answer.note)}</i></p>")
-        for source in answer.sources:
-            if source.startswith("https://"):
-                parts.append(f'<p {line}>Source: <a href="{html.escape(source)}">{html.escape(urlsplit(source).hostname or source)}</a></p>')
-        if answer.grounded:
-            parts.append(f"<p {line}>" + ("Written by your local answer model from the guide above." if answer.generated else "From Klicky's checked browser guide.") + "</p>")
-        self.answer_view.setHtml("".join(parts))
+        text, one_step = answer_html(self.answer, self.profile, self.step)
+        self.answer_view.setHtml(text)
         self.answer_view.show()
         self.step_controls.setVisible(one_step)
         if one_step:
             self.back.setEnabled(self.step > 0)
-            self.next.setEnabled(self.step < len(answer.steps) - 1)
+            self.next.setEnabled(self.step < len(self.answer.steps) - 1)
 
     def stop_task(self):
         if self.worker and self.worker.isRunning():
@@ -640,6 +587,7 @@ class MainWindow(QWidget):
             return
         self.hotkey.unregister()
         self.speaker.close()
+        self.popup.hide()
         self.compact.hide()
         event.accept()
         QApplication.instance().quit()

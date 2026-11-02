@@ -39,10 +39,15 @@ There are no animations, satisfying reduced-motion use without another setting.
 
 ## Ask from any app (global shortcut)
 
-While Klicky is running, press **Ctrl+Alt+K** from any application, for example while reading in Chrome.
-Klicky notes which browser was in front, opens its question box with the cursor ready, and answers with
-that browser's guide unless your question names another browser. Press **Escape** to close Klicky and
-return to the window you were in. The shortcut only opens the question box; it never presses keys elsewhere.
+After the first run Klicky starts quietly: only the small corner widget shows. Open Chrome or Edge, then
+press **Ctrl+Alt+K**. An **Ask Klicky** popup floats over the browser with the cursor ready. Type a
+question (or pick a suggestion such as "Make text bigger") and press Enter; the steps appear in the popup
+with a link to the official help page. Klicky answers for the browser that was in front unless your
+question names another one. Press **Escape** to close the popup and return to the browser. The widget's
+**Ask** button opens the same popup. A "Search for …" request typed in the popup runs the search agent.
+The shortcut only opens the popup; it never presses keys elsewhere.
+
+Demo: `launch.pyw --smoke-popup popup.png` opens the popup, answers a sample question and saves a screenshot.
 
 If another app already owns Ctrl+Alt+K, Klicky tries Win+Shift+K and then Ctrl+Alt+F9, and the main window
 shows which one is active. A shortcut you choose in Settings → "Shortcut to open Klicky from any app" is

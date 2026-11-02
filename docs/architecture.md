@@ -31,7 +31,8 @@ search URL rather than typing into a page-specific search field.
 | profiles.py | Access profiles (standard, low vision, cognitive, motor): theme, fonts, spacing, pacing and answer style |
 | rag.py | Knowledge loading, per-app chunks, BM25, optional embeddings with rank fusion, browser filter, no-match rule |
 | assistant.py | Grounded answers: citation-checked generation with the optional text model, extractive fallback |
-| hotkey.py | Global "open Klicky" shortcut via RegisterHotKey and a Qt native event filter; summons the question box only |
+| hotkey.py | Global "open Klicky" shortcut via RegisterHotKey and a Qt native event filter; summons the Ask popup only |
+| popup.py | Floating Ask popup over the browser, shared answer worker and answer renderer |
 
 ## Guide assistant (intelligence layer)
 
