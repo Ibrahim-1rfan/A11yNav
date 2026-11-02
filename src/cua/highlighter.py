@@ -12,20 +12,29 @@ from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QPainter
 from PySide6.QtWidgets import QWidget
 
 TEAL = "#1D9E75"
+# (words in a step, UI Automation control type, name pattern or "class:" pattern, callout text, side of the window)
+# Names and classes were read from real Chrome and Edge windows; the profile button is named after the profile,
+# so it is matched by class, and every tab has its own close button, so the selected tab's one is chosen.
 TARGETS = {
     # First match wins: "the plus sign ... The cursor appears in the address bar" is about the plus sign.
     "newtab": (r"\bplus sign\b|\bplus button\b|\bNew tab, the plus\b", "Button", r"^(New tab|New Tab|Open a new tab.*|New tab \(Ctrl\+T\))$",
                "New tab is up here", "left"),
+    "back": (r"\bselect Back\b", "Button", r"^Back$", "Back is up here", "left"),
+    "refresh": (r"\bselect (Reload|Refresh)\b", "Button", r"^(Reload|Refresh)$", "Refresh is up here", "left"),
+    "closetab": (r"\bthe X on the tab\b", "Button", r"class:^(Edge)?TabCloseButton$", "Your tab's X is up here", "left"),
+    "extensions": (r"\bExtensions, to the right of the address bar\b", "Button", r"^Extensions$", "Extensions are up here", "right"),
+    "profile": (r"\bselect Profile\b|\bthe Profile icon\b", "Button", r"class:^(Edge)?AvatarToolbarButton$", "Your profile is up here", "right"),
     "menu": (r"\bthree dots\b|\bSettings and more\b|\bmenu \(three lines|\bMore \(|\bselect More\b|\bopen the menu\b", "Button",
              r"^(Chrome|Google Chrome|Customize and control.*|Settings and more.*|Open application menu|Application menu)$",
              "The menu is up here", "right"),
-    "address": (r"\baddress bar\b", "Edit", r"^(Address and search bar|Address bar|Search or enter address|Search with .* or enter address)$",
-                "The address bar is up here", "left"),
-    "bookmark": (r"\bBookmark star\b|\bstar\b", "Button", r"^(Bookmark this tab|Bookmark this page|Add this page to favou?rites.*|Edit bookmark.*)$",
+    "bookmark": (r"\bBookmark star\b|\bstar\b", "Button", r"^(Bookmark this tab|Bookmark this page|Add this page to favou?rites.*|Edit bookmark.*|Edit favou?rite.*)$",
                  "The star is up here", "right"),
     "reader": (r"\bReading mode in the address bar\b|\bReader View icon\b|\bReading mode button\b", "Button",
                r"^(Reading mode|Enter Reading mode.*|Immersive Reader.*|Toggle reader view.*|Reader view.*)$",
                "Reading mode is up here", "left"),
+    # Last: many steps mention the address bar only to say where something else is.
+    "address": (r"\baddress bar\b", "Edit", r"^(Address and search bar|Address bar|Search or enter address|Search with .* or enter address)$",
+                "The address bar is up here", "left"),
 }
 
 
@@ -52,6 +61,23 @@ def window_rect(hwnd):
     return rect.left, rect.top, rect.right, rect.bottom
 
 
+def browser_chrome(root, max_depth=14):
+    """The browser's own controls: walk the UI Automation tree but never enter the web page (Document).
+    A busy page has hundreds of elements; skipping it took lookups from about 3 s to a fraction of that."""
+    stack = [(root, 0)]
+    while stack:
+        info, depth = stack.pop()
+        if depth >= max_depth:
+            continue
+        try:
+            children = info.children()
+        except Exception:
+            continue
+        kept = [child for child in children if child.control_type != "Document"]
+        yield from kept  # in screen order, so the first match is the first such control
+        stack.extend((child, depth + 1) for child in reversed(kept))
+
+
 class ControlLocator(QThread):
     """Finds a toolbar control in the browser window through UI Automation, off the UI thread."""
     found = Signal(str, object)
@@ -76,16 +102,29 @@ class ControlLocator(QThread):
         from pywinauto import Desktop
         _pattern, control_type, name_pattern, *_rest = TARGETS[self.target]
         window = Desktop(backend="uia").window(handle=self.hwnd).wrapper_object()
-        names = re.compile(name_pattern, re.I)
+        by_class = name_pattern.startswith("class:")
+        matcher = re.compile(name_pattern[6:] if by_class else name_pattern, re.I)
+        from pywinauto.controls.uiawrapper import UIAWrapper
         top = window_rect(self.hwnd)[1]
-        for control in window.descendants(control_type=control_type, depth=14):
-            info = control.element_info
-            if names.match(info.name or "") or (self.target == "address" and (info.automation_id or "") == "urlbar-input"):
+        for info in browser_chrome(window.element_info):
+            if info.control_type != control_type:
+                continue
+            text = info.class_name if by_class else info.name
+            if matcher.match(text or "") or (self.target == "address" and (info.automation_id or "") == "urlbar-input"):
                 r = info.rectangle
-                # Browser chrome sits in the top band of the window; skip look-alikes inside the page.
-                if r.width() > 0 and r.top - top < 220 and control.is_visible():
+                # Browser chrome sits in the top band of the window.
+                if r.width() > 0 and r.top - top < 220 and info.visible and self.on_current_tab(UIAWrapper(info)):
                     return r.left, r.top, r.right, r.bottom
         return None
+
+    def on_current_tab(self, control):
+        """Every tab has a close button; only the selected tab's one is the page the user is on."""
+        if self.target != "closetab":
+            return True
+        try:
+            return bool(control.parent().iface_selection_item.CurrentIsSelected)
+        except Exception:
+            return False
 
 
 class Overlay(QWidget):

@@ -159,3 +159,27 @@ def test_router_is_deterministic(text, kind):
 def test_router_rejects_other_requests(text):
     with pytest.raises(UserError):
         route(text, "bing")
+
+
+@pytest.mark.parametrize("question,topic", [
+    ("how do I go back", "go-back"), ("how do I go back to the previous page in Edge", "go-back"),
+    ("how do I refresh the page", "refresh-page"), ("the page is stuck, how do I reload it in chrome", "refresh-page"),
+    ("how do I cancel the already opened page", "close-tab"), ("how do I close this tab in Edge", "close-tab"),
+    ("how do I open a new page", "new-tab"), ("how do I open my extensions", "extensions"),
+    ("where are my add-ons in Edge", "extensions"), ("how do I add this to my favorites", "bookmarks"),
+    ("how do I add this page to favourites in Edge", "bookmarks"), ("how do I open my profile", "profile"),
+    ("how do I switch profile in chrome", "profile"), ("how do I open settings", "settings"),
+    ("where are the settings in Edge", "settings"),
+])
+def test_everyday_toolbar_questions_find_their_guide(corpus, question, topic):
+    assert Index(corpus).retrieve(question)[0].chunk.id.split("/")[1].startswith(topic + "#")
+
+
+def test_everyday_guides_cover_chrome_and_edge_and_lead_with_the_button(corpus):
+    from cua.highlighter import target_for
+    expected = {"go-back": "back", "refresh-page": "refresh", "close-tab": "closetab", "new-tab": "newtab",
+                "extensions": "extensions", "bookmarks": "bookmark", "profile": "profile", "settings": "menu"}
+    for topic, target in expected.items():
+        for app in ("chrome", "edge"):
+            chunk = next(c for c in corpus if c.id == f"browsers/{topic}#{app}")
+            assert target_for(chunk.steps[0]) == target, (topic, app)  # the companion can point from step 1

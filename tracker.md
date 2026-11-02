@@ -170,3 +170,15 @@
 - Live on Edge: the answer was read, Edge's + button was found and ringed, and the companion glided from the orb to
   rest exactly on it. Pointing began 6.1 s after asking, so controls are now looked up as soon as the answer arrives.
   Also keeps every running lookup thread referenced (an earlier one could be collected mid-run). Tests: 189 passed.
+
+## 3 November 2026 — everyday toolbar tasks in Edge and Chrome
+
+- New guides, each leading with the button so the companion can point from step 1: go back, refresh, close the tab
+  you are on, extensions, profile, settings; the bookmarks guide now starts with the star. Wording checked against
+  Google's and Microsoft's help pages (shortcuts, extensions, profiles, "Add this page to favorites").
+- Pointer targets were taken from the real Chrome and Edge windows on this PC: the profile button is named after the
+  profile, so it is matched by class (AvatarToolbarButton / EdgeAvatarToolbarButton); every tab has a close button,
+  so the selected tab's one is used. Targets that only mention the address bar as a location no longer point at it.
+- Lookups searched the web page too (about 3 s each on a WhatsApp tab); they now skip the page's Document subtree and
+  take 0.1-0.2 s. Live: Chrome found all eight buttons; Edge found all but the star, which its New tab page does not
+  show. Firefox sections for these guides are still to do. Tests: 208 passed.

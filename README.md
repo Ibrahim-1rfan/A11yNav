@@ -47,7 +47,8 @@ companion turns into a teal **orb** right where it was, with the answer card ope
 listening; the browser stays visible and usable. Its rings follow your voice and captions show what it hears.
 Pause, and the orb "breathes" while it finds the answer. A short card appears with up to three steps and is
 **read aloud**, each step highlighted as it is spoken. When a step mentions a browser control (the New tab plus
-sign, the menu, the address bar, the star or the reading-mode button), the companion flies out of the orb and
+sign, Back, Refresh, the current tab's X, Extensions, your profile picture, the menu, the address bar, the star or
+the reading-mode button), the companion flies out of the orb and
 points at the real control while that step is read, with a ring around it. If the control cannot be found, an
 arrow at the screen edge shows where it is. Klicky never moves your own mouse pointer.
 
@@ -89,7 +90,8 @@ Type a question instead of a search, for example `How do I make text bigger in E
 `How can Chrome read this page aloud?`. A deterministic router sends "search for …" requests to the
 search agent and questions ("how do I…", "where is…", "I can't…", or anything ending in `?`) to the guide assistant.
 
-- Answers come only from the checked guides in `knowledge/browsers/` (new tabs, zoom and text size, reading mode,
+- Answers come only from the checked guides in `knowledge/browsers/` (everyday toolbar tasks: back, refresh, closing
+  the tab you are on, new tab, extensions, adding a favourite or bookmark, your profile and settings; plus zoom and text size, reading mode,
   read aloud, dark mode and contrast, captions, caret browsing, find on page, tabs, bookmarks, history) for
   Edge, Chrome and Firefox. Each guide cites the official help page it was checked against.
 - Retrieval runs locally: keyword ranking always works, and an optional LM Studio **embedding model**

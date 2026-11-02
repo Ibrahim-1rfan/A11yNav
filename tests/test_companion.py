@@ -315,3 +315,27 @@ def test_prefetch_makes_pointing_instant_when_the_step_is_read(monkeypatch):
     assert located and located[-1] is not None           # shown at once from the cache, no second lookup
     assert lookups == ["newtab"]
     highlighter.clear()
+
+
+def test_lookup_never_walks_into_the_web_page():
+    from types import SimpleNamespace as N
+    from cua.highlighter import browser_chrome
+    visited = []
+    def node(kind, name, kids=()):
+        n = N(control_type=kind, name=name)
+        n.children = lambda: (visited.append(name), list(kids))[1]
+        return n
+    page = node("Document", "page", [node("Button", "Back")])        # a page button that looks like the toolbar's
+    root = node("Window", "root", [node("ToolBar", "bar", [node("Button", "Back"), node("Button", "Reload")]), page])
+    names = [n.name for n in browser_chrome(root)]
+    assert names == ["bar", "Back", "Reload"] and "page" not in visited
+
+
+@pytest.mark.parametrize("selected,expected", [(1, True), (0, False)])
+def test_only_the_current_tabs_close_button_counts(selected, expected):
+    from types import SimpleNamespace as N
+    from cua.highlighter import ControlLocator
+    locator = ControlLocator(1, "closetab")
+    control = N(parent=lambda: N(iface_selection_item=N(CurrentIsSelected=selected)))
+    assert locator.on_current_tab(control) is expected
+    assert ControlLocator(1, "back").on_current_tab(control) is True
