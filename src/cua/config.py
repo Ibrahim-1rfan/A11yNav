@@ -33,7 +33,7 @@ class Settings:
     text_model: str = ""
     embed_model: str = ""
     rag_app: str = "auto"
-    hotkey: str = "Ctrl+Alt+K"
+    hotkey: str = "Win+Shift+K"
 
     def validate(self):
         u = urlsplit(self.endpoint)

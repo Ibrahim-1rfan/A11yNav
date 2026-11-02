@@ -19,5 +19,5 @@
   "text_model": "",
   "embed_model": "",
   "rag_app": "auto",
-  "hotkey": "Ctrl+Alt+K"
+  "hotkey": "Win+Shift+K"
 }

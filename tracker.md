@@ -114,3 +114,7 @@
 - Screenshots in each profile found clipped input text, a monospace look and answers cut off under a default
   scrollbar; fixed with Segoe UI in the popup, taller input, a themed scrollbar and content-fitted answers.
 - Tests: 133 passed. A physical shortcut press inside Chrome or Edge is still to be tried by hand.
+- Feedback: the always-visible corner box felt intrusive. Klicky now waits in the system tray with nothing on
+  screen; Win+Shift+K (the new single default, free on this machine) opens the popup and Escape hides it. The
+  corner box appears only while the search agent controls the browser. Closing the window hides Klicky; Quit is
+  in the tray menu. Verified live: process running, Win+Shift+K held, no visible Klicky windows. Tests: 134 passed.

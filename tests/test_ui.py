@@ -194,10 +194,20 @@ def test_hotkey_conflict_is_reported(monkeypatch):
 
 def test_only_the_default_hotkey_falls_back(monkeypatch):
     app=QApplication.instance() or QApplication([])
-    monkeypatch.setattr("cua.ui.GlobalHotkey.register",lambda self,text: text=="Win+Shift+K")
+    monkeypatch.setattr("cua.ui.GlobalHotkey.register",lambda self,text: text=="Ctrl+Alt+F9")
     window=MainWindow(Settings())
-    assert window.active_hotkey=="Win+Shift+K" and "Press Win+Shift+K" in window.voice_note.text()
+    assert Settings().hotkey=="Win+Shift+K"
+    assert window.active_hotkey=="Ctrl+Alt+F9" and "Press Ctrl+Alt+F9" in window.voice_note.text()
     window.close()
     custom=MainWindow(Settings(hotkey="Ctrl+Alt+J"))
     assert custom.active_hotkey=="" and "Ctrl+Alt+J is already used" in custom.voice_note.text()
     custom.close()
+
+
+def test_nothing_stays_on_screen_until_needed():
+    app=QApplication.instance() or QApplication([])
+    window=MainWindow(Settings(hotkey=""))
+    assert not window.compact.isVisible() and not window.popup.isVisible()
+    window.collapse()
+    assert not window.isVisible() and not window.compact.isVisible()
+    window.close()

@@ -39,19 +39,20 @@ There are no animations, satisfying reduced-motion use without another setting.
 
 ## Ask from any app (global shortcut)
 
-After the first run Klicky starts quietly: only the small corner widget shows. Open Chrome or Edge, then
-press **Ctrl+Alt+K**. An **Ask Klicky** popup floats over the browser with the cursor ready. Type a
-question (or pick a suggestion such as "Make text bigger") and press Enter; the steps appear in the popup
-with a link to the official help page. Klicky answers for the browser that was in front unless your
-question names another one. Press **Escape** to close the popup and return to the browser. The widget's
-**Ask** button opens the same popup. A "Search for …" request typed in the popup runs the search agent.
-The shortcut only opens the popup; it never presses keys elsewhere.
+Klicky runs in the background with nothing on screen, just a "K" icon in the system tray. Open Chrome or
+Edge and press **Win+Shift+K**. An **Ask Klicky** popup floats over the browser and asks what you need.
+Type a question (or pick a suggestion such as "Make text bigger") and press Enter; the steps appear in the
+popup with a link to the official help page. Klicky answers for the browser that was in front unless your
+question names another one. Press **Escape** and the popup disappears, returning you to the browser.
+
+- The tray icon's menu has Ask, Open window, Settings and **Quit**. Closing the window keeps Klicky running.
+- The small corner box with Stop appears only while the search agent is controlling the browser.
+- A "Search for …" request typed in the popup runs the search agent.
+- If another app owns Win+Shift+K, Klicky uses Ctrl+Alt+F9 and says so in the tray tooltip. A shortcut you
+  choose in Settings is never replaced; Klicky tells you if it is taken. Leave it empty to turn it off.
+- The shortcut only opens the popup; it never presses keys in other apps.
 
 Demo: `launch.pyw --smoke-popup popup.png` opens the popup, answers a sample question and saves a screenshot.
-
-If another app already owns Ctrl+Alt+K, Klicky tries Win+Shift+K and then Ctrl+Alt+F9, and the main window
-shows which one is active. A shortcut you choose in Settings → "Shortcut to open Klicky from any app" is
-never replaced; Klicky tells you if it is taken. Leave the field empty to turn the shortcut off.
 
 ## Ask how to do something (browser guides)
 

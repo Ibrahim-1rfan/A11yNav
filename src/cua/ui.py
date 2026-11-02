@@ -2,10 +2,10 @@
 from dataclasses import replace
 import threading
 from PySide6.QtCore import Qt, QThread, Signal, QTimer, QEvent
-from PySide6.QtGui import QFont, QFontDatabase, QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
     QPushButton, QTextEdit, QTextBrowser, QCheckBox, QDialog, QFormLayout, QLineEdit, QComboBox,
-    QSpinBox, QDialogButtonBox, QMessageBox, QScrollArea)
+    QSpinBox, QDialogButtonBox, QMessageBox, QScrollArea, QSystemTrayIcon, QMenu)
 from .config import Settings, UserError, save
 from .models import LocalModel, LocalText
 from .browser import WindowsBrowser, foreground_app
@@ -17,7 +17,7 @@ from .speech import Speaker
 from . import profiles
 
 # Tried in order only when the default shortcut is owned by another app. Avoids browser and screen-reader keys.
-FALLBACK_HOTKEYS = ["Win+Shift+K", "Ctrl+Alt+F9"]
+FALLBACK_HOTKEYS = ["Ctrl+Alt+F9"]
 EXAMPLES = ["Search for accessible computer interfaces", "How do I make text bigger in Edge?", "How can Chrome read this page aloud?"]
 
 
@@ -98,7 +98,7 @@ class SetupDialog(QDialog):
         self.endpoint, self.model = QLineEdit(settings.endpoint), QLineEdit(settings.model)
         self.text_model, self.embed_model = QLineEdit(settings.text_model), QLineEdit(settings.embed_model)
         self.hotkey = QLineEdit(settings.hotkey)
-        self.hotkey.setPlaceholderText("For example Ctrl+Alt+K. Leave empty to turn off.")
+        self.hotkey.setPlaceholderText("For example Win+Shift+K. Leave empty to turn off.")
         self.text_model.setPlaceholderText("Optional, for example qwen2.5-3b-instruct")
         self.embed_model.setPlaceholderText("Optional, for example text-embedding-nomic-embed-text-v1.5")
         self.adapter, self.browser, self.engine, self.rag_app = QComboBox(), QComboBox(), QComboBox(), QComboBox()
@@ -344,7 +344,7 @@ class MainWindow(QWidget):
             self.profile_box.addItem(profile.label, key)
         self.profile_box.setCurrentIndex(self.profile_box.findData(settings.profile))
         self.profile_box.currentIndexChanged.connect(self.choose_profile)
-        self.settings_button, self.compact_button = QPushButton("Settings"), QPushButton("Use small widget")
+        self.settings_button, self.compact_button = QPushButton("Settings"), QPushButton("Hide window")
         self.settings_button.clicked.connect(self.open_settings)
         self.compact_button.clicked.connect(self.collapse)
         options.addWidget(self.voice, 0, 0)
@@ -363,10 +363,53 @@ class MainWindow(QWidget):
         self.hotkey = GlobalHotkey()
         self.hotkey.triggered.connect(self.summon)
         self.hotkey_ok = self.register_hotkey()
+        # Nothing stays on screen: Klicky waits in the tray, and the corner box appears only while a search runs.
+        self.tray = self.make_tray()
         self.apply_style()
-        self.compact.show()
         if startup_error:
             self.update_status("error", startup_error)
+
+    def make_tray(self):
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            return None
+        pixmap = QPixmap(64, 64)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColor("#68e3b5"))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawEllipse(2, 2, 60, 60)
+        font = QFont("Segoe UI")
+        font.setPixelSize(38)
+        font.setBold(True)
+        painter.setFont(font)
+        painter.setPen(QColor("#0a202b"))
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "K")
+        painter.end()
+        tray = QSystemTrayIcon(QIcon(pixmap), self)
+        menu = QMenu()
+        self.tray_ask = menu.addAction("Ask Klicky", lambda: self.popup.open_for(self.popup.context_app, self.popup.return_hwnd))
+        menu.addAction("Open Klicky window", self.expand)
+        menu.addAction("Settings", lambda: (self.expand(), self.open_settings()))
+        menu.addSeparator()
+        menu.addAction("Quit Klicky", self.quit_app)
+        tray.setContextMenu(menu)
+        self.tray_menu = menu
+        tray.activated.connect(lambda reason: self.tray_ask.trigger() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
+        tray.show()
+        return tray
+
+    def quit_app(self):
+        if self.worker and self.worker.isRunning():
+            self.worker.stop_event.set()
+            self.worker.wait(3000)
+        self.hotkey.unregister()
+        self.speaker.close()
+        self.popup.hide()
+        self.compact.hide()
+        if self.tray:
+            self.tray.hide()
+        QApplication.instance().quit()
 
     def register_hotkey(self):
         """Register the chosen shortcut. Only the default falls back to alternatives when another app owns it."""
@@ -433,6 +476,9 @@ class MainWindow(QWidget):
         self.compact.idle_message = f"Press {self.active_hotkey} in your browser to ask" if self.active_hotkey else "Ready"
         if not (self.worker and self.worker.isRunning()):
             self.compact.status("inactive", self.compact.idle_message)
+        if self.tray:
+            self.tray.setToolTip(f"Klicky: press {self.active_hotkey} to ask" if self.active_hotkey else "Klicky")
+            self.tray_ask.setText(f"Ask Klicky ({self.active_hotkey})" if self.active_hotkey else "Ask Klicky")
         if self.popup.isVisible():
             self.popup.restyle()
         if not (self.worker and self.worker.isRunning()):
@@ -470,7 +516,6 @@ class MainWindow(QWidget):
         self.activateWindow()
 
     def collapse(self):
-        self.compact.show()
         self.hide()
 
     def toggle_speech(self, enabled):
@@ -524,6 +569,7 @@ class MainWindow(QWidget):
         self.worker.status.connect(self.update_status)
         self.worker.finished.connect(self.task_finished)
         self.collapse()
+        self.compact.show()  # the Stop button stays reachable while Klicky controls the browser
         self.worker.start()
 
     def ask(self, question, factory=None):
@@ -569,7 +615,9 @@ class MainWindow(QWidget):
 
     def task_finished(self):
         self.set_running(False)
-        # Do not raise over the final browser results or steal focus.
+        # Do not raise over the final browser results or steal focus; let the result be read, then clear the box.
+        if isinstance(self.worker, TaskWorker):
+            QTimer.singleShot(6000, lambda: self.compact.hide() if not (self.worker and self.worker.isRunning()) else None)
 
     def update_status(self, state, message):
         self.status_label.setText(message)
@@ -585,9 +633,10 @@ class MainWindow(QWidget):
             self.stop_task()
             event.ignore()
             return
-        self.hotkey.unregister()
-        self.speaker.close()
-        self.popup.hide()
-        self.compact.hide()
+        if self.tray:
+            # Closing the window keeps Klicky waiting for the shortcut; Quit lives in the tray menu.
+            event.ignore()
+            self.hide()
+            return
         event.accept()
-        QApplication.instance().quit()
+        self.quit_app()

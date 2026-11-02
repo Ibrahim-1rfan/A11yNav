@@ -20,7 +20,7 @@ def main():
     app = QApplication(sys.argv[:1])
     app.setApplicationName("Klicky")
     app.setOrganizationName("Klicky HCI")
-    # Klicky lives in the corner widget and popup; only closing the main window quits it.
+    # Klicky waits in the tray for its shortcut; only Quit in the tray menu ends it.
     app.setQuitOnLastWindowClosed(False)
     try:
         settings, error = load(), ""
@@ -31,19 +31,21 @@ def main():
     first_run = not settings_path().exists()
     if (args.smoke or first_run or error) and not args.smoke_popup:
         window.show()
-    # Otherwise start quietly: the corner widget and the global shortcut are the way in.
+    elif window.tray and window.active_hotkey and not args.smoke_popup:
+        # Start quietly: one short notice, then nothing on screen until the shortcut is pressed.
+        window.tray.showMessage("Klicky is ready", f"Press {window.active_hotkey} in Chrome or Edge to ask a question.", window.tray.icon(), 5000)
     if args.smoke_popup:
         def popup_finish():
             window.popup.open_for("chrome", None)
             window.popup.input.setText("How do I make text bigger?")
             window.popup.submit()
-            QTimer.singleShot(1500, lambda: (window.popup.grab().save(args.smoke_popup), window.popup.hide(), window.close()))
+            QTimer.singleShot(1500, lambda: (window.popup.grab().save(args.smoke_popup), window.popup.hide(), window.quit_app()))
         QTimer.singleShot(300, popup_finish)
     elif args.smoke:
         def finish():
             if args.smoke_image:
                 window.grab().save(args.smoke_image)
-            window.close()
+            window.quit_app()
         QTimer.singleShot(1500,finish)
     elif first_run:
         QTimer.singleShot(300,window.open_settings)
