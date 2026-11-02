@@ -180,3 +180,22 @@ def test_voice_off_or_missing_model_falls_back_to_typing(monkeypatch):
     window.popup.open_for(None, None)
     assert not window.popup.listening
     window.popup.hide(); window.close()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="uses Windows speech")
+def test_stop_silences_real_windows_speech_immediately():
+    speaker = Speaker()
+    speaker.volume = 0  # real SAPI speech, inaudible during tests
+    speaker.say("Step one. To zoom in, press Control and Plus together. " * 6, force=True)
+    deadline = time.monotonic() + 5
+    while not speaker.speaking and time.monotonic() < deadline:
+        time.sleep(.01)
+    assert speaker.speaking
+    time.sleep(.5)
+    started = time.monotonic()
+    speaker.stop()
+    while speaker.speaking and time.monotonic() < started + 2:
+        time.sleep(.005)
+    assert not speaker.speaking and speaker.stopped_cleanly
+    assert speaker.cut_at - started < .1  # muted within 100 ms of Stop
+    speaker.close(); speaker.thread.join(1)

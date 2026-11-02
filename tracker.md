@@ -128,3 +128,7 @@
   all four test questions were transcribed exactly in about 1 s each and matched the right guide. The model now
   preloads at startup. Tests: 147 passed; the suite never opens the real microphone. A live spoken test by a person
   is still to be done.
+- Bug from live use: Escape closed the popup but the answer kept being read. pyttsx3 reports "not busy" while
+  Windows SAPI is still speaking, so Stop was never applied. Speech now drives SAPI directly, waits on a stop
+  event instead of polling, and mutes, pauses and purges on Stop. Measured: muted 0 ms after Stop, SAPI finished
+  within 115-180 ms (was 700+ ms or never). Guide text is spoken as plain text only (no SAPI markup). Tests: 148 passed.
