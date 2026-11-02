@@ -17,7 +17,6 @@ TRANSITIONS = {
     (SPEAKING, "finished"): DONE,
     (SPEAKING, "stop"): DONE,                # Esc or orb click while reading
     (SPEAKING, "barge_in"): LISTENING,       # the user started talking over the answer
-    (DONE, "replay"): SPEAKING,
     (LISTENING, "stop_listening"): IDLE,
     (LISTENING, "fail"): ERROR, (THINKING, "fail"): ERROR, (TYPING, "fail"): ERROR, (SPEAKING, "fail"): DONE,
     (LISTENING, "cancel"): CLOSED, (THINKING, "cancel"): CLOSED,   # Esc while listening or thinking closes

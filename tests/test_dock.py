@@ -30,12 +30,12 @@ def test_state_machine_follows_the_spec_and_ignores_stray_events():
     assert machine.fire("heard") is None and machine.state == CLOSED  # a late result cannot jump the dock
     for event, state in [("open", IDLE), ("start", LISTENING), ("heard", THINKING), ("answer_read", SPEAKING),
                          ("barge_in", LISTENING), ("heard", THINKING), ("answer_read", SPEAKING), ("stop", DONE),
-                         ("replay", SPEAKING), ("finished", DONE), ("type", TYPING), ("submit", THINKING),
+                         ("type", TYPING), ("submit", THINKING),
                          ("answer_quiet", DONE), ("start", LISTENING), ("fail", ERROR), ("start", LISTENING),
                          ("cancel", CLOSED)]:
         assert machine.fire(event) == state, event
-    assert machine.fire("answer_read") is None
-    assert len(seen) == 17
+    assert machine.fire("answer_read") is None and machine.fire("replay") is None
+    assert len(seen) == 15
 
 
 @pytest.mark.parametrize("step,expected", [
@@ -108,15 +108,14 @@ def test_orb_follows_the_voice_breathes_and_respects_reduced_motion():
     assert not still.timer.isActive()  # no scaling or pulsing at all
 
 
-def test_card_shows_three_steps_and_more_options_reveals_the_rest():
+def test_card_shows_at_most_three_steps_and_no_buttons():
+    from PySide6.QtWidgets import QPushButton
     app = QApplication.instance() or QApplication([])
     card = AnswerCard()
     answer = Answer("Make pages bigger (zoom)", ("edge",), tuple(f"Step {i} text." for i in range(5)), ("https://support.microsoft.com/x",), True)
     card.show_answer(answer, LIGHT)
     assert len(card.step_labels) == VISIBLE_STEPS == 3 and card.title.text() == "Make pages bigger"
-    assert card.more_button.isVisibleTo(card) and not card.note.isVisibleTo(card)
-    card.more_button.click()
-    assert len(card.step_labels) == 5 and "support.microsoft.com" in card.note.text()
+    assert card.findChildren(QPushButton) == [] and not card.note.isVisibleTo(card)
     card.set_active(1)
     assert card.step_labels[1].property("active") == "true" and card.step_labels[0].property("active") == "false"
 
@@ -231,16 +230,16 @@ def test_talking_over_the_answer_stops_reading_and_listens_again(dock_setup):
     assert s.dock.state == CLOSED and wait_for(s.app, lambda: not s.listeners[-1].isRunning())
 
 
-def test_orb_click_and_escape_stop_reading_replay_and_slower(dock_setup):
+def test_orb_click_and_escape_stop_reading(dock_setup):
     s = dock_setup
     s.window.summon()
     assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
+    assert s.dock.tts.calls[-1].rate == pytest.approx(1.0)        # speed comes from Settings
     s.dock.orb.click()
     assert s.dock.state == DONE and s.dock.isVisible()             # stopped, answer stays visible
-    s.dock.card.replay_button.click()
-    assert s.dock.state == SPEAKING and s.dock.tts.calls[-1].lines[0].startswith("Here's how")
-    s.dock.card.slower_button.click()
-    assert s.dock.tts.calls[-1].rate == pytest.approx(.8)
+    s.dock.orb.click()
+    assert wait_for(s.app, lambda: s.dock.state in (LISTENING, THINKING, SPEAKING))  # orb asks again
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
     s.dock.escape()
     assert s.dock.state == DONE and s.dock.isVisible()             # first Esc stops speech
     s.dock.escape()

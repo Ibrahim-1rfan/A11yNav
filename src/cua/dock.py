@@ -21,10 +21,10 @@ from .tts import ReadAloud, intro, spoken
 
 LIGHT = {"surface": "#FFFFFF", "border": "#D5DDDA", "text": "#14231E", "muted": "#46564F", "accent_text": "#0F6E56",
          "active_bg": "#E1F5EE", "active_text": "#085041", "kbd_bg": "#EEF2F1", "kbd_text": "#14231E",
-         "focus": "#085041", "button_bg": "#F4F7F6"}
+         "focus": "#085041"}
 DARK = {"surface": "#1B2321", "border": "#3A4744", "text": "#F1F5F4", "muted": "#B9C7C2", "accent_text": "#5DCAA5",
         "active_bg": "#E1F5EE", "active_text": "#085041", "kbd_bg": "#2C3835", "kbd_text": "#F1F5F4",
-        "focus": "#9FE1CB", "button_bg": "#253230"}
+        "focus": "#9FE1CB"}
 
 
 def palette(profile_key):
@@ -80,7 +80,7 @@ class Dock(QWidget):
         self.machine = DockState(self.on_state)
         self.context_app = self.return_hwnd = None
         self.listener = self.monitor = self.worker = None
-        self.answer, self.slower, self.colors, self.answered = None, False, LIGHT, False
+        self.answer, self.colors, self.answered = None, LIGHT, False
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
         self.highlighter = Highlighter()
@@ -89,9 +89,6 @@ class Dock(QWidget):
         layout.setSpacing(10)
         self.card = AnswerCard()
         self.card.hide()
-        self.card.replay.connect(self.replay)
-        self.card.slower.connect(self.set_slower)
-        self.card.more.connect(lambda _: QTimer.singleShot(0, self.reposition))
         self.caption = QLabel()
         self.caption.setObjectName("caption")
         self.caption.setWordWrap(True)
@@ -182,10 +179,7 @@ class Dock(QWidget):
             f' #note {{ color:{c["muted"]}; font-size:{max(16, px - 2)}px; }}'
             f' QLabel#caption {{ background:{c["surface"]}; border:1px solid {c["border"]}; border-radius:10px; padding:6px 14px; font-size:{cap}px; }}'
             f' QLineEdit#typed {{ background:{c["surface"]}; border:2px solid {c["border"]}; border-radius:10px; padding:8px 12px; font-size:{cap}px; }}'
-            f' QLineEdit#typed:focus {{ border:3px solid {c["focus"]}; }}'
-            f' QPushButton#cardButton {{ background:{c["button_bg"]}; border:1px solid {c["border"]}; border-radius:8px; padding:6px 14px; min-height:28px; }}'
-            f' QPushButton#cardButton:focus {{ border:3px solid {c["focus"]}; }}'
-            f' QPushButton#cardButton:checked {{ background:{c["active_bg"]}; color:{c["active_text"]}; }}')
+            f' QLineEdit#typed:focus {{ border:3px solid {c["focus"]}; }}')
         if self.answer:
             self.card.colors = c
             self.card.render()
@@ -327,7 +321,7 @@ class Dock(QWidget):
             return
         self.answered = True
         self.answer = answer
-        self.card.show_answer(answer, self.colors, self.slower)
+        self.card.show_answer(answer, self.colors)
         self.card.show()
         announce(self, answer.spoken() if answer.grounded else answer.note)
         read = self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
@@ -336,7 +330,7 @@ class Dock(QWidget):
         else:
             self.machine.fire("answer_quiet")
             self.point_at_first_step()
-        self.card.replay_button.setFocus() if self.card.replay_button.isVisible() else self.orb.setFocus()
+        self.orb.setFocus()
 
     def lines(self):
         if not self.answer.grounded:
@@ -345,8 +339,7 @@ class Dock(QWidget):
 
     def read_answer(self):
         self.tts.voice_name = self.settings.tts_voice
-        rate = self.settings.speech_rate * (.8 if self.slower else 1.0)
-        self.tts.speak(self.lines(), rate, on_line_start=self.on_line, on_end=self.on_read_end)
+        self.tts.speak(self.lines(), self.settings.speech_rate, on_line_start=self.on_line, on_end=self.on_read_end)
         self.start_monitor()
 
     def on_line(self, index):
@@ -371,19 +364,6 @@ class Dock(QWidget):
     def stop_reading(self):
         self.quiet()
         self.machine.fire("stop")
-
-    def replay(self):
-        if self.state not in (SPEAKING, DONE) or not self.answer:
-            return
-        self.quiet()
-        if self.state == DONE:
-            self.machine.fire("replay")
-        self.read_answer()
-
-    def set_slower(self, on):
-        self.slower = on
-        if self.state == SPEAKING:
-            self.replay()
 
     # ---- barge-in ------------------------------------------------------------------------------------------
     def start_monitor(self):

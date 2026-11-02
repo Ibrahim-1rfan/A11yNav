@@ -47,7 +47,7 @@ Pause, and the orb "breathes" while it finds the answer. A short card appears wi
 star or reading-mode button, Klicky rings the real control, or points to the screen edge where it is.
 
 - **Talk over the answer** to stop it and ask again. **Esc** or clicking the orb stops reading; Esc again closes.
-- **Replay** reads from step 1, **Slower** reads at 80% speed, **More options** shows the remaining steps and source.
+- The card shows the first three steps of the guide. Reading speed and voice are in Settings.
 - Start typing at any time to switch to a text box. Without a microphone, typing takes over automatically.
 - Answers are for the browser that was in front unless your question names another one. "Search for …" runs
   the search agent.

@@ -1,9 +1,8 @@
-"""Short answer card: one-line title, up to three numbered steps, key chips, Replay / Slower / More options."""
+"""Short answer card: one-line title and up to three numbered steps with key chips. No buttons."""
 import html
 import re
-from urllib.parse import urlsplit
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QVariantAnimation, Qt, Signal
-from PySide6.QtWidgets import QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QVariantAnimation, Qt
+from PySide6.QtWidgets import QFrame, QGraphicsOpacityEffect, QLabel, QVBoxLayout
 
 VISIBLE_STEPS = 3
 KEYS = r"Ctrl|Alt|Shift|Esc|Escape|Tab|Enter|Delete|Home|End|Page Down|Page Up|Print Screen|F\d{1,2}|Plus \(\+\)|Minus \(-\)"
@@ -26,15 +25,11 @@ def rich_step(text, colors):
 
 
 class AnswerCard(QFrame):
-    replay = Signal()
-    slower = Signal(bool)
-    more = Signal(bool)
-
     def __init__(self):
         super().__init__()
         self.setObjectName("card")
         self.colors = {}
-        self.answer, self.active, self.expanded = None, -1, False
+        self.answer, self.active = None, -1
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(10)
@@ -47,35 +42,14 @@ class AnswerCard(QFrame):
         self.note = QLabel()
         self.note.setObjectName("note")
         self.note.setWordWrap(True)
-        self.note.setOpenExternalLinks(True)
-        self.note.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(self.note)
-        row = QHBoxLayout()
-        row.setSpacing(8)
-        self.replay_button, self.slower_button, self.more_button = QPushButton("Replay"), QPushButton("Slower"), QPushButton("More options")
-        self.replay_button.setAccessibleName("Replay the answer from step 1")
-        self.slower_button.setCheckable(True)
-        self.slower_button.setAccessibleName("Read more slowly")
-        self.more_button.setAccessibleName("Show more steps")
-        self.replay_button.clicked.connect(self.replay)
-        self.slower_button.toggled.connect(self.slower)
-        self.more_button.clicked.connect(self.toggle_more)
-        for button in (self.replay_button, self.slower_button, self.more_button):
-            button.setObjectName("cardButton")
-            button.setCursor(Qt.CursorShape.PointingHandCursor)
-            row.addWidget(button)
-        row.addStretch()
-        layout.addLayout(row)
         self.step_labels = []
         self.fade = QGraphicsOpacityEffect(self)
         self.fade.setOpacity(1.0)
         self.setGraphicsEffect(self.fade)
 
-    def show_answer(self, answer, colors, slower=False):
-        self.answer, self.colors, self.active, self.expanded = answer, colors, -1, False
-        self.slower_button.blockSignals(True)
-        self.slower_button.setChecked(slower)
-        self.slower_button.blockSignals(False)
+    def show_answer(self, answer, colors):
+        self.answer, self.colors, self.active = answer, colors, -1
         title = re.sub(r"\s*\(.*?\)", "", answer.title).strip() if answer.grounded else "No guide for that yet"
         self.title.setText(title)
         self.title.setToolTip(answer.title)
@@ -84,13 +58,7 @@ class AnswerCard(QFrame):
 
     @property
     def visible_steps(self):
-        steps = self.answer.steps if self.answer else ()
-        return steps if self.expanded else steps[:VISIBLE_STEPS]
-
-    def toggle_more(self):
-        self.expanded = not self.expanded
-        self.render()
-        self.more.emit(self.expanded)
+        return self.answer.steps[:VISIBLE_STEPS] if self.answer else ()
 
     def render(self):
         for label in self.step_labels:
@@ -105,33 +73,16 @@ class AnswerCard(QFrame):
             label.setAccessibleName(f"Step {i + 1}: {step}")
             self.steps_box.addWidget(label)
             self.step_labels.append(label)
-        extra = len(self.answer.steps) - VISIBLE_STEPS if self.answer else 0
-        self.more_button.setVisible(extra > 0)
-        self.more_button.setText("Fewer options" if self.expanded else "More options")
-        self.more_button.setAccessibleName("Show fewer steps" if self.expanded else f"Show {extra} more steps")
-        has_steps = bool(self.answer and self.answer.steps)
-        self.replay_button.setVisible(has_steps)
-        self.slower_button.setVisible(has_steps)
-        notes = []
-        if self.answer and not self.answer.grounded:
-            notes.append(html.escape(self.answer.note))
-        elif self.answer and self.expanded:
-            if self.answer.note:
-                notes.append(html.escape(self.answer.note))
-            for source in self.answer.sources:
-                if source.startswith("https://"):
-                    notes.append(f'Source: <a style="color:{self.colors["accent_text"]};" href="{html.escape(source)}">'
-                                 f'{html.escape(urlsplit(source).hostname or source)}</a>')
-        self.note.setText("<br>".join(notes))
-        self.note.setVisible(bool(notes))
+        note = self.answer.note if self.answer and not self.answer.grounded else ""
+        self.note.setText(note)
+        self.note.setVisible(bool(note))
         self.set_active(self.active)
 
     def set_active(self, index):
         """Highlight the step being read; -1 clears it."""
         self.active = index
         for i, label in enumerate(self.step_labels):
-            on = i == index
-            label.setProperty("active", "true" if on else "false")
+            label.setProperty("active", "true" if i == index else "false")
             label.style().unpolish(label)
             label.style().polish(label)
 
