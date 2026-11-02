@@ -33,6 +33,7 @@ class Orb(QPushButton):
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.mode = "idle"
+        self.pop = 1.0  # whole-orb scale for popping in and out of the companion
         self.level, self.target = 0.0, 0.0
         self.scales = (1.0, 1.0, 1.0)
         self.started = time.monotonic()
@@ -92,7 +93,7 @@ class Orb(QPushButton):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         center = QPointF(self.width() / 2, self.height() / 2)
-        radius = self.diameter / 2
+        radius = self.diameter / 2 * self.pop
         orb, inner, outer = (1.0, 1.0, 1.0) if self.reduced else self.scales
         painter.setPen(Qt.PenStyle.NoPen)
         for scale, alpha in ((outer, .20), (inner, .35)):

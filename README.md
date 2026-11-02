@@ -39,8 +39,11 @@ There are no animations, satisfying reduced-motion use without another setting.
 
 ## Ask from any app (global shortcut)
 
-Klicky runs in the background with nothing on screen, just a "K" icon in the system tray. Open Chrome or
-Edge and press **Win+Shift+K**. A small teal **orb** appears at the bottom-centre of the screen and starts
+Klicky runs in the background with a "K" icon in the system tray. Over Chrome, Edge or Firefox a small teal
+**companion** pointer trails your mouse, down and to the right so it never covers what you point at. It dims after
+4 seconds without movement and hides while you type, in fullscreen, and outside the browser. Clicks still go to
+the page as normal; the companion just squishes and a small ripple marks the click. Press **Win+Shift+K** and the
+companion turns into a teal **orb** right where it was, with the answer card opening beside it, and starts
 listening; the browser stays visible and usable. Its rings follow your voice and captions show what it hears.
 Pause, and the orb "breathes" while it finds the answer. A short card appears with up to three steps and is
 **read aloud**, each step highlighted as it is spoken. When a step mentions the browser's menu, address bar,
@@ -54,7 +57,9 @@ star or reading-mode button, Klicky rings the real control, or points to the scr
 - The tray menu has Ask, Open window, Settings and **Quit**. If another app owns Win+Shift+K, Klicky uses
   Ctrl+Alt+F9. Settings has the shortcut, voice listening, **Read answers aloud**, reading voice and speed,
   barge-in, and "let my screen reader read answers instead".
-- Windows "Show animations" off means no pulsing or scaling; state is shown by colour, icon and caption.
+- Windows "Show animations" off means no pulsing, scaling, lag, ripple or overshoot; state is shown by colour, icon and caption.
+- Settings: "Show Klicky companion", follow speed (Gentle, Normal, Snappy) and "Click ripple". With the companion off,
+  the hotkey opens the orb at the pointer. Clicking outside Klicky closes the orb; the companion comes back at the pointer.
 
 Demo: `launch.pyw --smoke-popup dock.png` opens the dock, answers a typed sample question silently and saves a
 screenshot of the dock.

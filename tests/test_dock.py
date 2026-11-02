@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 from PySide6.QtCore import QEvent, Qt, QThread, Signal
 from PySide6.QtGui import QFont, QKeyEvent
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QLabel
 from cua.answer_card import AnswerCard, rich_step, VISIBLE_STEPS
 from cua.assistant import Answer, build_assistant
 from cua.config import Settings
@@ -214,7 +214,8 @@ def test_hotkey_listens_captions_thinks_and_reads_each_step(dock_setup):
     call.end()
     assert dock.state == DONE and s.monitors[-1].stop_event.is_set()
     dock.escape()
-    assert dock.state == CLOSED and not dock.isVisible() and s.focused == [12345]
+    assert dock.state == CLOSED and s.focused == [12345]
+    assert wait_for(s.app, lambda: not dock.isVisible() and not dock.panel.isVisible())  # 180 ms shrink and fade
 
 
 def test_talking_over_the_answer_stops_reading_and_listens_again(dock_setup):
@@ -292,15 +293,15 @@ def test_spoken_search_hands_over_to_the_search_agent(dock_setup, monkeypatch):
     s.listeners.append(FakeListener("search for accessible computer interfaces"))
     s.window.summon()
     assert wait_for(s.app, lambda: searches == ["search for accessible computer interfaces"])
-    assert s.dock.state == CLOSED and not s.dock.isVisible()
+    assert s.dock.state == CLOSED and wait_for(s.app, lambda: not s.dock.isVisible())
 
 
 def test_text_sizes_meet_the_minimums(dock_setup):
     s = dock_setup
     s.window.summon()
-    style = s.dock.styleSheet()
+    style = s.dock.panel.styleSheet()
     assert "font-size:18px" in style and s.dock.caption.font().pixelSize() >= 18
-    assert s.dock.width() <= 420 + 16 + 1  # max width 420 at the default text size
+    assert s.dock.panel.width() == 320  # card about 320 px wide at the default text size
 
 
 def test_steps_that_mention_the_menu_point_at_it_while_read(dock_setup):
@@ -313,3 +314,15 @@ def test_steps_that_mention_the_menu_point_at_it_while_read(dock_setup):
     assert s.pointed[-1] == (steps[menu], 12345)
     s.dock.escape(); s.dock.escape()
     assert s.pointed[-1] is None  # highlights removed when the card closes
+
+
+def test_a_new_answer_replaces_the_old_steps_immediately():
+    app = QApplication.instance() or QApplication([])
+    card = AnswerCard()
+    card.show()
+    first = Answer("First", ("edge",), ("One.", "Two.", "Three."), (), True)
+    second = Answer("Second", ("edge",), ("Alpha.", "Beta."), (), True)
+    card.show_answer(first, LIGHT)
+    card.show_answer(second, LIGHT)  # no event-loop pass in between
+    shown = [label.text() for label in card.findChildren(QLabel, "step") if label.isVisible()]
+    assert len(shown) == 2 and "Alpha." in shown[0] and "Beta." in shown[1]

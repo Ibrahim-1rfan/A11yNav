@@ -38,6 +38,10 @@ search URL rather than typing into a page-specific search field.
 | orb.py | Orb button with voice-reactive rings, thinking breath, speaking pulse; honours reduced motion |
 | answer_card.py | Title, three steps with key chips, active-step highlight, Replay / Slower / More options |
 | tts.py | Per-step read-aloud on Windows SAPI with instant stop; spoken versions of steps |
+| companion.py | Teal companion trailing the pointer over the browser: dt-corrected easing, idle dim, typing/fullscreen hiding |
+| companion_asset.py | The companion's SVG and size, kept apart so the design can be swapped |
+| ripple.py | Click ripple windows |
+| morph.py | Orb clamping and card placement beside the orb; overshoot easing |
 | highlighter.py | Rings the browser's real toolbar control through UI Automation, or shows an edge callout |
 | voice.py | Microphone capture with end-of-speech detection and on-device Whisper; audio stays in memory |
 

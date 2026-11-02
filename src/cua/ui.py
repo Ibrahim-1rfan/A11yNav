@@ -2,7 +2,8 @@
 from dataclasses import replace
 import threading
 from PySide6.QtCore import Qt, QThread, Signal, QTimer, QEvent
-from PySide6.QtGui import QColor, QFont, QFontDatabase, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtCore import QPoint
+from PySide6.QtGui import QColor, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
     QPushButton, QTextEdit, QTextBrowser, QCheckBox, QDialog, QFormLayout, QLineEdit, QComboBox,
     QSpinBox, QDialogButtonBox, QMessageBox, QScrollArea, QSystemTrayIcon, QMenu)
@@ -107,6 +108,14 @@ class SetupDialog(QDialog):
         self.barge.setChecked(settings.barge_in)
         self.reader_quiet = QCheckBox("Let my screen reader read answers instead, when one is running")
         self.reader_quiet.setChecked(settings.screen_reader_quiet)
+        self.show_companion = QCheckBox("Show Klicky companion next to the pointer")
+        self.show_companion.setChecked(settings.companion)
+        self.companion_speed = QComboBox()
+        for label, key in (("Gentle", "gentle"), ("Normal", "normal"), ("Snappy", "snappy")):
+            self.companion_speed.addItem(label, key)
+        self.companion_speed.setCurrentIndex(max(0, self.companion_speed.findData(settings.companion_speed)))
+        self.click_ripple = QCheckBox("Show a ripple when I click")
+        self.click_ripple.setChecked(settings.click_ripple)
         from .tts import list_voices
         self.tts_voice = QComboBox()
         self.tts_voice.addItem("Windows default", "")
@@ -130,7 +139,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Reading voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Reading voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -168,7 +177,8 @@ class SetupDialog(QDialog):
                        hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked(),
                        read_aloud=self.read_aloud.isChecked(), barge_in=self.barge.isChecked(),
                        screen_reader_quiet=self.reader_quiet.isChecked(), tts_voice=self.tts_voice.currentData(),
-                       speech_rate=self.speech_rate.currentData()).validate()
+                       speech_rate=self.speech_rate.currentData(), companion=self.show_companion.isChecked(),
+                       companion_speed=self.companion_speed.currentData(), click_ripple=self.click_ripple.isChecked()).validate()
 
     def update_budget_note(self):
         suggested = 4 * self.timeout.value() + 30
@@ -381,7 +391,12 @@ class MainWindow(QWidget):
         self.escape_shortcut = QShortcut(QKeySequence("Escape"),self)
         self.escape_shortcut.activated.connect(self.stop_task)
         self.dock = Dock(self)
-        self.compact.ask.connect(lambda: self.dock.open_for(self.dock.context_app, self.dock.return_hwnd))
+        self.compact.ask.connect(lambda: self.open_orb(self.dock.context_app, self.dock.return_hwnd))
+        # The companion trails the pointer over the browser and turns into the orb on the hotkey.
+        from .companion import Companion
+        self.companion = Companion(lambda: self.settings)
+        self.dock.on_closed = self.companion.reappear
+        self.companion.start()
         self.hotkey = GlobalHotkey()
         self.hotkey.triggered.connect(self.summon)
         self.hotkey_ok = self.register_hotkey()
@@ -413,7 +428,7 @@ class MainWindow(QWidget):
         painter.end()
         tray = QSystemTrayIcon(QIcon(pixmap), self)
         menu = QMenu()
-        self.tray_ask = menu.addAction("Ask Klicky", lambda: self.dock.open_for(self.dock.context_app, self.dock.return_hwnd))
+        self.tray_ask = menu.addAction("Ask Klicky", lambda: self.open_orb(self.dock.context_app, self.dock.return_hwnd))
         menu.addAction("Open Klicky window", self.expand)
         menu.addAction("Settings", lambda: (self.expand(), self.open_settings()))
         menu.addSeparator()
@@ -430,6 +445,7 @@ class MainWindow(QWidget):
             self.worker.wait(3000)
         self.hotkey.unregister()
         self.speaker.close()
+        self.companion.stop()
         self.dock.close_dock()
         self.dock.tts.close()
         self.compact.hide()
@@ -459,7 +475,21 @@ class MainWindow(QWidget):
         own = {int(self.winId()), int(self.compact.winId()), int(self.dock.winId())}
         if not hwnd or int(hwnd) in own:
             hwnd, app = self.dock.return_hwnd, self.dock.context_app
-        self.dock.open_for(app, hwnd)
+        self.open_orb(app, hwnd)
+
+    def open_orb(self, app, hwnd):
+        """The companion shrinks away and the orb pops in centred 18 px down-right of where it was.
+        With the companion off or hidden, the orb opens at the pointer."""
+        if not self.dock.isVisible() or self.dock.closing:
+            if self.companion.is_showing():
+                corner = self.companion.position()
+                anchor = QPoint(corner.x() + 18, corner.y() + 18)
+            else:
+                anchor = QCursor.pos()
+            self.companion.morph_out()
+            self.dock.open_for(app, hwnd, anchor=anchor)
+        else:
+            self.dock.open_for(app, hwnd)
 
     def run_search(self, text):
         """A search typed into the popup runs through the normal guarded search agent."""

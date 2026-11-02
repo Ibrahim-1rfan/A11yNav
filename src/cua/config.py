@@ -41,6 +41,9 @@ class Settings:
     speech_rate: float = 1.0
     barge_in: bool = True
     screen_reader_quiet: bool = True
+    companion: bool = True
+    companion_speed: str = "normal"
+    click_ripple: bool = True
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -76,8 +79,10 @@ class Settings:
             raise UserError("Invalid shortcut setting.")
         if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
             raise UserError("Invalid voice setting.")
-        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet")):
+        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple")):
             raise UserError("Invalid read-aloud setting.")
+        if self.companion_speed not in {"gentle", "normal", "snappy"}:
+            raise UserError("Invalid companion speed.")
         if not isinstance(self.tts_voice, str) or len(self.tts_voice) > 200:
             raise UserError("Invalid reading voice.")
         if type(self.speech_rate) not in (int, float) or not math.isfinite(self.speech_rate) or not .5 <= self.speech_rate <= 1.5:

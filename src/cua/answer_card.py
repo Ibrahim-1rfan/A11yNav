@@ -62,6 +62,9 @@ class AnswerCard(QFrame):
 
     def render(self):
         for label in self.step_labels:
+            # Out of the layout now; deleteLater alone left old steps showing until the next event-loop pass.
+            self.steps_box.removeWidget(label)
+            label.hide()
             label.deleteLater()
         self.step_labels = []
         for i, step in enumerate(self.visible_steps):
@@ -72,6 +75,7 @@ class AnswerCard(QFrame):
             label.setText(f'<b style="color:{self.colors["accent_text"]};">{i + 1}.</b>&nbsp; {rich_step(step, self.colors)}')
             label.setAccessibleName(f"Step {i + 1}: {step}")
             self.steps_box.addWidget(label)
+            label.show()  # a child added to an already visible card is not shown automatically
             self.step_labels.append(label)
         note = self.answer.note if self.answer and not self.answer.grounded else ""
         self.note.setText(note)

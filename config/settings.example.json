@@ -26,5 +26,8 @@
   "tts_voice": "",
   "speech_rate": 1.0,
   "barge_in": true,
-  "screen_reader_quiet": true
+  "screen_reader_quiet": true,
+  "companion": true,
+  "companion_speed": "normal",
+  "click_ripple": true
 }

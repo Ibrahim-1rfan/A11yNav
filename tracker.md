@@ -145,3 +145,17 @@
   word-wrapped captions were under-measured. Minimized browsers reported controls near -32000; pointing now skips them.
 - Live checks: per-step SAPI callbacks in order, stop silent in 156 ms with no late end event; real Whisper captions
   then exact final text; Chrome's menu button found by UI Automation in 1.0 s. Tests: 161 passed.
+
+## 3 November 2026 — companion cursor and morph
+
+- Added a teal companion pointer (exact supplied SVG, 22 px) that trails the mouse over Chrome, Edge and Firefox
+  with frame-rate independent easing (k = 1 - (1 - 0.18)^(dt*60)), offset (16, 14), idle dim, typing/fullscreen/
+  outside-browser hiding, click squish and ripple. It is a click-through window that never takes focus.
+- The hotkey morphs it into the orb at its position (+18 px) with an overshoot pop; the card opens beside the orb,
+  flips left at the right edge and clamps to the screen. Closing fades both and the companion reappears at the pointer.
+- Desktop adaptations of the extension brief: pointer polling instead of mousemove (no system-wide hook, so no
+  click can ever be delayed), "page" means the foreground browser window, settings live in settings.json.
+- Findings: Qt's precise timer forced 1 ms system timer resolution, costing 3.4% of a core while idle; coarse timers
+  and 4 Hz polling with no browser in front brought the whole app to 0.94% of one core. Renders caught duplicated
+  steps on a second answer (deleteLater left old labels in the layout) and steps vanishing when a visible card
+  re-rendered. Tests: 184 passed. The feel of the follow and squish needs a person's eye.

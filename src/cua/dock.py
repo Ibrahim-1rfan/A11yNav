@@ -1,12 +1,12 @@
-"""Voice-first dock: a small orb docked bottom-centre, live captions, and an answer card that is read aloud.
+"""Voice-first dock: the orb pops in where the companion was, with captions and the read-aloud card beside it.
 
-Laid out as [answer card] -> [caption] -> [orb] in a frameless window with no backdrop, so the browser stays
-visible and usable. Every behaviour goes through the DockState machine in dockstate.py.
+Two frameless windows with no backdrop, so the browser stays visible and usable: the orb window, and a side
+panel holding the caption, the typing box and the answer card. Every behaviour goes through dockstate.py.
 """
 import ctypes
 import os
 from dataclasses import replace
-from PySide6.QtCore import QRect, Qt, QTimer
+from PySide6.QtCore import QPoint, QRect, Qt, QTimer, QVariantAnimation
 from PySide6.QtGui import QCursor, QFont, QFontMetrics, QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QWidget
 from .answer_card import AnswerCard
@@ -14,6 +14,7 @@ from .config import UserError
 from .dockstate import (CAPTIONS, CLOSED, DONE, ERROR, IDLE, LISTENING, ORB_LABELS, SPEAKING, THINKING, TYPING,
                         DockState)
 from .highlighter import Highlighter
+from .morph import orb_center, overshoot, panel_rect
 from .orb import Orb
 from .popup import AnswerWorker
 from .rag import detect_app
@@ -70,6 +71,20 @@ def last_two_lines(text, font, width):
     return words[-1] if words else ""
 
 
+class SidePanel(QWidget):
+    """Caption, typing box and answer card, placed beside the orb."""
+    def __init__(self, dock):
+        super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
+                         | Qt.WindowType.NoDropShadowWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setWindowTitle("Klicky answer")
+        self.dock = dock
+        QShortcut(QKeySequence("Escape"), self, activated=dock.escape)
+
+    def keyPressEvent(self, event):
+        self.dock.keyPressEvent(event)  # typing anywhere in Klicky switches to the text box
+
+
 class Dock(QWidget):
     def __init__(self, owner):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
@@ -84,9 +99,12 @@ class Dock(QWidget):
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
         self.highlighter = Highlighter()
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 4)
-        layout.setSpacing(10)
+        self.anchor = QPoint()
+        self.on_closed = lambda: None
+        self.panel = SidePanel(self)
+        layout = QVBoxLayout(self.panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
         self.card = AnswerCard()
         self.card.hide()
         self.caption = QLabel()
@@ -100,13 +118,25 @@ class Dock(QWidget):
         self.input.setPlaceholderText("Type your question and press Enter")
         self.input.returnPressed.connect(self.submit_typed)
         self.input.hide()
-        self.orb = Orb()
-        self.orb.clicked.connect(self.orb_clicked)
-        layout.addWidget(self.card)
         layout.addWidget(self.caption)
         layout.addWidget(self.input)
-        layout.addWidget(self.orb, 0, Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(self.card)
+        layout.addStretch()
+        self.orb = Orb()
+        self.orb.clicked.connect(self.orb_clicked)
+        orb_layout = QVBoxLayout(self)
+        orb_layout.setContentsMargins(0, 0, 0, 0)
+        orb_layout.addWidget(self.orb)
         QShortcut(QKeySequence("Escape"), self, activated=self.escape)
+        self.pop = QVariantAnimation(self)
+        self.pop.valueChanged.connect(self.set_pop)
+        self.pop.finished.connect(self.pop_finished)
+        self.closing = False
+        # Click anywhere outside Klicky closes it; polled, so no system-wide mouse hook is needed.
+        self.outside = QTimer(self)
+        self.outside.setInterval(50)
+        self.outside.timeout.connect(self.check_outside_click)
+        self.button_was_down = False
 
     @property
     def state(self):
@@ -139,7 +169,8 @@ class Dock(QWidget):
             announce(self, text)
 
     # ---- opening, layout, styling ---------------------------------------------------------------------------
-    def open_for(self, app, hwnd, listen=True):
+    def open_for(self, app, hwnd, listen=True, anchor=None):
+        """anchor: where the orb's centre should be (the companion's spot); defaults to the pointer."""
         if self.state == CLOSED:
             self.context_app, self.return_hwnd = app, hwnd
             self.highlighter.cache.clear()
@@ -147,8 +178,18 @@ class Dock(QWidget):
             self.card.hide()
             self.restyle()
             self.machine.fire("open")
+            area = self.screen_area(anchor or QCursor.pos())
+            self.anchor = orb_center(anchor or QCursor.pos(), area, self.orb.diameter // 2)
+            self.closing = False
+            self.pop.stop()
+            self.setWindowOpacity(1.0)
+            self.panel.setWindowOpacity(1.0)
+            self.reposition()
             self.show()
             self.orb.start()
+            self.animate_pop(.5, 1.0, 220, overshoot())  # pops in with a small overshoot
+            self.button_was_down = True  # ignore the click that may have opened Klicky
+            self.outside.start()
         elif hwnd:
             self.context_app, self.return_hwnd = app, hwnd
         self.raise_()
@@ -157,6 +198,49 @@ class Dock(QWidget):
         self.reposition()
         if listen:
             self.listen_now()
+
+    def screen_area(self, point):
+        screen = QGuiApplication.screenAt(point) or QGuiApplication.primaryScreen()
+        return screen.availableGeometry()
+
+    def animate_pop(self, start, end, ms, curve=None):
+        if self.orb.reduced:
+            self.set_pop(end)
+            self.pop_finished()
+            return
+        self.pop.stop()
+        self.pop.setDuration(ms)
+        self.pop.setStartValue(start)
+        self.pop.setEndValue(end)
+        if curve is not None:
+            self.pop.setEasingCurve(curve)
+        self.pop.start()
+
+    def set_pop(self, value):
+        self.orb.pop = value
+        self.orb.update()
+        if self.closing:  # scale down and fade together
+            fade = max(0.0, (value - .6) / .4)
+            self.setWindowOpacity(fade)
+            self.panel.setWindowOpacity(fade)
+
+    def pop_finished(self):
+        if self.closing:
+            self.closing = False
+            self.hide()
+            self.panel.hide()
+            self.orb.pop = 1.0
+            self.on_closed()
+
+    def check_outside_click(self):
+        if os.name != "nt" or not self.isVisible():
+            return
+        down = bool(ctypes.windll.user32.GetAsyncKeyState(0x01) & 0x8000)
+        if down and not self.button_was_down:
+            pos = QCursor.pos()
+            if not (self.frameGeometry().contains(pos) or self.panel.isVisible() and self.panel.frameGeometry().contains(pos)):
+                self.close_dock()
+        self.button_was_down = down
 
     def restyle(self):
         p = self.owner.profile
@@ -169,8 +253,9 @@ class Dock(QWidget):
         font = QFont("Segoe UI")
         font.setPixelSize(cap)
         self.caption.setFont(font)
-        self.setFixedWidth(self.dock_width() + 16)
-        self.setStyleSheet(
+        self.panel.setFixedWidth(self.panel_width())
+        self.setStyleSheet("* { background:transparent; }")
+        self.panel.setStyleSheet(
             f'* {{ background:transparent; color:{c["text"]}; font-family:"Segoe UI"; font-size:{px}px; }}'
             f' #card {{ background:{c["surface"]}; border:1px solid {c["border"]}; border-radius:12px; }}'
             f' #cardTitle {{ font-weight:500; font-size:{px + 2}px; }}'
@@ -184,23 +269,33 @@ class Dock(QWidget):
             self.card.colors = c
             self.card.render()
 
-    def dock_width(self):
-        return max(420, self.settings.font_px * 22)
+    def panel_width(self):
+        return max(320, self.settings.font_px * 17)  # about 320 px; wider for large text
 
     def caption_width(self):
-        return self.dock_width() - 30
+        return self.panel_width() - 30
 
     def reposition(self):
-        if not self.isVisible():
+        """Orb centred on its anchor; panel beside it. Neither follows the mouse while open."""
+        if self.state == CLOSED:
             return
-        # Wrapped captions and steps need height-for-width; adjustSize alone under-measures them and clips the orb.
-        layout = self.layout()
+        self.adjustSize()
+        self.move(self.anchor.x() - self.width() // 2, self.anchor.y() - self.height() // 2)
+        has_content = not self.caption.isHidden() or not self.input.isHidden() or not self.card.isHidden()
+        if not has_content:
+            self.panel.hide()
+            return
+        # Wrapped captions and steps need height-for-width; adjustSize alone under-measures them.
+        layout = self.panel.layout()
         layout.activate()
-        height = layout.totalHeightForWidth(self.width()) if layout.hasHeightForWidth() else layout.totalSizeHint().height()
-        self.setFixedHeight(max(height, layout.totalMinimumSize().height()))
-        screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
-        area = screen.availableGeometry()
-        self.move(area.x() + (area.width() - self.width()) // 2, area.bottom() - 24 - self.height())
+        width = self.panel_width()
+        height = layout.totalHeightForWidth(width) if layout.hasHeightForWidth() else layout.totalSizeHint().height()
+        height = max(height, layout.totalMinimumSize().height())
+        self.panel.setFixedHeight(height)
+        self.panel.setGeometry(panel_rect(self.anchor, width, height, self.screen_area(self.anchor)))
+        if not self.closing:
+            self.panel.show()
+            self.panel.raise_()
 
     # ---- listening -----------------------------------------------------------------------------------------
     def voice_ready(self):
@@ -274,6 +369,8 @@ class Dock(QWidget):
             self.machine.fire("type")
         self.input.setText(text)
         self.input.show()
+        self.reposition()
+        self.panel.activateWindow()
         self.input.setFocus()
         self.input.end(False)
         QTimer.singleShot(0, self.reposition)
@@ -436,9 +533,10 @@ class Dock(QWidget):
         if self.worker and self.worker.isRunning():
             self.worker.stop_event.set()
         self.quiet()
+        self.outside.stop()
         self.orb.stop()  # stops the animation loop; the microphone closes when the listener thread ends
-        self.card.hide()
-        self.hide()
+        self.closing = True
+        self.animate_pop(1.0, .6, 180)  # orb and card shrink and fade, then the companion returns
         hwnd, self.return_hwnd = self.return_hwnd, None
         if hwnd:
             try:
