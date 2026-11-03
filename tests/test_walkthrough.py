@@ -58,6 +58,7 @@ def walk_setup(monkeypatch):
     window.companion.timer.stop()
     dock = window.dock
     dock.tts = FakeTTS()
+    dock.silent = dock.tts  # typed questions are answered in text alone; the flow is the same
     browser = Browser()
     dock.probe_factory = browser.probe
     dock.answer_factory = None  # the real assistant, so the browser context (Chrome) reaches retrieval
@@ -196,3 +197,17 @@ def test_clicking_the_pointed_button_moves_on_without_waiting_for_the_menu(walk_
     assert not check_until(s, lambda: s.dock.walk.index == 0, rounds=4)
     s.dock.walk.clicked(QPoint(1345, 317))                           # the plus in the real menu
     assert s.dock.state == SPEAKING and s.dock.tts.calls[-1].lines[0] == "That's it, well done."
+
+
+def test_the_card_moves_off_a_wide_tab_at_the_top_of_the_page(walk_setup):
+    s = walk_setup
+    dock = s.dock
+    finish_speaking(s)
+    area = dock.screen_area(dock.anchor)
+    tab = QRect(area.center().x() - 150, area.top() + 60, 300, 40)    # like a course tab in the LMS top bar
+    dock.anchor = QPoint(tab.center().x(), tab.bottom() + 40)           # Klicky opened right on top of it
+    dock.reposition()
+    dock.guide_companion(tab)
+    clear = tab.adjusted(-12, -12, 12, 12)
+    assert not dock.frameGeometry().intersects(clear)
+    assert not (dock.panel.isVisible() and dock.panel.frameGeometry().intersects(clear))

@@ -143,6 +143,7 @@ def acting(monkeypatch):
     window.companion.timer.stop()
     dock = window.dock
     dock.tts = FakeTTS()
+    dock.silent = dock.tts  # typed questions are answered in text alone; the flow is the same
     dock.action_factory = FakeActor
     presses = []
     monkeypatch.setattr(window.companion, "press", lambda: presses.append(True))

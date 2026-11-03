@@ -26,7 +26,7 @@ MORPH_S = .2
 GUIDE_SPEED = .12                 # a visible glide from the orb to the control being explained
 SETTLED_MS = 50                   # light polling once settled
 AWAY_MS = 250                     # no browser in front
-PAD = 3                           # transparent margin around the 22 px pointer
+PAD = 3                           # transparent margin around the pointer
 MODIFIERS = {0x10, 0x11, 0x12, 0x5B, 0x5C, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0x14, 0x90, 0x91}
 
 

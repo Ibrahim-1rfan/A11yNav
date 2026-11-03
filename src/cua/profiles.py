@@ -28,6 +28,7 @@ class Profile:
     max_steps: int = 8
     settle_seconds: float = 1.0
     answer_style: str = ""
+    input_mode: str = "speak"  # how the hotkey opens: "type" for people who don't use their voice or hearing
 
 
 DARK = {"background": "#0b202b", "surface": "#15323f", "text": "#f2f7f9", "muted": "#b8cbd4",
@@ -70,6 +71,12 @@ PROFILES = {
         answer_style=("The reader has limited hand movement. Choose the way with the fewest key presses and no precise "
                       "mouse pointing. Avoid shortcuts that need three keys at once when a menu or single key works. "
                       "Mention a keyboard-only option whenever one exists.")),
+    "deaf": Profile(
+        "deaf", "Deaf and hard of hearing",
+        "Klicky opens ready to type, answers in text and captions without sound, and points at each step on screen.",
+        MONO, 18, 22, DARK, DARK_STATES, input_mode="type",
+        answer_style=("The reader is Deaf or hard of hearing. Never rely on sounds, beeps or spoken cues: say what "
+                      "appears on screen instead, for example 'a red badge appears' rather than 'you'll hear a chime'.")),
 }
 
 
@@ -87,4 +94,4 @@ def apply_to(settings, key):
     from dataclasses import replace
     profile = get(key)
     return replace(settings, profile=profile.key, font_px=profile.font_px, speech=profile.speech,
-                   settle_seconds=profile.settle_seconds).validate()
+                   settle_seconds=profile.settle_seconds, input_mode=profile.input_mode).validate()

@@ -23,6 +23,8 @@ TRANSITIONS = {
     (WAITING, "next"): SPEAKING,             # the browser shows the step was done (or a reminder/step back)
     (WAITING, "stop"): DONE, (WAITING, "start"): LISTENING, (WAITING, "close"): CLOSED, (WAITING, "fail"): DONE,
     (LISTENING, "stop_listening"): IDLE,
+    (LISTENING, "resume"): WAITING, (THINKING, "resume"): WAITING,
+    (WAITING, "submit"): THINKING,     # the typed answer to a walkthrough's question ("Which assignment?")  # a walkthrough's question went unanswered: click instead
     (LISTENING, "fail"): ERROR, (THINKING, "fail"): ERROR, (TYPING, "fail"): ERROR, (SPEAKING, "fail"): DONE,
     (LISTENING, "cancel"): CLOSED, (THINKING, "cancel"): CLOSED,   # Esc while listening or thinking closes
     (IDLE, "close"): CLOSED, (DONE, "close"): CLOSED, (ERROR, "close"): CLOSED, (TYPING, "close"): CLOSED,

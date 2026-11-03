@@ -152,6 +152,8 @@ def test_guide_text_is_inert_in_prompts(corpus):
     ("where is my history", HelpQuestion),
     ("I can't read this page", HelpQuestion),
     ("zoom in firefox?", HelpQuestion),
+    ("show me the syllabus of computer security", HelpQuestion),   # typed "do it" requests reach the guides too
+    ("open my HCI assignments", HelpQuestion),
 ])
 def test_router_is_deterministic(text, kind):
     assert isinstance(route(text, "bing"), kind)
@@ -249,7 +251,7 @@ def test_every_course_guide_asks_for_the_course_and_points_at_its_menu(corpus, t
     assert chunk.points[0] == "course" and "{course}" in chunk.steps[0]
     assert chunk.points[1] == f"link: {menu}" and menu in chunk.steps[1]
     specs = chunk.points
-    assert all(s in ("course", "any", "tip") or s.split(":")[0] in ("link", "button", "control") for s in specs)
+    assert all(s in ("course", "any", "tip", "assignment") or s.split(":")[0] in ("link", "button", "control") for s in specs)
     assert "tip" not in specs or all(s == "tip" for s in specs[specs.index("tip"):])  # tips only at the end
 
 
@@ -271,3 +273,14 @@ def test_named_places_never_take_over_browser_questions(corpus):
     for question, expected in [("how do I make text bigger", "zoom-and-text-size"), ("how do I bookmark this page", "bookmarks"),
                                ("how do I open a new tab", "new-tab")]:
         assert index.retrieve(question, app="chrome", platform="lms")[0].chunk.id == f"browsers/{expected}#chrome"
+
+
+@pytest.mark.parametrize("text,do_it", [
+    ("show me the syllabus of computer security", True), ("open the course outline of HCI", True),
+    ("take me to my assignments", True), ("can you open resources for cloud computing", True),
+    ("please go to the calendar", True), ("how do I open the syllabus", False), ("show me how to submit", False),
+    ("where is the syllabus", False), ("can you show me where the syllabus is", False), ("what is due this week", False),
+])
+def test_do_it_requests_are_told_apart_from_how_to_questions(text, do_it):
+    from cua.planning import is_do_it
+    assert is_do_it(text) is do_it

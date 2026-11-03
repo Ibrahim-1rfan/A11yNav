@@ -1,10 +1,27 @@
 """Application entry point. --smoke exercises the real UI without desktop input."""
 import argparse
 import logging
+import os
 from pathlib import Path
 import sys
 from .browser import enable_dpi_awareness
 from .config import load, Settings, UserError, settings_path
+
+
+def walk_log():
+    """Guided steps are noted in %LOCALAPPDATA%\Klicky\klicky.log (step numbers and counts, never page text), so a
+    walkthrough that stalls can be understood afterwards. The file is kept small."""
+    from logging.handlers import RotatingFileHandler
+    try:
+        folder = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "Klicky"
+        folder.mkdir(parents=True, exist_ok=True)
+        handler = RotatingFileHandler(folder / "klicky.log", maxBytes=200_000, backupCount=1, encoding="utf-8")
+    except OSError:
+        return
+    handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+    log = logging.getLogger("klicky.walk")
+    log.setLevel(logging.INFO)
+    log.addHandler(handler)
 
 
 def main():
@@ -33,6 +50,7 @@ def main():
     except UserError as exc:
         settings, error = Settings(), str(exc)
     logging.basicConfig(level=logging.WARNING)
+    walk_log()
     window = MainWindow(settings,error)
     if not (args.smoke or args.smoke_popup):
         QTimer.singleShot(3000, window.dock.warm_voice)  # cache the natural voice's common lines in the background

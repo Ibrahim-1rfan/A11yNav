@@ -118,6 +118,8 @@ class SetupDialog(QDialog):
         self.click_ripple.setChecked(settings.click_ripple)
         self.allow_actions = QCheckBox("Let Klicky do simple browser tasks when I ask (new tab, refresh, zoom...)")
         self.allow_actions.setChecked(settings.actions)
+        self.summaries = QCheckBox("Summarize assignment instructions with AI (the instruction text is sent to the AI service in keys.env)")
+        self.summaries.setChecked(settings.summaries)
         from .tts import list_voices
         self.tts_voice = QComboBox()
         self.tts_voice.addItem("Windows default", "")
@@ -125,6 +127,10 @@ class SetupDialog(QDialog):
             self.tts_voice.addItem(name, name)
         self.tts_voice.setCurrentIndex(max(0, self.tts_voice.findData(settings.tts_voice)))
         from .neural_tts import VOICES
+        self.input_mode = QComboBox()
+        self.input_mode.addItem("Speak (Klicky listens)", "speak")
+        self.input_mode.addItem("Type (answers shown as text, no sound)", "type")
+        self.input_mode.setCurrentIndex(max(0, self.input_mode.findData(settings.input_mode)))
         self.voice_engine = QComboBox()
         self.voice_engine.addItem("Natural (online: the text read is sent to Microsoft)", "natural")
         self.voice_engine.addItem("Windows (offline)", "windows")
@@ -163,7 +169,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Klicky opens in",self.input_mode),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Assignment summaries",self.summaries),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -192,6 +198,7 @@ class SetupDialog(QDialog):
         profile = profiles.get(self.profile.currentData())
         self.profile_note.setText(profile.description)
         self.size.setValue(profile.font_px)
+        self.input_mode.setCurrentIndex(max(0, self.input_mode.findData(profile.input_mode)))
 
     def values(self):
         key = self.profile.currentData()
@@ -205,7 +212,8 @@ class SetupDialog(QDialog):
                        voice_engine=self.voice_engine.currentData(), neural_voice=self.neural_voice.currentData(),
                        speech_rate=self.speech_rate.currentData(), companion=self.show_companion.isChecked(),
                        companion_speed=self.companion_speed.currentData(), click_ripple=self.click_ripple.isChecked(),
-                       actions=self.allow_actions.isChecked()).validate()
+                       actions=self.allow_actions.isChecked(), summaries=self.summaries.isChecked(),
+                       input_mode=self.input_mode.currentData()).validate()
 
     def update_budget_note(self):
         suggested = 4 * self.timeout.value() + 30

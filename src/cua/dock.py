@@ -1,7 +1,12 @@
-"""Voice-first dock: the orb pops in where the companion was, with captions and the read-aloud card beside it.
+"""The dock: the orb pops in where the companion was, with captions and the answer card beside it.
 
-Two frameless windows with no backdrop, so the browser stays visible and usable: the orb window, and a side
-panel holding the caption, the typing box and the answer card. Every behaviour goes through dockstate.py.
+Two frameless windows with no backdrop, so the browser stays visible and usable: the orb window (the orb, the
+Speak / Type toggle under it and the typing box under that), and a side panel holding the caption and the answer card.
+Every behaviour goes through dockstate.py.
+
+Speak or Type: the hotkey opens in the person's saved mode. A question that was spoken is answered aloud; a typed one
+is answered in text only, with each line shown as a caption for as long as it takes to read, so guided steps work
+without any sound (for Deaf and hard-of-hearing people, or anyone in a quiet room).
 """
 import ctypes
 import os
@@ -14,6 +19,7 @@ from .config import UserError
 from .dockstate import (ACTING, CAPTIONS, CLOSED, DONE, ERROR, IDLE, LISTENING, ORB_LABELS, SPEAKING, THINKING,
                         TYPING, WAITING, DockState)
 from .highlighter import Highlighter
+from .inputmode import InputToggle
 from .morph import orb_center, overshoot, panel_rect
 from .orb import Orb
 from .popup import AnswerWorker
@@ -72,6 +78,10 @@ def last_two_lines(text, font, width):
     return words[-1] if words else ""
 
 
+TOGGLE_GAP, INPUT_GAP = 15, 8  # between the orb's square and the toggle; between the toggle and the typing box
+INPUT_WIDTH = 200
+
+
 class SidePanel(QWidget):
     """Caption, typing box and answer card, placed beside the orb."""
     def __init__(self, dock):
@@ -84,6 +94,40 @@ class SidePanel(QWidget):
 
     def keyPressEvent(self, event):
         self.dock.keyPressEvent(event)  # typing anywhere in Klicky switches to the text box
+
+
+class SilentReader:
+    """Shows each line as a caption instead of saying it, for as long as it takes to read, with the same callbacks
+    as the voices, so guided steps work in text alone."""
+    MS_PER_CHAR, MIN_MS = 60, 1800
+
+    def __init__(self, show):
+        self.show, self.run = show, 0
+
+    def speak(self, lines, rate=1.0, on_line_start=None, on_end=None):
+        self.run += 1
+        self.next(self.run, list(lines), 0, rate, on_line_start, on_end)
+
+    def next(self, run, lines, index, rate, on_line_start, on_end):
+        if run != self.run:
+            return  # stopped, or something newer is being shown
+        if index >= len(lines):
+            if on_end:
+                on_end()
+            return
+        if on_line_start:
+            on_line_start(index)  # first, so the card shows the step before the caption is chosen
+        if run != self.run:
+            return
+        self.show(lines[index])
+        ms = int(max(self.MIN_MS, self.MS_PER_CHAR * len(lines[index])) / max(rate, .5))
+        QTimer.singleShot(ms, lambda: self.next(run, lines, index + 1, rate, on_line_start, on_end))
+
+    def stop(self):
+        self.run += 1
+
+    def close(self):
+        self.stop()
 
 
 def common_lines():
@@ -112,6 +156,8 @@ class Dock(QWidget):
         self.probe_factory = None  # tests inject a fake control lookup for walkthroughs
         self.choice, self.last_question, self.choice_misses = None, "", 0  # "Which course?" waiting for an answer
         self.page_courses = self.page_find = self.page_seer = None  # tests inject fakes; None means the real page and model
+        self.page_reader = None  # likewise for reading assignments and summarizing them
+        self.page_press = None   # and for opening a link (None: through UI Automation)
         self.page_worker = None
         self.action_factory = None  # tests inject a fake action runner
         self.actor = None
@@ -121,6 +167,8 @@ class Dock(QWidget):
         self.auto_close.timeout.connect(lambda: self.state == DONE and self.answer is None and self.close_dock())
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
+        self.silent = SilentReader(self.show_silent)
+        self.input_mode = getattr(getattr(owner, "settings", None), "input_mode", "speak")
         self.highlighter = Highlighter(self.guide_companion)
         self.anchor = QPoint()
         self.on_closed = lambda: None
@@ -138,19 +186,32 @@ class Dock(QWidget):
         self.input = QLineEdit()
         self.input.setObjectName("typed")
         self.input.setAccessibleName("Type your question")
-        self.input.setPlaceholderText("Type your question and press Enter")
+        self.input.setPlaceholderText("Type and press Enter")
         self.input.returnPressed.connect(self.submit_typed)
+        self.input.setFixedWidth(INPUT_WIDTH)
+        policy = self.input.sizePolicy()
+        policy.setRetainSizeWhenHidden(True)  # its row stays reserved in Speak mode, so nothing above it moves
+        self.input.setSizePolicy(policy)
         self.input.hide()
         layout.addWidget(self.caption)
-        layout.addWidget(self.input)
         layout.addWidget(self.card)
         # No trailing stretch: the panel is sized to its contents, and a stretch would take the height the card
         # asked for (height-for-width), leaving wrapped steps cut off at their one-line size.
         self.orb = Orb()
         self.orb.clicked.connect(self.orb_clicked)
+        self.toggle = InputToggle(self.input_mode)
+        self.toggle.changed.connect(self.set_input_mode)
+        self.mode_note = QLabel()  # polite live region: "Listening" / "Typing"
+        self.mode_note.setAccessibleName("Input mode status")
+        self.mode_note.hide()
         orb_layout = QVBoxLayout(self)
         orb_layout.setContentsMargins(0, 0, 0, 0)
-        orb_layout.addWidget(self.orb)
+        orb_layout.setSpacing(0)
+        orb_layout.addWidget(self.orb, 0, Qt.AlignmentFlag.AlignHCenter)
+        orb_layout.addSpacing(TOGGLE_GAP)
+        orb_layout.addWidget(self.toggle, 0, Qt.AlignmentFlag.AlignHCenter)
+        orb_layout.addSpacing(INPUT_GAP)
+        orb_layout.addWidget(self.input, 0, Qt.AlignmentFlag.AlignHCenter)
         QShortcut(QKeySequence("Escape"), self, activated=self.escape)
         self.pop = QVariantAnimation(self)
         self.pop.valueChanged.connect(self.set_pop)
@@ -175,8 +236,8 @@ class Dock(QWidget):
         if new == CLOSED:
             self.finish_close()
             return
-        self.orb.set_mode(new, ORB_LABELS[new])
-        self.input.setVisible(new == TYPING)
+        self.orb.set_mode(new, "Typing: microphone off" if self.input_mode == "type" else ORB_LABELS[new])
+        self.input.setVisible(self.input_mode == "type")
         self.set_caption(CAPTIONS.get(new, ""))
         if new == LISTENING:
             self.card.hide()
@@ -185,8 +246,9 @@ class Dock(QWidget):
             announce(self, "Reading the answer" if new == SPEAKING else "Answer ready")
         QTimer.singleShot(0, self.reposition)
 
-    def set_caption(self, text):
-        text = last_two_lines(text, self.caption.font(), self.caption_width()) if text else ""
+    def set_caption(self, text, whole=False):
+        """whole: show all of it (a line being read in text-only mode); otherwise the newest two lines (live speech)."""
+        text = (text if whole else last_two_lines(text, self.caption.font(), self.caption_width())) if text else ""
         self.caption.setText(text)
         self.caption.setVisible(bool(text))
         if text:
@@ -201,10 +263,12 @@ class Dock(QWidget):
             self.highlighter.cache.clear()
             self.answer = None
             self.card.hide()
+            self.input_mode = self.settings.input_mode  # the hotkey opens in the saved mode
+            self.show_input_mode()
             self.restyle()
             self.machine.fire("open")
             area = self.screen_area(anchor or QCursor.pos())
-            self.anchor = orb_center(anchor or QCursor.pos(), area, self.orb.diameter // 2)
+            self.anchor = self.column_anchor(anchor or QCursor.pos(), area)
             self.closing = False
             self.pop.stop()
             self.setWindowOpacity(1.0)
@@ -232,6 +296,21 @@ class Dock(QWidget):
             return detect_platform(title=window_title(hwnd))
         except Exception:
             return None
+
+    def show_silent(self, line):
+        """A line of a typed question's answer, as a caption; a guided step already on the card isn't repeated."""
+        steps = self.card.visible_steps if self.card.isVisible() else ()
+        if len(steps) == 1 and spoken(steps[0]) == line:
+            self.set_caption("")
+            return
+        self.set_caption(line, whole=True)
+
+    def column_anchor(self, point, area):
+        """The orb's centre, kept on screen together with the toggle and typing box below it."""
+        self.adjustSize()
+        center = orb_center(point, area, self.orb.width() // 2)
+        below = self.height() - self.orb.height() // 2  # from the orb's centre to the bottom of the typing box
+        return QPoint(center.x(), min(center.y(), area.bottom() - 16 - below))
 
     def screen_area(self, point):
         screen = QGuiApplication.screenAt(point) or QGuiApplication.primaryScreen()
@@ -274,7 +353,8 @@ class Dock(QWidget):
             pos = QCursor.pos()
             inside = self.frameGeometry().contains(pos) or self.panel.isVisible() and self.panel.frameGeometry().contains(pos)
             if self.walk and self.walk.active:
-                self.walk.clicked(pos)
+                if not inside:  # a click on Klicky itself is never a step on the page
+                    self.walk.clicked(pos)
             elif not inside:
                 self.close_dock()
         self.button_was_down = down
@@ -287,12 +367,17 @@ class Dock(QWidget):
         self.colors = c = palette(p.key)
         self.orb.set_diameter(72 if p.key == "low_vision" else 56)
         self.orb.focus_color = c["focus"]
+        self.toggle.restyle(c)
         self.card.reduced = self.orb.reduced
         font = QFont("Segoe UI")
         font.setPixelSize(cap)
         self.caption.setFont(font)
         self.panel.setFixedWidth(self.panel_width())
-        self.setStyleSheet("* { background:transparent; }")
+        self.setStyleSheet(
+            "* { background:transparent; }"
+            f' QLineEdit#typed {{ background:{c["surface"]}; color:{c["text"]}; border:2px solid {c["text"]}; border-radius:12px;'
+            f' padding:8px 12px; font-family:"Segoe UI"; font-size:{max(16, px)}px; }}'
+            f' QLineEdit#typed:focus {{ border:3px solid {c["focus"]}; padding:7px 11px; }}')
         self.panel.setStyleSheet(
             f'* {{ background:transparent; color:{c["text"]}; font-family:"Segoe UI"; font-size:{px}px; }}'
             f' #card {{ background:{c["surface"]}; border:1px solid {c["border"]}; border-radius:12px; }}'
@@ -300,9 +385,7 @@ class Dock(QWidget):
             f' QLabel#step {{ padding:6px 8px; border-radius:8px; }}'
             f' QLabel#step[active="true"] {{ background:{c["active_bg"]}; color:{c["active_text"]}; }}'
             f' #note {{ color:{c["muted"]}; font-size:{max(16, px - 2)}px; }}'
-            f' QLabel#caption {{ background:{c["surface"]}; border:1px solid {c["border"]}; border-radius:10px; padding:6px 14px; font-size:{cap}px; }}'
-            f' QLineEdit#typed {{ background:{c["surface"]}; border:2px solid {c["border"]}; border-radius:10px; padding:8px 12px; font-size:{cap}px; }}'
-            f' QLineEdit#typed:focus {{ border:3px solid {c["focus"]}; }}')
+            f' QLabel#caption {{ background:{c["surface"]}; border:1px solid {c["border"]}; border-radius:10px; padding:6px 14px; font-size:{cap}px; }}')
         if self.answer:
             self.card.colors = c
             self.card.render()
@@ -318,8 +401,8 @@ class Dock(QWidget):
         if self.state == CLOSED:
             return
         self.adjustSize()
-        self.move(self.anchor.x() - self.width() // 2, self.anchor.y() - self.height() // 2)
-        has_content = not self.caption.isHidden() or not self.input.isHidden() or not self.card.isHidden()
+        self.move(self.anchor.x() - self.width() // 2, self.anchor.y() - self.orb.height() // 2)
+        has_content = not self.caption.isHidden() or not self.card.isHidden()
         if not has_content:
             self.panel.hide()
             return
@@ -330,7 +413,7 @@ class Dock(QWidget):
         height = layout.totalHeightForWidth(width) if layout.hasHeightForWidth() else layout.totalSizeHint().height()
         height = max(height, layout.totalMinimumSize().height())
         self.panel.setFixedHeight(height)
-        self.panel.setGeometry(panel_rect(self.anchor, width, height, self.screen_area(self.anchor)))
+        self.panel.setGeometry(panel_rect(self.anchor, width, height, self.screen_area(self.anchor), gap=self.width() // 2 + 12))
         if not self.closing:
             self.panel.show()
             self.panel.raise_()
@@ -345,13 +428,25 @@ class Dock(QWidget):
         return model_installed(self.settings.voice_model)
 
     def listen_now(self):
-        """Hotkey while open: listen, or barge in over an answer being read."""
+        """Hotkey while open: listen, or barge in over an answer being read. In Type mode: the typing box."""
+        if self.input_mode == "type":
+            if self.state in (IDLE, DONE, ERROR, TYPING):
+                self.start_typing("")
+            else:
+                self.input.setFocus()
+            return
         if self.state == SPEAKING:
             self.barge_in()
         elif self.state in (IDLE, DONE, ERROR, TYPING, WAITING):
             self.start_listening()
 
     def start_listening(self):
+        if self.input_mode == "type":  # e.g. "Which course?" in Type mode: the answer is typed
+            self.start_typing("")
+            return
+        if self.walk and self.walk.active and self.walk.asking and self.state == WAITING:
+            self.walk.wants_answer = self.listen_for_walk()  # the hotkey answers "Which assignment?"
+            return
         if not self.voice_ready():
             self.start_typing("")
             if self.settings.voice:
@@ -360,6 +455,26 @@ class Dock(QWidget):
         self.quiet()
         if self.machine.fire("start"):
             self.listen()
+
+    def listen_for_walk(self):
+        """A walkthrough asked something ("Which assignment?"): listen for the answer without ending it.
+        In Type mode the answer is typed instead (submit_typed passes it on)."""
+        if self.input_mode == "type":
+            self.input.setFocus()
+            return True
+        if not self.voice_ready() or not self.machine.fire("start"):
+            return False
+        self.listen()
+        return True
+
+    def walk_listening(self):
+        return bool(self.walk and self.walk.active and self.state in (LISTENING, THINKING))
+
+    def resume_walk(self, caption="Click the assignment you want, or press the hotkey and say its name."):
+        """No answer heard: back to the walkthrough's step, where a click still works."""
+        self.walk.wants_answer = False
+        if self.machine.fire("resume"):
+            self.set_caption(caption)
 
     def listen(self, cue=True):
         from .voice import VoiceWorker
@@ -383,10 +498,20 @@ class Dock(QWidget):
         if stage == "transcribing":
             self.machine.fire("heard")  # end of speech: no Ask button
         elif stage == "stopped" and self.state == LISTENING:
-            self.machine.fire("stop_listening")
+            if self.walk_listening():
+                self.resume_walk()
+            else:
+                self.machine.fire("stop_listening")
 
     def on_heard(self, text):
         if self.state != THINKING:
+            return
+        if self.walk_listening():
+            if self.walk.wants_answer:
+                self.set_caption(f"“{text}”")
+                self.walk.answered(text)
+            else:
+                self.resume_walk()  # heard after they clicked instead
             return
         if self.choice:
             self.set_caption(f"“{text}”")
@@ -397,31 +522,93 @@ class Dock(QWidget):
         self.route(text, spoken_question=True)
 
     # ---- typing fallback -----------------------------------------------------------------------------------
+    # ---- Speak or Type ----------------------------------------------------------------------------------------
+    def set_input_mode(self, mode, typed=""):
+        """The person picked Speak or Type (the toggle, a printable key or Tab): switch, and remember it."""
+        if mode not in ("speak", "type"):
+            return
+        changed = mode != self.input_mode
+        self.input_mode = mode
+        self.show_input_mode()
+        if changed:
+            self.mode_note.setText("Typing" if mode == "type" else "Listening")
+            announce(self.mode_note, self.mode_note.text())
+            self.remember_mode(mode)
+        if mode == "type":
+            self.stop_listener()
+            if self.state == LISTENING:
+                self.machine.fire("type")
+            if self.state in (IDLE, DONE, ERROR, TYPING):
+                self.start_typing(typed)
+            else:  # mid-answer or mid-walkthrough: the box is ready for the next thing typed
+                self.input.setText(typed)
+                self.input.setFocus()
+        elif self.state in (IDLE, DONE, ERROR, TYPING):
+            self.start_listening()
+
+    def show_input_mode(self):
+        typing = self.input_mode == "type"
+        self.toggle.set_mode(self.input_mode)
+        self.input.setVisible(typing)
+        if self.state != CLOSED:
+            self.orb.set_mode(self.state, "Typing: microphone off" if typing else ORB_LABELS[self.state])
+
+    def remember_mode(self, mode):
+        try:
+            from .config import save
+            self.owner.settings = replace(self.settings, input_mode=mode)
+            save(self.owner.settings)
+        except Exception:
+            pass  # still applies now; just not remembered
+
+    def focusNextPrevChild(self, forward):
+        """In Speak mode, Tab from the orb switches to typing."""
+        if forward and self.input_mode == "speak" and self.orb.hasFocus():
+            self.set_input_mode("type")
+            return True
+        return super().focusNextPrevChild(forward)
+
     def keyPressEvent(self, event):
         text = event.text()
         if (text and text.isprintable() and not text.isspace() and not event.modifiers() & (Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier)
                 and self.state in (LISTENING, IDLE, DONE, ERROR)):
-            self.start_typing(text)
+            self.set_input_mode("type", typed=text)
             return
         super().keyPressEvent(event)
 
     def start_typing(self, text):
         self.stop_listener()
         self.quiet()
+        if self.input_mode != "type":
+            self.input_mode = "type"
+            self.show_input_mode()
         if self.state != TYPING:
             self.machine.fire("type")
         self.input.setText(text)
         self.input.show()
         self.reposition()
-        self.panel.activateWindow()
+        self.activateWindow()
         self.input.setFocus()
         self.input.end(False)
         QTimer.singleShot(0, self.reposition)
 
     def submit_typed(self):
         text = self.input.text().strip()
-        if not text or self.state != TYPING:
+        if not text:
             return
+        if self.walk and self.walk.active and self.walk.asking and self.state == WAITING:
+            self.input.clear()  # the typed answer to "Which assignment?"
+            self.machine.fire("submit")
+            self.walk.answered(text)
+            return
+        if self.state in (SPEAKING, WAITING):  # a new question while answering: that answer stops
+            self.quiet()
+            self.machine.fire("stop")
+        if self.state in (IDLE, DONE, ERROR):
+            self.machine.fire("type")
+        if self.state != TYPING:
+            return
+        self.input.clear()
         if self.choice:  # the answer to "Which course?", not a new question
             self.machine.fire("submit")
             self.answer_choice(text)
@@ -521,7 +708,7 @@ class Dock(QWidget):
         if self.points_at_browser():
             self.highlighter.prefetch(self.card.visible_steps, self.return_hwnd)  # pointing is instant when each step is read
         announce(self, answer.spoken() if answer.grounded else answer.note)
-        read = self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
+        read = self.reading()
         from .walkthrough import Walkthrough, actionable_steps
         steps = self.card.visible_steps
         # Only guides that declare a sequence become walkthroughs; alternatives in a list are read as usual.
@@ -538,8 +725,15 @@ class Dock(QWidget):
         self.orb.setFocus()
 
     # ---- guided steps inside the page: "Which course?" then point at each link ----------------------------
+    def voice_out(self):
+        """Answers are said aloud only for a spoken question, with read-aloud on and no screen reader taking over."""
+        return (self.asked_by_voice and self.settings.read_aloud
+                and not (self.settings.screen_reader_quiet and screen_reader_running()))
+
     def reading(self):
-        return self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
+        """Whether answers are read out line by line (aloud, or in text alone for a typed question), so guided
+        steps can run. False only for a spoken question with read-aloud off."""
+        return self.voice_out() or not self.asked_by_voice
 
     def start_choice(self, answer):
         from . import page
@@ -609,20 +803,28 @@ class Dock(QWidget):
 
     def begin_guide(self, answer, short, full, lead=None):
         from .assistant import fill
+        from . import page
         from .pagewalk import PageWalkthrough
         steps = fill(answer.template, answer.ask, short)
         self.answer = guided = replace(answer, steps=steps)
         self.card.show_answer(guided, self.colors)
         self.card.show()
-        here = full in self.page_title()  # e.g. "Sakai : Computer Security (Class No ...) : Overview"
+        title = self.page_title()
+        here = full in title  # e.g. "Sakai : Computer Security (Class No ...) : Overview"
         start = 1 if here and answer.points[:1] == ("course",) else 0
+        if here and start < len(answer.points) and page.opens(answer.points[start], page.tool_of(title)):
+            start += 1  # already on that tool's page too (e.g. Assignments): its link isn't the next step
         lead = lead or f"Okay, {short}." + (f" You're already in {short}." if start else "")
         if not (self.reading() and self.machine.fire("answer_read")):
             self.machine.fire("answer_quiet")
             announce(self, guided.spoken())
             return
+        from .pagewalk import page_reader
+        from .planning import is_do_it
         self.walk = PageWalkthrough(self, steps, answer.points, self.return_hwnd, full, start, lead, finder=self.page_find,
-                                    seer=self.page_seer or self.vision_seer())
+                                    seer=self.page_seer or self.vision_seer(), reader=self.page_reader or page_reader(self.settings),
+                                    question=self.last_question, presser=self.page_press,
+                                    auto=self.settings.actions and is_do_it(self.last_question))
         self.walk.start()
 
     def vision_seer(self):
@@ -682,11 +884,17 @@ class Dock(QWidget):
         return self.tts
 
     def speak(self, lines, on_line_start=None, on_end=None):
-        self.reader().speak(lines, self.settings.speech_rate, on_line_start=on_line_start, on_end=on_end)
+        reader = self.reader() if self.voice_out() else self.silent
+        reader.speak(lines, self.settings.speech_rate, on_line_start=on_line_start, on_end=on_end)
+
+    def stop_speech(self):
+        self.tts.stop()
+        self.silent.stop()
 
     def read_answer(self):
-        self.reader().speak(self.lines(), self.settings.speech_rate, on_line_start=self.on_line, on_end=self.on_read_end)
-        self.start_monitor()
+        self.speak(self.lines(), on_line_start=self.on_line, on_end=self.on_read_end)
+        if self.voice_out():
+            self.start_monitor()
 
     def on_line(self, index):
         step = index - 1  # line 0 is the spoken intro
@@ -726,9 +934,29 @@ class Dock(QWidget):
         if not (self.frameGeometry().intersects(target) or self.panel.isVisible() and self.panel.frameGeometry().intersects(target)):
             return
         area = self.screen_area(rect.center())
-        # Below and to the left of the control, with the card to the orb's left or right as space allows.
-        wanted = QPoint(rect.left() - self.panel_width() - 70, rect.bottom() + 90)
-        self.anchor = orb_center(wanted, area, self.orb.diameter // 2)
+        width, height = self.width(), self.height()
+        card = (self.panel.width(), self.panel.height()) if self.panel.isVisible() else (0, 0)
+        half, top = width // 2, self.orb.height() // 2
+        # Below and to the left of the control first (the card then to the orb's left or right as space allows), then
+        # the other sides: the first spot where neither the orb column nor the card covers it, else the least covering.
+        spots = [QPoint(rect.left() - card[0] - half - 24, rect.bottom() + 90), QPoint(rect.right() + half + 20, rect.bottom() + 90),
+                 QPoint(rect.left() - card[0] - half - 24, rect.center().y()), QPoint(rect.right() + half + 20, rect.center().y()),
+                 QPoint(rect.left() - half - 20, rect.top() - height), QPoint(rect.right() + half + 20, rect.top() - height)]
+        best = None
+        for spot in spots:
+            anchor = self.column_anchor(spot, area)
+            column = QRect(anchor.x() - half, anchor.y() - top, width, height)
+            covered = column.intersected(target)
+            if card[0]:
+                beside = panel_rect(anchor, card[0], card[1], area, gap=half + 12).intersected(target)
+                covered = max(covered.width() * covered.height(), 0) + max(beside.width() * beside.height(), 0)
+            else:
+                covered = max(covered.width() * covered.height(), 0)
+            if best is None or covered < best[0]:
+                best = (covered, anchor)
+            if covered == 0:
+                break
+        self.anchor = best[1]
         self.reposition()
 
     def points_at_browser(self):
@@ -774,7 +1002,7 @@ class Dock(QWidget):
         if self.walk:
             self.walk.stop()
             self.walk = None
-        self.tts.stop()
+        self.stop_speech()
         self.stop_monitor()
         self.card.set_active(-1)
         self.highlighter.clear()
@@ -803,6 +1031,9 @@ class Dock(QWidget):
 
     def on_fail(self, message):
         self.stop_listener()
+        if self.walk_listening():  # couldn't hear the answer to the walkthrough's question: a click still works
+            self.resume_walk("Click the assignment you want.")
+            return
         self.quiet()
         from .voice import NO_MIC
         if message == NO_MIC:

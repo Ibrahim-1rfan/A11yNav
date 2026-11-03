@@ -208,8 +208,10 @@ def test_hotkey_opens_the_orb_where_the_companion_is(monkeypatch):
     assert dock.geometry().center().x() == pytest.approx(618, abs=1)
     dock.start_typing("x")
     area = dock.screen_area(dock.anchor)                                  # the 800 px offscreen test screen
-    assert dock.panel.geometry() == panel_rect(dock.anchor, 320, dock.panel.height(), area)
-    assert dock.panel.geometry().right() < 618 - 39                       # no room on the right: flipped left
+    gap = dock.width() // 2 + 12                                          # the card clears the toggle under the orb
+    assert dock.panel.geometry() == panel_rect(dock.anchor, 320, dock.panel.height(), area, gap=gap)
+    assert dock.panel.geometry().right() < 618 - gap + 1                  # no room on the right: flipped left
+    assert not dock.panel.geometry().intersects(dock.geometry())         # and never over the toggle or typing box
     dock.escape()
     deadline = time.monotonic() + 2
     while dock.isVisible() and time.monotonic() < deadline:

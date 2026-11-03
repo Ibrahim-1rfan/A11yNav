@@ -22,11 +22,12 @@ def orb_center(anchor, area, radius):
     return QPoint(x, y)
 
 
-def panel_rect(center, width, height, area):
-    """Card beside the orb: to the right by default, flipped left near the right edge, clamped top and bottom."""
-    left = center.x() + PANEL_GAP
+def panel_rect(center, width, height, area, gap=PANEL_GAP):
+    """Card beside the orb: to the right by default, flipped left near the right edge, clamped top and bottom.
+    gap: from the orb's centre to the card's edge (past the toggle under the orb)."""
+    left = center.x() + gap
     if left + width > area.right() - PANEL_EDGE:
-        left = center.x() - PANEL_GAP - width
+        left = center.x() - gap - width
     left = min(max(left, area.left() + PANEL_EDGE), area.right() - PANEL_EDGE - width)
     top = center.y() - PANEL_RISE
     top = min(max(top, area.top() + PANEL_EDGE), area.bottom() - PANEL_EDGE - height)

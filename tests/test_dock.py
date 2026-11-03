@@ -177,6 +177,7 @@ def dock_setup(monkeypatch):
     window = MainWindow(Settings(hotkey=""))
     dock = window.dock
     dock.tts = FakeTTS()
+    dock.silent = dock.tts  # typed questions are answered in text alone; the flow is the same
     listeners, monitors, captions, focused = [], [], [], []
     dock.voice_factory = lambda: listeners[-1] if listeners and not listeners[-1].isRunning() and not listeners[-1].isFinished() else listeners.append(FakeListener("how do I make the text bigger in firefox")) or listeners[-1]
     dock.monitor_factory = lambda: monitors.append(FakeMonitor()) or monitors[-1]
@@ -185,7 +186,7 @@ def dock_setup(monkeypatch):
     dock.highlighter = SimpleNamespace(point=lambda step, hwnd: pointed.append((step, hwnd)), clear=lambda: pointed.append(None), cache={},
                                        prefetch=lambda steps, hwnd: None)
     original = dock.set_caption
-    monkeypatch.setattr(dock, "set_caption", lambda text: (captions.append(text), original(text)))
+    monkeypatch.setattr(dock, "set_caption", lambda text, whole=False: (captions.append(text), original(text, whole)))
     monkeypatch.setattr("cua.dock.ctypes.windll.user32.SetForegroundWindow", focused.append)
     monkeypatch.setattr("cua.ui.foreground_app", lambda: (12345, "chrome"))
     yield SimpleNamespace(app=app, window=window, dock=dock, listeners=listeners, monitors=monitors, captions=captions,
@@ -349,7 +350,9 @@ def test_a_new_answer_replaces_the_old_steps_immediately():
 LMS_COURSES = ["Computer Security (Class No 101765) - Fall 2026", "HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026",
                "Introduction to Cloud Computing ( Class : 102201 ) Fall 2026"]
 BOXES = {"course": (500, 260, 900, 300), "link: Assignments": (20, 480, 240, 520), "control: Proceed|Submit": (280, 700, 380, 740),
-         "control: Submit": (300, 500, 400, 540)}
+         "control: Submit": (300, 500, 400, 540), "link: Week 08 Reading": (288, 659, 431, 683),
+         "link: Week 07 Reading": (288, 704, 431, 728), "link: Course Outline": (291, 646, 409, 670)}
+SUMMARY = "Read the paper and answer three questions about it in under 400 words."
 
 
 @pytest.fixture
@@ -364,6 +367,11 @@ def lms_dock(dock_setup, monkeypatch):
     s.dock.page_find = lambda hwnd, spec, chosen: (s.looked.append((spec, chosen)), (BOXES.get(spec), False))[1]
     s.seen, s.vision = [], lambda spec: None   # the vision fallback: a fake that, by default, sees nothing
     s.dock.page_seer = lambda hwnd, spec, chosen, step: (s.seen.append(spec), s.vision(spec))[1]
+    s.rows, s.opened, s.summaries = [], None, []   # the Assignments list and the opened assignment, as read
+    s.pressed, s.press_ok = [], True                # links Klicky opened itself ("show me the syllabus")
+    s.dock.page_press = lambda hwnd, spec, chosen: (s.pressed.append(spec), s.press_ok)[1]
+    s.dock.page_reader = SimpleNamespace(assignments=lambda hwnd: list(s.rows), opened=lambda hwnd: s.opened,
+                                         summarize=lambda title, text: (s.summaries.append((title, text)), SUMMARY)[1])
     rect = lambda b: QRect(b[0], b[1], b[2] - b[0], b[3] - b[1])
     s.dock.highlighter.show_page = lambda b: (s.pointed.append(("page", b)), s.dock.guide_companion(rect(b)))
     s.dock.highlighter.clear = lambda: (s.pointed.append(None), s.dock.guide_companion(None))
@@ -404,12 +412,14 @@ def test_lms_asks_which_course_then_points_at_each_link_and_waits_for_clicks(lms
     assert dock.state == WAITING
     click(s, BOXES["course"])
     assert wait_for(s.app, lambda: dock.walk.index == 1 and dock.state == SPEAKING)
-    assert dock.card.step_labels[0].text().startswith('<b') and "2." in dock.card.step_labels[0].text()  # card moved on
+    assert len(dock.card.step_labels) == 1 and "Step 2 of 6" in dock.card.step_labels[0].text()  # only the current step
     dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
     assert wait_for(s.app, lambda: ("page", BOXES["link: Assignments"]) in s.pointed and dock.state == WAITING)
+    calls = len(dock.tts.calls)
     click(s, BOXES["link: Assignments"])
     for index in (2, 3):                                    # choose the assignment, type the answer: any click
-        assert wait_for(s.app, lambda: dock.walk.index == index and dock.state == SPEAKING)
+        assert wait_for(s.app, lambda: dock.walk.index == index and dock.state == SPEAKING and len(dock.tts.calls) > calls)
+        calls = len(dock.tts.calls)
         dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
         assert dock.pointed_rect is None
         dock.walk.clicked(__import__("PySide6.QtCore").QtCore.QPoint(900, 900))
@@ -496,6 +506,175 @@ def test_a_different_course_named_while_inside_one_wins(lms_dock):
 
 
 
+def assignment_rows():
+    from cua.page import Assignment
+    return [Assignment("Week 08 Reading", "In progress", "Nov 4, 2099, 2:15 PM"),
+            Assignment("Week 07 Reading", "Submitted Oct 28, 2026, 2:04 PM", "Oct 28, 2026, 2:15 PM"),
+            Assignment("Project Draft", "Not Started", "Sep 30, 2026, 11:55 PM")]   # past due: not offered
+
+
+def to_assignment_list(s):
+    """Inside Computer Security, asked how to submit: point at Assignments, click it, and the list is read."""
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    s.rows = assignment_rows()
+    say(s, "how do I submit my assignment")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Assignments"]) in s.pointed and s.dock.state == WAITING)
+    calls = len(s.dock.tts.calls)
+    click(s, BOXES["link: Assignments"])
+    assert wait_for(s.app, lambda: s.dock.walk.index == 2 and s.dock.walk.rows and len(s.dock.tts.calls) > calls)
+    return s.dock.tts.calls[-1]
+
+
+def test_the_assignment_step_says_what_is_not_submitted_points_at_it_and_a_named_one_already_submitted_ends_it(lms_dock):
+    s = lms_dock
+    question = to_assignment_list(s)
+    assert question.lines == ["Which assignment? Week 08 Reading isn't submitted yet. It's due November 4 at 2:15 PM. "
+                              "I'm pointing at it: click it, or tell me another one."]
+    assert "Not submitted yet: Week 08 Reading (due Nov 4, 2099, 2:15 PM)" == s.dock.card.note.text()
+    question.line(0)
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Week 08 Reading"]) in s.pointed)   # boxed, pointer on it
+    say(s, "week seven")
+    question.end()                                            # Klicky listens for the name
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING and s.dock.tts.calls[-1].lines == ["Okay, Week 07 Reading. Click it to open it."])
+    assert s.dock.walk.active and s.dock.walk.index == 2
+    s.dock.tts.calls[-1].line(0)
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Week 07 Reading"]) in s.pointed)
+    s.dock.tts.calls[-1].end()
+    from cua.page import AssignmentPage
+    s.opened = AssignmentPage("Week 07 Reading", True, "Oct 28, 2026, 2:04 PM", "", "Answer three questions.")
+    walk = s.dock.walk
+    click(s, BOXES["link: Week 07 Reading"])
+    assert wait_for(s.app, lambda: not walk.active)
+    assert s.dock.tts.calls[-1].lines == ["Week 07 Reading is already submitted, on October 28 at 2:04 PM. "
+                                          "You don't have to worry about this one."]
+    assert s.summaries == []                                  # nothing is summarized (or sent) for a submitted one
+    s.dock.tts.calls[-1].end()
+    assert s.dock.state == DONE
+
+
+def test_a_clicked_assignment_not_submitted_gets_its_due_date_and_a_summary_then_the_next_step(lms_dock):
+    s = lms_dock
+    question = to_assignment_list(s)
+    s.listeners.append(FakeListener(wait=True))               # nothing said: the person clicks instead
+    question.line(0); question.end()
+    assert wait_for(s.app, lambda: s.dock.state == LISTENING)
+    from cua.page import AssignmentPage
+    s.opened = AssignmentPage("Week 08 Reading", False, "", "Nov 4, 2099, 2:15 PM", "The paper is provided. Answer the questions.")
+    s.dock.walk.clicked(__import__("PySide6.QtCore").QtCore.QPoint(300, 670))
+    assert wait_for(s.app, lambda: s.dock.walk.index == 3 and s.dock.state == SPEAKING)
+    assert s.summaries == [("Week 08 Reading", "The paper is provided. Answer the questions.")]
+    lines = s.dock.tts.calls[-1].lines
+    assert lines[:2] == ["Week 08 Reading isn't submitted yet. It's due November 4 at 2:15 PM.", f"Here's what it asks: {SUMMARY}"]
+    assert lines[2].startswith("Read the Instructions")       # then on with the submit steps
+    assert SUMMARY in s.dock.card.note.text()
+
+
+def test_an_assignment_named_in_the_question_is_pointed_at_without_asking(lms_dock):
+    s = lms_dock
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Assignments - Google Chrome"
+    s.rows = assignment_rows()
+    say(s, "how do I submit my week 8 reading")
+    s.window.summon()                                         # already on the Assignments page: its link is skipped
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.walk.first == 2 and s.dock.walk.rows)
+    assert wait_for(s.app, lambda: s.dock.tts.calls[-1].lines[-1] == "Okay, Week 08 Reading. Click it to open it.")
+    assert s.dock.tts.calls[-1].lines[0] == "You're in Computer Security, so I'll use it."
+    assert not s.dock.walk.asking
+
+
+def test_inside_an_assignment_already_it_reads_that_page_straight_away(lms_dock):
+    from cua.page import AssignmentPage
+    s = lms_dock
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Assignments - Google Chrome"
+    s.rows, s.opened = [], AssignmentPage("Week 07 Reading", True, "Oct 28, 2026, 2:04 PM", "", "Answer three questions.")
+    say(s, "is my assignment submitted")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.tts.calls and "already submitted" in s.dock.tts.calls[-1].lines[-1])
+    assert s.dock.tts.calls[-1].lines == ["Week 07 Reading is already submitted, on October 28 at 2:04 PM. "
+                                          "You don't have to worry about this one."]
+
+
+def test_the_course_outline_step_boxes_the_course_outline_item(lms_dock):
+    s = lms_dock
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    BOXES["link: Syllabus"] = (0, 494, 250, 539)
+    say(s, "where is the course outline")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Syllabus"]) in s.pointed)
+    click(s, BOXES["link: Syllabus"])
+    assert wait_for(s.app, lambda: s.dock.walk.index == 2 and s.dock.state == SPEAKING)
+    s.dock.tts.calls[-1].line(0)
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Course Outline"]) in s.pointed)
+    assert s.dock.pointed_rect is not None                    # the companion flies to it
+
+
+def run_opening(s, count):
+    """Klicky says "Opening ..." and opens that link itself, count times."""
+    for _ in range(count):
+        calls = len(s.dock.tts.calls)
+        line = s.dock.tts.calls[-1]
+        line.line(len(line.lines) - 1)
+        line.end()
+        assert wait_for(s.app, lambda: len(s.dock.tts.calls) > calls)
+
+
+def test_show_me_the_syllabus_opens_the_course_syllabus_and_course_outline_itself(lms_dock, monkeypatch):
+    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
+    s = lms_dock
+    BOXES["link: Syllabus"] = (0, 494, 250, 539)
+    say(s, "show me the syllabus of computer security")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    assert s.dock.walk.auto and s.dock.tts.calls[-1].lines == ["Okay, Computer Security.", "Opening Computer Security."]
+    run_opening(s, 3)
+    assert s.pressed == ["course", "link: Syllabus", "link: Course Outline"]
+    assert [c.lines[-1] for c in s.dock.tts.calls[-3:-1]] == ["Opening Syllabus.", "Opening Course Outline."]
+    assert ("page", BOXES["link: Course Outline"]) in s.pointed          # each one boxed before it's opened
+    lines = s.dock.tts.calls[-1].lines
+    assert lines[0] == "Here it is." and "Resources" in lines[1] and not s.dock.walk.active
+
+
+def test_opening_assignments_itself_stops_at_choosing_one_and_never_presses_submit(lms_dock, monkeypatch):
+    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
+    s = lms_dock
+    s.rows = assignment_rows()
+    say(s, "open my computer security assignments")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    run_opening(s, 2)
+    assert s.pressed == ["course", "link: Assignments"]
+    assert wait_for(s.app, lambda: s.dock.tts.calls[-1].lines[-1].startswith("Which assignment?"))
+    assert s.dock.walk.index == 2 and s.pressed == ["course", "link: Assignments"]   # the choice is the person's
+
+
+def test_when_klicky_cannot_open_a_link_the_person_clicks_it_and_is_guided(lms_dock, monkeypatch):
+    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
+    s = lms_dock
+    s.press_ok = False
+    say(s, "show me the syllabus of computer security")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    run_opening(s, 1)
+    assert s.dock.tts.calls[-1].lines == ["I couldn't open it myself. Please click it."] and not s.dock.walk.auto
+    s.dock.tts.calls[-1].line(0); s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: s.dock.state == WAITING and s.dock.pointed_rect is not None)
+    click(s, BOXES["course"])
+    assert wait_for(s.app, lambda: s.dock.walk.index == 1)
+    assert s.dock.tts.calls[-1].lines[-1] == "Select Syllabus in the left menu."          # guided from here on
+
+
+def test_how_do_i_questions_are_still_guided_not_done(lms_dock):
+    s = lms_dock
+    say(s, "how do I see the syllabus of computer security")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    assert not s.dock.walk.auto and s.pressed == []
+
+
 def test_when_the_tree_cannot_find_a_control_the_vision_model_points_at_it(lms_dock, monkeypatch):
     from cua.vision import Seen
     s = lms_dock
@@ -532,7 +711,7 @@ def test_a_control_folded_into_a_menu_points_at_the_menu_first(lms_dock, monkeyp
         s.window.summon()
         assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
         s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
-        assert wait_for(s.app, lambda: ("page", menu) in s.pointed and s.dock.walk.revealing)
+        assert wait_for(s.app, lambda: ("page", menu) in s.pointed and s.dock.walk.revealing, 8)  # slower under a full run
         assert s.captions[-1] == "It's inside this menu. Open it first."
         BOXES["link: Assignments"] = (20, 480, 240, 520)  # the menu unfolds: now the tree can see the link
         click(s, menu)
@@ -542,3 +721,101 @@ def test_a_control_folded_into_a_menu_points_at_the_menu_first(lms_dock, monkeyp
         assert wait_for(s.app, lambda: s.dock.walk.index == 2)
     finally:
         BOXES["link: Assignments"] = (20, 480, 240, 520)
+
+
+# ---- Speak or Type ------------------------------------------------------------------------------------------
+def test_the_orb_toggle_and_typing_box_follow_the_spec(dock_setup):
+    s = dock_setup
+    s.window.summon()
+    dock = s.dock
+    assert dock.orb.diameter == 56                                                  # the original orb, unchanged
+    toggle = dock.toggle
+    assert (toggle.width(), toggle.height()) == (190, 46) and toggle.accessibleName() == "Input mode"
+    voice, typing = toggle.buttons["speak"], toggle.buttons["type"]
+    assert (voice.accessibleName(), voice.text(), typing.accessibleName(), typing.text()) == ("Voice", "Speak", "Typing", "Type")
+    assert voice.isCheckable() and voice.isChecked() and not typing.isChecked()
+    assert voice.height() >= 44 and typing.height() >= 44
+    gap = toggle.geometry().top() - dock.orb.geometry().bottom() - 1
+    assert 14 <= gap <= 16
+    height = dock.height()
+    dock.set_input_mode("type")
+    assert dock.height() == height                                                  # the reserved row: nothing moves
+    assert typing.isChecked() and dock.input.isVisible() and dock.state == TYPING
+    dock.set_input_mode("speak")
+    assert not dock.input.isVisible() and dock.state == LISTENING
+
+
+def test_the_hotkey_opens_in_the_saved_mode_and_a_typed_question_is_answered_in_text_only(dock_setup, monkeypatch):
+    from cua.config import load
+    monkeypatch.setattr("cua.dock.SilentReader.MIN_MS", 5)
+    monkeypatch.setattr("cua.dock.SilentReader.MS_PER_CHAR", 0)
+    s = dock_setup
+    s.window.settings = Settings(hotkey="", input_mode="type")
+    dock = s.dock
+    dock.silent = __import__("cua.dock", fromlist=["SilentReader"]).SilentReader(lambda line: dock.set_caption(line, whole=True))
+    s.window.summon()
+    assert dock.state == TYPING and dock.input.isVisible() and not s.listeners    # no microphone at all
+    dock.input.setText("how do I make the text bigger in firefox")
+    dock.submit_typed()
+    assert wait_for(s.app, lambda: dock.state == DONE, 6)
+    assert dock.tts.calls == []                                                    # nothing said aloud
+    assert dock.answer.steps[-1] in " ".join(s.captions) or s.captions                 # each line shown instead
+    assert dock.card.isVisible() and dock.answer.grounded                          # the answer is shown as text
+    assert dock.input.isVisible() and dock.input.text() == ""                      # ready for the next question
+    first = dock.answer.title
+    dock.input.setText("how do I see my history in firefox")                      # typing again just works
+    dock.submit_typed()
+    assert wait_for(s.app, lambda: dock.answer.title != first, 6) and dock.tts.calls == []
+
+
+def test_a_printable_key_or_tab_switches_speak_to_type_and_the_choice_is_remembered(dock_setup, monkeypatch):
+    from PySide6.QtCore import Qt
+    from cua.config import load
+    s = dock_setup
+    s.listeners.append(FakeListener(wait=True))
+    s.window.summon()
+    dock = s.dock
+    assert dock.state == LISTENING and dock.input_mode == "speak"
+    dock.keyPressEvent(QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_H, Qt.KeyboardModifier.NoModifier, "h"))
+    assert dock.input_mode == "type" and dock.state == TYPING and dock.input.text() == "h"
+    assert s.window.settings.input_mode == "type" and load().input_mode == "type"   # saved (in the test's folder)
+    dock.set_input_mode("speak")
+    s.listeners.append(FakeListener(wait=True))
+    monkeypatch.setattr(dock.orb, "hasFocus", lambda: True)  # the offscreen test screen has no keyboard focus
+    assert dock.focusNextPrevChild(True) and dock.input_mode == "type"              # Tab from the orb: typing
+
+
+def test_typing_the_course_and_the_assignment_works_without_a_microphone(lms_dock):
+    s = lms_dock
+    s.window.settings = Settings(hotkey="", input_mode="type")
+    s.title = "Sakai : Home : Overview - Google Chrome"
+    s.rows = assignment_rows()
+    s.window.summon()
+    dock = s.dock
+    dock.input.setText("how do I submit my assignment")
+    dock.submit_typed()
+    assert wait_for(s.app, lambda: dock.state == SPEAKING and dock.choice)
+    dock.tts.calls[-1].end()                                     # "Which course?" shown: the answer is typed
+    assert wait_for(s.app, lambda: dock.state == TYPING)
+    dock.input.setText("computer security")
+    dock.submit_typed()
+    assert wait_for(s.app, lambda: dock.walk is not None and dock.state == SPEAKING)
+    assert "Computer Security" in dock.answer.steps[0] and not s.listeners
+
+
+def test_a_typed_walkthrough_shows_one_step_and_does_not_repeat_it_as_a_caption(lms_dock, monkeypatch):
+    from cua.dock import SilentReader
+    monkeypatch.setattr("cua.dock.SilentReader.MIN_MS", 5)
+    monkeypatch.setattr("cua.dock.SilentReader.MS_PER_CHAR", 0)
+    s = lms_dock
+    s.window.settings = Settings(hotkey="", input_mode="type")
+    s.dock.silent = SilentReader(s.dock.show_silent)
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    s.window.summon()
+    s.dock.input.setText("how do I see the announcements")
+    s.dock.submit_typed()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == WAITING)
+    labels = s.dock.card.step_labels
+    assert len(labels) == 1 and "Step 2 of" in labels[0].text()
+    assert "You're in Computer Security, so I'll use it." in s.captions                  # the lead is shown
+    assert not any(c.startswith("Select Announcements") for c in s.captions)           # the step isn't repeated

@@ -53,6 +53,11 @@ class Settings:
     # Claude (ANTHROPIC_API_KEY), else the local model above. "off" never looks.
     vision: str = "auto"
     vision_model: str = "claude-haiku-5-5"
+    # Summarize an unsubmitted assignment's instructions with the first AI service in keys.env (the instruction text
+    # is sent to it). Off: the first sentences are read instead and nothing is sent.
+    summaries: bool = True
+    # How the hotkey opens: "speak" listens; "type" opens the typing box (answers then come as text, without sound).
+    input_mode: str = "speak"
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -70,7 +75,8 @@ class Settings:
             if not isinstance(value, str) or len(value) > 200:
                 raise UserError(f"Enter the {key.replace('_', ' ')} identifier shown in your local server, or leave it empty.")
         for key, choices in {"adapter": {"ui_tars", "json"}, "browser": {"default", "edge", "chrome", "firefox"}, "engine": {"bing", "google", "duckduckgo"},
-                             "profile": {"default", "low_vision", "cognitive", "motor"}, "rag_app": {"auto", "edge", "chrome", "firefox"},
+                             "profile": {"default", "low_vision", "cognitive", "motor", "deaf"}, "rag_app": {"auto", "edge", "chrome", "firefox"},
+                             "input_mode": {"speak", "type"},
                              "vision": {"auto", "openrouter", "huggingface", "claude", "local", "off"}}.items():
             if getattr(self, key) not in choices:
                 raise UserError(f"Unsupported {key} setting.")
@@ -89,7 +95,7 @@ class Settings:
             raise UserError("Invalid shortcut setting.")
         if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
             raise UserError("Invalid voice setting.")
-        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions")):
+        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions", "summaries")):
             raise UserError("Invalid read-aloud setting.")
         if self.companion_speed not in {"gentle", "normal", "snappy"}:
             raise UserError("Invalid companion speed.")

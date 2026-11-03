@@ -7,10 +7,11 @@ ask: course
 point:
 - course
 - link: Syllabus
-- any
+- link: Course Outline
 - tip
 evidence:
 - IBA LMS student walkthrough video, 0:31 to 1:06
+- IBA LMS Syllabus page, checked live on 3 November 2026
 ---
 ## LMS
 1. Open {course} from the course tabs at the top.

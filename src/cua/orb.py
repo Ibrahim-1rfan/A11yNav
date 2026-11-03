@@ -38,6 +38,7 @@ class Orb(QPushButton):
         self.scales = (1.0, 1.0, 1.0)
         self.started = time.monotonic()
         self.reduced = reduced_motion()
+        self.keyboard_focus = False  # the focus ring shows only when the orb was reached with Tab
         self.timer = QTimer(self)
         self.timer.setInterval(16)
         self.timer.timeout.connect(self.tick)
@@ -49,6 +50,14 @@ class Orb(QPushButton):
         self.setStyleSheet(f"QPushButton {{ min-width:{side}px; max-width:{side}px; min-height:{side}px; max-height:{side}px;"
                            " padding:0; margin:0; border:none; background:transparent; }")
         self.setFixedSize(side, side)
+
+    def focusInEvent(self, event):
+        self.keyboard_focus = event.reason() in (Qt.FocusReason.TabFocusReason, Qt.FocusReason.BacktabFocusReason)
+        super().focusInEvent(event)
+
+    def focusOutEvent(self, event):
+        self.keyboard_focus = False
+        super().focusOutEvent(event)
 
     def set_mode(self, mode, label):
         self.mode = mode
@@ -103,7 +112,7 @@ class Orb(QPushButton):
             painter.drawEllipse(center, radius * scale, radius * scale)
         painter.setBrush(QColor(TEAL_DARK if self.mode in ("thinking", "acting") else TEAL))
         painter.drawEllipse(center, radius * orb, radius * orb)
-        if self.hasFocus():
+        if self.hasFocus() and self.keyboard_focus:  # opening Klicky focuses the orb too, without a ring
             painter.setBrush(Qt.BrushStyle.NoBrush)
             painter.setPen(QPen(QColor(self.focus_color), 3))
             painter.drawEllipse(center, radius * orb + 5, radius * orb + 5)

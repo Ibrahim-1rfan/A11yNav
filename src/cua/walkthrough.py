@@ -66,7 +66,10 @@ class Walkthrough(QObject):
                         on_end=lambda: self.await_step(index))
 
     def show_step(self, index):
-        self.dock.card.set_active(index)
+        if self.dock.card.offset != index or self.dock.card.limit != 1:
+            self.dock.card.show_from(index, 1)  # only the step being done; the next appears once it's done
+            self.dock.reposition()
+        self.dock.card.set_active(0)
         self.dock.highlighter.point(self.steps[index], self.hwnd)
 
     def await_step(self, index):
@@ -86,8 +89,11 @@ class Walkthrough(QObject):
         if self.dock.state != "speaking":
             self.dock.machine.fire("next")
         rest = self.steps[self.actionable:]
+        if rest:
+            self.dock.card.show_from(self.actionable, len(rest))
+            self.dock.reposition()
         lines = ["That's it, well done."] + [spoken(step) for step in rest]
-        self.dock.speak(lines, on_line_start=lambda line: self.dock.card.set_active(self.actionable + line - 1) if line else None,
+        self.dock.speak(lines, on_line_start=lambda line: self.dock.card.set_active(line - 1) if line else None,
                         on_end=self.dock.on_read_end)
 
     def step_back(self):

@@ -318,3 +318,49 @@
   keys.env, settings, privacy, project layout, how to add a guide, troubleshooting. requirements.txt now lists
   every package the code imports (adds pywin32, numpy, av); requirements-lock.txt regenerated from the tested
   environment (Python 3.13.5). Tests: 368 passed.
+
+## 3 November 2026 — LMS: assignments in detail, Course Outline pointed at
+
+- Read-only recording of the live LMS (ComSec Syllabus, Assignments list, a submitted and an in-progress assignment;
+  kept only in a temp folder). The Course Outline "dropdown" is a link named Course Outline: the guide now boxes it
+  and the companion points at it, instead of just saying it.
+- New "assignment" step (submit-assignment guide): Klicky reads the Assignments table (title, Status, Due Date: all
+  20 ComSec rows read correctly), says which aren't submitted and still open, boxes the first and listens for a name
+  ("week eight" matches "Week 08 Reading"); a click on any assignment also counts. The opened page is then read:
+  submitted (Status bar or Submitted Date) → "already submitted, on …, you don't have to worry about this one" and
+  the walkthrough ends; otherwise its due date (or that it passed) and a short summary of its Instructions (only the
+  text between "Instructions" and the attachments/submission), then the remaining steps.
+- Summaries: summary.py, OpenRouter anthropic/claude-haiku-5.5 → Anthropic → local answer model → first sentences.
+  Only title and instructions are sent; Settings → Assignment summaries turns it off. Live: 2.5 s, correct summary.
+- "how do I submit my week 8 reading" went to the Calendar guide ("week"): the assignment guide now has reading keywords.
+
+## 3 November 2026 — LMS: "show me the syllabus" opens it
+
+- Your feedback: "nothing happened" on Assignments. Cause: already on the Assignments page, Klicky still waited for
+  a click on the Assignments menu link and ignored the click on an assignment. Now a link step for the tool the tab
+  already shows is skipped, and an assignment that is already open is read straight away. Walk steps are logged
+  (numbers and counts only) to %LOCALAPPDATA%\Klicky\klicky.log.
+- Requests ("show me / open / take me to / go to …", not "how do I") with Settings → Browser tasks on: Klicky opens
+  the course tab and menu links itself through UI Automation Invoke (LegacyIAccessible DoDefaultAction as fallback),
+  after the companion has boxed each one; only "course" and "link:" steps and only real Hyperlinks, never a button
+  (Proceed, Submit, Upload) or an assignment choice. If it can't, it asks the person to click and guides the rest.
+  Tests: 406 passed. Not yet tried on the live LMS.
+
+## 4 November 2026 — Speak or Type (Deaf and hard-of-hearing users)
+
+- Three groups: motor (ask instead of doing), low vision (voice and large text), and now Deaf and hard of hearing.
+  Under the orb: one Speak / Type segmented control (190 x 46, 2 px border in the text colour, straight 2 px divider,
+  chosen half filled with the text colour; group "Input mode", toggle buttons "Voice" / "Typing"; 3 px inset focus
+  ring), and a typing box row that is always reserved so nothing moves when switching.
+- Orb: fixed 84 x 84 square, 50 px orb with a 2 px border; only the pale-green halo animates, by scale 0.88-1.0,
+  1.4 s each way (still at 0.88 with reduced motion). Type mode: no halo, surface-coloured orb, crossed-out mic.
+  Our theme green #0F6E56 is used for the orb (white on it is 6.2:1; the brighter teal is 3.3:1, below the 4.5:1 asked).
+  All text, icons, borders and the chosen fill measured at 6.2-16.3:1 in light and dark.
+- A typed question is answered in text only (SilentReader: each line as a caption for its reading time, same
+  callbacks), so LMS walkthroughs, "Which course?" and "Which assignment?" work without sound or microphone.
+  Printable key or Tab in Speak mode switches to Type; the mode is remembered; new "Deaf and hard of hearing" profile
+  opens in Type. Settings → Klicky opens in.
+- Mistake fixed: remembering the mode let the tests write the real settings file (hotkey cleared, voice reset to Ava,
+  Type mode). Restored (Win+Shift+K, Andrew, Speak); tests now use a throwaway settings folder (conftest).
+- Your feedback: the new orb look and animation were worse. The original orb (teal, voice-following rings,
+  breathing, pulse) is back unchanged; only the Speak / Type boxes and the typing box were kept under it.

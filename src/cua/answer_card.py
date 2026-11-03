@@ -30,6 +30,7 @@ class AnswerCard(QFrame):
         self.setObjectName("card")
         self.colors = {}
         self.answer, self.active = None, -1
+        self.found = ""  # what Klicky read on the page, e.g. what an assignment asks for; shown under the steps
         self.offset, self.limit = 0, VISIBLE_STEPS  # which steps show: a guided walkthrough moves the window along
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -54,7 +55,7 @@ class AnswerCard(QFrame):
         self.setGraphicsEffect(self.fade)
 
     def show_answer(self, answer, colors):
-        self.answer, self.colors, self.active = answer, colors, -1
+        self.answer, self.colors, self.active, self.found = answer, colors, -1, ""
         self.offset, self.limit = 0, VISIBLE_STEPS
         title = re.sub(r"\s*\(.*?\)", "", answer.title).strip() if answer.grounded else "No guide for that yet"
         self.title.setText(title)
@@ -65,16 +66,23 @@ class AnswerCard(QFrame):
     def show_choice(self, question, options, colors):
         """A question with numbered options, e.g. "Which course?" and the person's courses."""
         from .assistant import Answer
-        self.answer, self.colors, self.active = Answer(question, (), tuple(options), (), True), colors, -1
+        self.answer, self.colors, self.active, self.found = Answer(question, (), tuple(options), (), True), colors, -1, ""
         self.offset, self.limit = 0, len(options)
         self.title.setText(question)
         self.title.setToolTip(question)
         self.render()
         self.enter()
 
-    def show_from(self, offset):
-        """Guided steps: the step being done and the ones after it."""
+    def show_note(self, text):
+        """Something read on the page itself, under the steps."""
+        self.found = text
+        self.render()
+
+    def show_from(self, offset, limit=None):
+        """Guided steps: from the step being done; limit 1 shows only that step ("Step 2 of 4")."""
         self.offset, self.active = offset, -1
+        if limit is not None:
+            self.limit = limit
         self.render()
 
     @property
@@ -93,13 +101,15 @@ class AnswerCard(QFrame):
             label.setObjectName("step")
             label.setWordWrap(True)
             label.setTextFormat(Qt.TextFormat.RichText)
-            number = self.offset + i + 1
-            label.setText(f'<b style="color:{self.colors["accent_text"]};">{number}.</b>&nbsp; {rich_step(step, self.colors)}')
-            label.setAccessibleName(f"Step {number}: {step}")
+            number, total = self.offset + i + 1, len(self.answer.steps)
+            alone = self.limit == 1 and total > 1  # a walkthrough's current step, on its own
+            mark = f"Step {number} of {total}<br>" if alone else f"{number}.&nbsp; "
+            label.setText(f'<b style="color:{self.colors["accent_text"]};">{mark}</b>{rich_step(step, self.colors)}')
+            label.setAccessibleName(f"Step {number} of {total}: {step}" if alone else f"Step {number}: {step}")
             self.steps_box.addWidget(label)
             label.show()  # a child added to an already visible card is not shown automatically
             self.step_labels.append(label)
-        note = self.answer.note if self.answer and not self.answer.grounded else ""
+        note = self.found or (self.answer.note if self.answer and not self.answer.grounded else "")
         self.note.setText(note)
         self.note.setVisible(bool(note))
         evidence = "; ".join(self.answer.evidence) if self.answer and self.answer.grounded else ""

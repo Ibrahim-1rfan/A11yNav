@@ -8,7 +8,8 @@ It is built for the **IBA LMS** (Sakai, `lms.iba.edu.pk`) and for everyday tasks
 Every answer comes from a checked guide (a RAG knowledge base), so it doesn't make things up, and each answer
 says where its steps came from.
 
-Klicky never moves your own mouse and never clicks or types inside a web page for you. It points, you click.
+Klicky never moves your own mouse. It points and you click; ask it to *go* somewhere and it opens the course tab and
+menu links itself, but every button, choice and form stays yours.
 
 ---
 
@@ -34,8 +35,8 @@ Klicky never moves your own mouse and never clicks or types inside a web page fo
 
 ## What it does
 
-- **Ask from anywhere.** Press **Win+Shift+K** (or Ctrl+Alt+F9 if another app owns that shortcut). A teal orb
-  appears by your pointer and listens. Speak your question, or just start typing.
+- **Ask from anywhere.** Press **Win+Shift+K** (or Ctrl+Alt+F9 if another app owns that shortcut). The teal orb
+  appears by your pointer with a **Speak / Type** switch under it. Speak your question, or type it.
 - **Guided LMS walkthroughs.** For course tasks (course outline, resources, assignments, quizzes, Drop Box,
   announcements, calendar…) Klicky asks **"Which course?"**, unless you're already inside one, and then points
   at each link or button in turn, waiting for your click before moving on.
@@ -125,6 +126,7 @@ Nothing here is downloaded automatically. Klicky only uses what you set up.
 | **Whisper `base.en`** (faster-whisper) | Voice questions | ~145 MB, runs on this PC | `scripts\get_speech_model.bat` (or `tiny.en` / `small.en` as an argument) |
 | **Edge neural voices** | Natural read-aloud | Free, online | Nothing to install. Settings → Voice type: Natural |
 | **UI-TARS-1.5-7B on OpenRouter** (recommended) | Finding a button by looking, when the accessibility tree can't | Pay per use, a few seconds per lookup | Make a key at [openrouter.ai](https://openrouter.ai/keys), put it in `keys.env` |
+| **Claude Haiku 5.5 on OpenRouter** | Summarizing an assignment's instructions | A fraction of a cent each, about 2.5 s | The same OpenRouter key |
 | UI-TARS-1.5-7B on Hugging Face | Same, alternative | Hugging Face credits | Token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) in `keys.env` |
 | Claude Haiku (`claude-haiku-5-5`) | Same, alternative | Anthropic API pricing | Key from [console.anthropic.com](https://console.anthropic.com/) in `keys.env` |
 | **LM Studio** + a local model | The web search agent, or a fully local vision fallback | Multi-GB download | See [Local models (LM Studio)](#local-models-lm-studio) |
@@ -184,6 +186,33 @@ OpenRouter, Hugging Face, Anthropic. A key set as a Windows environment variable
 4. The pointer flies to the first link and Klicky says the step. **Click it.** Klicky notices and moves on to
    the next step, until "That's it".
 
+**Assignments, in detail.** On the Assignments page Klicky reads the list itself and tells you which assignments
+aren't submitted yet and when they're due ("Which assignment? Week 08 Reading isn't submitted yet. It's due
+November 4 at 2:15 PM."). It boxes the first one and points at it. Click it, click another, or say its name
+("week eight"); if your question already named it ("how do I submit my week 8 reading") it goes straight there.
+When the assignment opens, Klicky reads that page:
+
+- **Already submitted:** "Week 07 Reading is already submitted, on October 28 at 2:04 PM. You don't have to worry
+  about this one." and the walkthrough ends.
+- **Not submitted:** it says the due date (or that it has passed), then a one- or two-sentence summary of the
+  instructions, for example "Read the paper and answer three questions in no more than 400 words.", shown on the card
+  too. Then it carries on: write or attach your work, Proceed, Submit.
+
+The summary is written by the first AI service with a key in `keys.env` (OpenRouter's Claude Haiku 5.5, then
+Anthropic, then a local LM Studio answer model). Only the assignment's title and instruction text are sent, never your
+name, grades or submission. Turn this off in Settings → Assignment summaries: Klicky then reads the first sentences
+of the instructions and sends nothing.
+
+On the **Syllabus** page, Klicky boxes the **Course Outline** item and points at it for you to click.
+
+**Or let Klicky go there.** Say it as a request instead of a question: *"show me the syllabus of Computer
+Security"*, *"open my HCI assignments"*, *"take me to Resources"*. Klicky says "Opening Computer Security.", the
+pointer flies to the tab and boxes it, and Klicky opens it, then the Syllabus link, then Course Outline: "Here it is."
+It only ever opens the **course tab and menu links**, through Windows accessibility (your mouse never moves). It
+never presses a button such as Proceed, Submit, Save or Upload, and it never picks an assignment for you: at the first
+step that needs you, it goes back to pointing and waiting for your click. If it can't open a link, it asks you to
+click it. "How do I…" questions are still guided step by step. Turn this off with Settings → Browser tasks.
+
 Esc or clicking the orb stops a walkthrough at any time.
 
 LMS guides cover: course outline (Syllabus), calendar, announcements, Resources (lectures), viewing and submitting
@@ -197,6 +226,19 @@ for steps that go through the browser's menu it points at each control and waits
 
 Short requests such as "open a new tab for me" are done for you (a fixed list of safe browser buttons only).
 Turn this off under Settings → "Let Klicky do simple browser tasks when I ask".
+
+### Speak or Type
+
+Under the orb is one switch with two halves, **Speak** and **Type**. Klicky opens in the one you used last (or the one
+set in Settings → Klicky opens in).
+
+- **Speak:** the orb listens, its rings following your voice. Your answer is read aloud.
+- **Type:** the microphone stays off and a text box appears under the switch. Type and press Enter. **The answer comes as text only, with no sound:** each line is shown as a caption
+  for as long as it takes to read, and guided steps work the same way: Klicky points, shows the step, and waits for
+  your click. "Which course?" and "Which assignment?" are typed too.
+- In Speak mode, pressing any letter or Tab switches to Type (the letter goes into the box). Esc closes.
+- Screen readers hear a group called "Input mode" with two toggle buttons, "Voice" and "Typing", and "Listening" /
+  "Typing" when it changes.
 
 ### Talking and listening
 
@@ -247,6 +289,7 @@ Pick one in the main window or Settings. It applies at once.
 | Low vision | 30 px text, yellow-on-black high contrast, thick focus outline, larger widget, speech on, at most 5 steps with key names spelled out |
 | Cognitive and learning | Calm colours, extra letter and line spacing, a dyslexia-friendly font if installed (OpenDyslexic, Lexend, else Verdana), plain language, one step at a time with Back/Next |
 | Motor and dexterity | Taller buttons with wide spacing, a larger Stop button, Enter starts, quick-pick examples, slower pacing, fewest key presses |
+| Deaf and hard of hearing | Opens in **Type** mode: answers and every guided step as text and captions, never sound; guides describe what appears on screen rather than sounds |
 
 Profiles change presentation and wording only. Their benefit has not yet been evaluated with users.
 
@@ -260,6 +303,7 @@ Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.j
 | Setting | Default | Notes |
 | --- | --- | --- |
 | Shortcut | Win+Shift+K | Falls back to Ctrl+Alt+F9 |
+| Klicky opens in | Speak | Speak or Type; also remembered from the switch under the orb |
 | Voice questions | On | Listens when the orb opens. Needs the speech model |
 | Answers | Read aloud | |
 | Voice type | Natural | Natural = Edge neural voices (online); Windows = offline SAPI voice |
@@ -269,6 +313,7 @@ Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.j
 | Show Klicky companion | On | Follow speed: Gentle, Normal, Snappy. Click ripple on/off |
 | Screen reader | On | "Let my screen reader read answers instead, when one is running" |
 | Browser tasks | On | "Let Klicky do simple browser tasks when I ask" |
+| Assignment summaries | On | Summarize an unsubmitted assignment's instructions with AI (the instruction text is sent) |
 | Answer model / Embedding model (optional) | Empty | LM Studio models |
 | Profile | Standard | See above |
 
@@ -278,11 +323,15 @@ Windows "Show animations" off means no pulsing, ripples or overshoot; state is s
 
 ## Privacy and safety
 
-- **Klicky never clicks inside web pages for you** and never moves your mouse pointer. You do every click on the LMS.
-  It never logs in, fills forms, submits assignments, sends messages or buys anything.
+- **Klicky never moves your mouse pointer.** When you ask it to go somewhere on the LMS ("show me the syllabus"),
+  it opens only course tabs and menu links. Every button, choice and form is yours: it never logs in, fills forms,
+  presses Proceed or Submit, submits assignments, sends messages or buys anything.
 - **Microphone audio** stays in memory on this PC (local Whisper). It is never saved or sent.
 - **Natural voice:** the text being read is sent to Microsoft's speech service. Switch to the Windows voice to keep
   it offline. Common lines are cached in `%LOCALAPPDATA%\Klicky\voice-cache`.
+- **Assignment summaries:** only an unsubmitted assignment's title and instruction text are sent, to the AI service
+  in `keys.env`. Whether it's submitted, and its due date, are read on this PC. Settings → Assignment summaries off
+  sends nothing.
 - **Vision fallback:** only when the accessibility tree can't find a control, a screenshot of the browser window
   is sent to the hosted backend you set up (OpenRouter, Hugging Face or Anthropic). Choose Local model or Off to keep
   screenshots on this PC. Screenshots are never saved by Klicky.
@@ -309,13 +358,15 @@ A11yNav/
 │   ├── dock.py                the orb, answer card and the whole ask → answer → guide flow
 │   ├── rag.py                 knowledge loading, BM25 + embeddings retrieval, platform detection
 │   ├── assistant.py           grounded answers from retrieved guides
-│   ├── page.py, pagewalk.py   LMS: reading course tabs and controls from the accessibility tree; guided steps
+│   ├── page.py, pagewalk.py   LMS: reading course tabs, controls and assignments from the accessibility tree; guided steps
+│   ├── summary.py             a short summary of an assignment's instructions
 │   ├── walkthrough.py         guided steps for the browser's own menus
 │   ├── vision.py              vision fallback: OpenRouter / Hugging Face UI-TARS, Claude, LM Studio
 │   ├── keys.py                reads keys.env
 │   ├── voice.py, speech.py    listening (Whisper)
 │   ├── neural_tts.py, tts.py  speaking (Edge neural voices, Windows voice)
 │   ├── companion.py, orb.py, highlighter.py, ripple.py   the pointer, orb and highlights
+│   ├── inputmode.py           the Speak / Type switch under the orb
 │   ├── browser.py, browser_actions.py, actions.py        browser windows and the fixed browser actions
 │   ├── controller.py, models.py, planning.py, …         the web search agent
 │   └── profiles.py, config.py, ui.py                    access profiles, settings, settings window
@@ -355,7 +406,8 @@ evidence:
 
 - `ask: course` makes Klicky ask which course and fill in `{course}`.
 - `point:` has one entry per step: `course`, `link: <name>`, `button: <name>`, `control: <name>`
-  (`A|B` for alternatives), `any` (wait for any click) or `tip` (just read it).
+  (`A|B` for alternatives), `any` (wait for any click), `assignment` (read the Assignments list, ask which one,
+  then report whether it's submitted or summarize it) or `tip` (just read it).
 - `sources:` (official URLs) or `evidence:` (where the steps were observed) is required, and shown on the card.
 
 ---
@@ -364,7 +416,7 @@ evidence:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m pytest -q          # 368 tests, about a minute
+.\.venv\Scripts\python.exe -m pytest -q          # about 410 tests, about two minutes
 .\.venv\Scripts\python.exe launch.pyw --smoke    # opens and closes the window
 .\scripts\build.bat                              # dist\Klicky\Klicky.exe
 ```

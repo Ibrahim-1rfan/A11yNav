@@ -1,18 +1,19 @@
 ---
 title: View and submit an assignment on the LMS
 task: submit an assignment
-keywords: assignment, assignments, submit, submission, hand in, turn in, upload assignment, homework, due date, save draft, draft, instructions, attachment, attach, assignment text, proceed
+keywords: assignment, assignments, submit, submitted, submission, hand in, turn in, upload assignment, homework, due date, save draft, draft, instructions, attachment, attach, assignment text, proceed, reading, weekly reading, is it submitted, pending assignments
 ask: course
 point:
 - course
 - link: Assignments
-- any
+- assignment
 - any
 - control: Proceed|Submit
 - control: Submit
 evidence:
 - IBA LMS student walkthrough video, 2:17 to 3:17
 - IBA LMS assignment page, checked live on 3 November 2026
+- IBA LMS Assignments list and opened assignments (status, due date, instructions), checked live on 3 November 2026
 ---
 ## LMS
 1. Open {course} from the course tabs at the top.
