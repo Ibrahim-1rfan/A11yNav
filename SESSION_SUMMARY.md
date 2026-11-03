@@ -46,7 +46,7 @@ things live and reports visually (screenshots). Calls the companion "the duplica
 - `azhab-dev` is pushed to GitHub with all of the work below, in the commit after a513e43 ("LMS assignments in
   detail, go-there mode, Speak or Type, one step at a time": the latest commit on the branch; see `git log`).
 - `main` is still at a513e43 (fast-forwarded on 3 Nov at the owner's request). Update it only when the owner asks.
-- Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- Commit messages must NOT include a Co-Authored-By: Claude line (the owner does not want Claude listed on GitHub).
 - `git stash list` → `stash@{0}: Blender experiment (removed from the project, 3 Nov 2026)`. Kept only as a backup.
   The owner said to remove everything Blender and stick to the LMS.
 
