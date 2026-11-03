@@ -210,3 +210,7 @@
   the browser window after bringing it forward. Zoom uses Ctrl+=/-/0; settings and extensions open the browser's own
   page in a new tab through the verified address-bar path. Setting "actions" turns this off.
 - Not run live in the person's browser by the developer; tests use fake buttons and keys. Tests: 251 passed.
+- People will usually ask "can you ...?". Of 44 such phrasings, 19 were missed (e.g. "take me back", "increase the zoom",
+  "bring back the tab", "refresh this page?", "can u"), and "can you show my history" was taken for a question. Widened
+  the action grammar and narrowed questions to "can you show/tell me how/where/what/why" and "can you help": 44/44.
+  Tests: 283 passed.

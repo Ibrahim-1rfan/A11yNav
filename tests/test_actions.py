@@ -182,3 +182,33 @@ def test_how_do_i_questions_are_guided_not_done(acting):
     ask(s, "how do I open a new tab")
     assert wait_for(s.app, lambda: s.dock.answer is not None)
     assert FakeActor.made == []
+
+
+@pytest.mark.parametrize("text,action", [
+    ("Can you open a new tab?", "newtab"), ("can you open another tab for me", "newtab"), ("can you open a tab", "newtab"),
+    ("Could you please open a new tab?", "newtab"), ("can u open a new tab", "newtab"), ("Can you refresh this page?", "refresh"),
+    ("can you take me back", "back"), ("can you go to the previous page", "back"), ("can you go back to the last page", "back"),
+    ("Can you zoom in?", "zoomin"), ("can you zoom in a bit", "zoomin"), ("can you make the text bigger", "zoomin"),
+    ("can you increase the zoom", "zoomin"), ("can you make it smaller", "zoomout"), ("can you decrease the zoom", "zoomout"),
+    ("can you make it normal size", "zoomreset"), ("can you reset the zoom", "zoomreset"), ("can you close the page", "closetab"),
+    ("can you reopen the tab I closed", "reopen"), ("can you bring back the tab", "reopen"), ("can you bookmark this", "bookmark"),
+    ("can you add this page to favorites", "bookmark"), ("can you show my history", "history"), ("can you show me my history", "history"),
+    ("can you open the browser settings", "settings"), ("can you show my extensions", "extensions"),
+])
+def test_can_you_requests_are_done(text, action):
+    result = route(text, "bing")
+    assert isinstance(result, BrowserAction) and result.action == action
+
+
+@pytest.mark.parametrize("text", ["can you show me how to zoom in", "can you tell me how to open a new tab", "can you help me open a new tab"])
+def test_can_you_show_me_how_is_still_a_question(text):
+    assert isinstance(route(text, "bing"), HelpQuestion)
+
+
+@pytest.mark.parametrize("text", ["can you delete my history", "can you open a new tab and search for cats", "can you save this file"])
+def test_can_you_with_anything_else_is_not_done(text):
+    try:
+        result = route(text, "bing")
+    except Exception:
+        result = None
+    assert not isinstance(result, BrowserAction)
