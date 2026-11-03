@@ -43,9 +43,10 @@ things live and reports visually (screenshots). Calls the companion "the duplica
 
 ### Git state
 
-- `azhab-dev` is pushed to GitHub with all of the work below, in the commit after a513e43 ("LMS assignments in
-  detail, go-there mode, Speak or Type, one step at a time": the latest commit on the branch; see `git log`).
-- `main` is still at a513e43 (fast-forwarded on 3 Nov at the owner's request). Update it only when the owner asks.
+- `main` and `azhab-dev` are the same on GitHub and contain all of the work below. On 4 Nov the history was rewritten
+  (at the owner's request) to drop a "Co-Authored-By: Claude" line from every commit, so commit IDs changed (e.g. the
+  big 4 Nov commit is now e896c68, the README commit c26a63f). Code was verified identical before the force-push.
+- A local-only branch `backup/before-rewrite` keeps the old history; delete it once the owner is happy.
 - Commit messages must NOT include a Co-Authored-By: Claude line (the owner does not want Claude listed on GitHub).
 - `git stash list` → `stash@{0}: Blender experiment (removed from the project, 3 Nov 2026)`. Kept only as a backup.
   The owner said to remove everything Blender and stick to the LMS.
