@@ -105,6 +105,24 @@ search agent and questions ("how do I…", "where is…", "I can't…", or anyth
   the tab you are on, new tab, extensions, adding a favourite or bookmark, your profile and settings; plus zoom and text size, reading mode,
   read aloud, dark mode and contrast, captions, caret browsing, find on page, tabs, bookmarks, history) for
   Edge, Chrome and Firefox. Each guide cites the official help page it was checked against.
+- Students on the **IBA LMS** (Sakai, `lms.iba.edu.pk`) get guides from `knowledge/lms/`: course outline (Syllabus),
+  calendar, announcements, lectures in Resources, viewing and submitting an assignment, tests and quizzes, uploading to
+  the Drop Box, adding a course to the top bar, and notifications. Each step was taken from a recorded student
+  walkthrough, and the card says where (for example "IBA LMS student walkthrough video, 3:40 to 4:51"). When the hotkey
+  is pressed on an LMS page (recognised from the browser's title), or the question says "LMS", these guides rank first;
+  browser questions such as zoom still get the browser guide. The companion does not point for LMS answers yet, since
+  it only finds the browser's own buttons.
+- **Guided LMS tasks.** On the LMS, course tasks ask "Which course?" and then point at each link or button in turn,
+  waiting for your click. Controls are found by name in the page's accessibility tree (the structure screen readers
+  use), so colours, dark mode and text size don't matter. When a name can't be found (a narrow layout that folds the
+  menu away, a renamed button), Klicky looks at a screenshot of the browser window with a vision model
+  (Settings → Finding buttons by looking): UI-TARS-1.5-7B hosted by OpenRouter (`OPENROUTER_API_KEY`) or Hugging Face
+  (`HF_TOKEN`), Claude (`claude-haiku-5-5`, `ANTHROPIC_API_KEY`), or a local model in LM Studio. Hosted backends receive
+  a screenshot of the browser window; the local one keeps it on this PC. "Auto" uses the first with a key set. The guide still
+  decides every step; the vision model only says where the control is, and can say "it's inside this menu".
+- **Natural voice.** Answers are read with Microsoft Edge's neural voices (Settings → Voice type: Natural; default Ava).
+  This is online: the text read is sent to Microsoft. Common lines are cached on disk so they start at once; offline,
+  Klicky falls back to the Windows voice.
 - Retrieval runs locally: keyword ranking always works, and an optional LM Studio **embedding model**
   (Settings → Embedding model) adds semantic matching, fused with reciprocal rank fusion. Vectors are cached
   under `%LOCALAPPDATA%/Klicky/index/`.
@@ -115,7 +133,7 @@ search agent and questions ("how do I…", "where is…", "I can't…", or anyth
 - The guide assistant only shows text. It never presses keys or controls the browser.
 
 New platforms can be added later as `knowledge/<platform>/*.md` files with the same front matter
-(`title`, `keywords`, `sources`) and one `## <app>` section per application.
+(`title`, `keywords`, `sources` and/or `evidence`) and one `## <app>` section per application.
 
 ## Access profiles
 

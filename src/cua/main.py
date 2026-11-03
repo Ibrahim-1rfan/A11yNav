@@ -14,6 +14,12 @@ def main():
     parser.add_argument("--smoke-popup", help="Open the voice dock, answer a typed sample question, save a screenshot and exit")
     args = parser.parse_args()
     enable_dpi_awareness()
+    from .keys import ensure_file, load_keys
+    try:
+        ensure_file()
+        load_keys()  # optional vision keys from keys.env in the project folder
+    except OSError:
+        pass
     from PySide6.QtCore import QTimer
     from PySide6.QtWidgets import QApplication
     from .ui import MainWindow
@@ -28,6 +34,8 @@ def main():
         settings, error = Settings(), str(exc)
     logging.basicConfig(level=logging.WARNING)
     window = MainWindow(settings,error)
+    if not (args.smoke or args.smoke_popup):
+        QTimer.singleShot(3000, window.dock.warm_voice)  # cache the natural voice's common lines in the background
     first_run = not settings_path().exists()
     if (args.smoke or first_run or error) and not args.smoke_popup:
         window.show()

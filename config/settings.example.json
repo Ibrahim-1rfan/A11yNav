@@ -29,5 +29,7 @@
   "screen_reader_quiet": true,
   "companion": true,
   "companion_speed": "normal",
-  "click_ripple": true
+  "click_ripple": true,
+  "vision": "auto",
+  "vision_model": "claude-haiku-5-5"
 }

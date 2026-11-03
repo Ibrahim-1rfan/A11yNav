@@ -124,6 +124,17 @@ class SetupDialog(QDialog):
         for name in list_voices():
             self.tts_voice.addItem(name, name)
         self.tts_voice.setCurrentIndex(max(0, self.tts_voice.findData(settings.tts_voice)))
+        from .neural_tts import VOICES
+        self.voice_engine = QComboBox()
+        self.voice_engine.addItem("Natural (online: the text read is sent to Microsoft)", "natural")
+        self.voice_engine.addItem("Windows (offline)", "windows")
+        self.voice_engine.setCurrentIndex(max(0, self.voice_engine.findData(settings.voice_engine)))
+        self.neural_voice = QComboBox()
+        for name, label in VOICES.items():
+            self.neural_voice.addItem(label, name)
+        if self.neural_voice.findData(settings.neural_voice) < 0:
+            self.neural_voice.addItem(settings.neural_voice, settings.neural_voice)
+        self.neural_voice.setCurrentIndex(max(0, self.neural_voice.findData(settings.neural_voice)))
         self.speech_rate = QComboBox()
         for label, rate in (("Slower", .8), ("Normal", 1.0), ("Faster", 1.2)):
             self.speech_rate.addItem(label, rate)
@@ -135,13 +146,24 @@ class SetupDialog(QDialog):
         for combo, values, current in [(self.adapter, ["ui_tars", "json"], settings.adapter), (self.browser, ["default", "edge", "chrome", "firefox"], settings.browser), (self.engine, ["bing", "google", "duckduckgo"], settings.engine), (self.rag_app, ["auto", "edge", "chrome", "firefox"], settings.rag_app)]:
             combo.addItems(values)
             combo.setCurrentText(current)
+        self.vision = QComboBox()
+        for value, text in [("auto", "Auto: the first one with a key set, else the local model"),
+                            ("openrouter", "UI-TARS on OpenRouter (screenshot sent to OpenRouter)"),
+                            ("huggingface", "UI-TARS on Hugging Face (screenshot sent to Hugging Face)"),
+                            ("claude", "Claude (screenshot sent to Anthropic)"),
+                            ("local", "Local model (screenshot stays on this PC)"), ("off", "Off: page names only")]:
+            self.vision.addItem(text, value)
+        self.vision.setCurrentIndex(max(0, self.vision.findData(settings.vision)))
+        self.vision.setToolTip("When a guided step's button can't be found by its name, look at a screenshot of the browser to find it. "
+                               "Keys come from environment variables: OPENROUTER_API_KEY, HF_TOKEN or ANTHROPIC_API_KEY.")
+        self.vision_model = QLineEdit(settings.vision_model)
         self.size, self.limit, self.timeout = QSpinBox(), QSpinBox(), QSpinBox()
         self.task_timeout, self.image_edge, self.tokens = QSpinBox(), QSpinBox(), QSpinBox()
         for control, lo, hi, value in [(self.size,16,40,settings.font_px),(self.limit,3,30,settings.max_actions),(self.timeout,1,120,int(settings.request_timeout)),(self.task_timeout,10,600,int(settings.task_timeout)),(self.image_edge,640,1920,settings.max_image_edge),(self.tokens,128,2048,settings.max_tokens)]:
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Reading voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -176,9 +198,11 @@ class SetupDialog(QDialog):
         base = self.settings if key == self.settings.profile else profiles.apply_to(self.settings, key)
         return replace(base, endpoint=self.endpoint.text().strip(), model=self.model.text().strip(), adapter=self.adapter.currentText(), browser=self.browser.currentText(), engine=self.engine.currentText(), font_px=self.size.value(), max_actions=self.limit.value(), request_timeout=self.timeout.value(), task_timeout=self.task_timeout.value(), max_image_edge=self.image_edge.value(), max_tokens=self.tokens.value(),
                        text_model=self.text_model.text().strip(), embed_model=self.embed_model.text().strip(), rag_app=self.rag_app.currentText(),
+                       vision=self.vision.currentData(), vision_model=self.vision_model.text().strip(),
                        hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked(),
                        read_aloud=self.read_aloud.isChecked(), barge_in=self.barge.isChecked(),
                        screen_reader_quiet=self.reader_quiet.isChecked(), tts_voice=self.tts_voice.currentData(),
+                       voice_engine=self.voice_engine.currentData(), neural_voice=self.neural_voice.currentData(),
                        speech_rate=self.speech_rate.currentData(), companion=self.show_companion.isChecked(),
                        companion_speed=self.companion_speed.currentData(), click_ripple=self.click_ripple.isChecked(),
                        actions=self.allow_actions.isChecked()).validate()

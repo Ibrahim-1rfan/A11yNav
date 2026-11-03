@@ -214,3 +214,98 @@
   "bring back the tab", "refresh this page?", "can u"), and "can you show my history" was taken for a question. Widened
   the action grammar and narrowed questions to "can you show/tell me how/where/what/why" and "can you help": 44/44.
   Tests: 283 passed.
+
+## 3 November 2026 — IBA LMS guides from the student walkthrough video
+
+- The LMS recording (6:35, student view) was transcribed and cut into keyframes locally; the video, transcript and
+  frames stay on this machine and are not in the repository. The LMS is Sakai at lms.iba.edu.pk.
+- Nine guides in `knowledge/lms/` (course outline, calendar, announcements, resources, submit an assignment, tests and
+  quizzes, Drop Box upload, starring courses for the top bar, notifications). Button names were read from the frames;
+  steps the video does not show were left out. Each guide's `evidence` names the video time range; the card shows it.
+- Retrieval: the browser filter no longer hides site guides; a platform seen in the question or the window title
+  boosts that platform's guides (x1.5), so "make text bigger" on the LMS still gets the zoom guide. 20/20 sample
+  questions retrieved the right guide. LMS answers never point the companion (its steps say "star" and "Back").
+- Confirmed from a screenshot of real Chrome: the LMS tab is titled "Sakai : <course> ..." at lms.iba.edu.pk, so the
+  title check ("Sakai") recognises it.
+- Not checked: the tutorial launcher, and the assignment page's bottom buttons (not captured in a frame; the guide says Submit or save as a draft).
+  Tests: 299 passed.
+
+## 3 November 2026 — Guided assignment submission inside the LMS page
+
+- Answer card fix: the panel ended in a stretch spacer that took the height wrapped steps needed, so long steps were
+  cut off mid-line (seen on the LMS assignment answer). Removed it; a test checks every step gets its full height.
+- "How do I upload my assignment?" on the LMS: Klicky reads the course tabs from the page (link names and addresses
+  through UI Automation, on this machine), asks "Which course?" and listens. Answers like "HCI", "cloud", "the second
+  one" or the full name work; an unclear answer is asked once more, typing also works. A course named in the question
+  skips the question; if the tab title shows you're already in that course, step 1 is skipped.
+- Then a guided walkthrough inside the page: the companion points at the course tab, then Assignments in the left menu,
+  then Submit, each step waiting for your click on it (choosing the assignment and typing are "any click" steps). The
+  pointer re-looks while the next page loads, says to scroll when Submit is below the fold, and after about 12 s without
+  finding a control lets any click continue. Klicky never clicks or types in the page.
+- Guides opt in with front matter `ask: course` and `point:` (one spec per step: course, link: <name>, button: <name>,
+  any); steps say {course}. Without the page (or off the LMS), the steps are read with "your course".
+- Not checked on the real page yet: that Chrome/Edge expose the LMS course tabs and left menu as named links with their
+  addresses, the left-menu link's exact name, the Submit button's name, and lookup speed. Tests: 321 passed.
+- Live check on the real LMS tab (read-only, with permission): the first try fell back to plain steps because Chrome
+  builds a page's accessibility tree only after something asks for it, so the first read found no links. Klicky now
+  looks again for up to about 2 s. The check also showed: Home's address is `/portal/site/%7E29227` (was taken for a
+  course), left-menu names start with icon glyphs (" Overview"), and course links also appear in the page body.
+  Courses are now the links between the Home tab and the left menu; icons are stripped; all courses (up to 8) are read
+  out. Verified on the real tab: 7 courses listed, Computer Security's tab and left-menu links located at their real
+  positions. Still unverified: the Assignments and Submit names inside a course page. Tests: 323 passed.
+
+## 3 November 2026 — Every course task on the LMS is guided
+
+- Course outline, calendar, announcements, resources, tests and quizzes, Drop Box upload and assignment submission now
+  all ask "Which course?" (unless the question names one, e.g. "the HCI calendar"), then point at the course tab, the
+  left-menu item and the controls on that page, one click at a time. "This one" picks the course you're in. Trailing
+  "tip" steps (what you'll see there) are read after the last click. A "control:" step matches a link, button or menu
+  item, and "A|B" allows either name.
+- Checked live on the HCI assignment page (read-only, with permission): all seven left-menu names match. The assignment
+  page has Proceed, Preview, Save Draft and Cancel, no Submit, plus "Select a file from computer"; the guide now points
+  at Proceed, then Submit on the next page. Still unverified: the confirmation page's Submit, and the Drop Box
+  Actions / Upload Files / Continue names. Tests: 332 passed.
+
+## 3 November 2026 — Vision fallback for finding page controls
+
+- Agreed design: the guides (RAG, with their evidence) decide every step; the accessibility tree finds the step's
+  control by name; only when it can't (nothing after about 2 s, or still out of sight) does a vision model look at a
+  screenshot of the browser window, at most twice per step. It answers with a position only (a JSON schema for Claude,
+  click(start_box) for UI-TARS), checked to lie inside the image; nothing it says is shown, spoken or run.
+- It may answer "inside a collapsed menu": Klicky points at that menu button, says "It's inside this menu. Open it
+  first.", doesn't count that click as the step, then looks inside the opened menu.
+- Settings: `vision` = auto (Claude if ANTHROPIC_API_KEY is set, else the local model) / claude / local / off, and
+  `vision_model` (default claude-haiku-5-5). Added the `anthropic` SDK (2.4) to requirements.
+- Not run live: no API key is set and LM Studio isn't installed on this laptop (i3-1005G1, 7.7 GB, integrated GPU), so
+  both backends were tested with fakes only. Tests: 340 passed.
+- Local UI-TARS was not installed: this laptop has 7.7 GB RAM (0.7 GB free at the time) and the 2B model plus its
+  vision part need about 3 GB. Instead, hosted UI-TARS-1.5-7B: OpenRouter (`bytedance/ui-tars-1.5-7b`, image input,
+  $0.10/M in) and Hugging Face Inference Providers (`ByteDance-Seed/UI-TARS-1.5-7B` via featherless-ai; image support
+  not confirmed). Fixed HTTPS addresses, keys from OPENROUTER_API_KEY / HF_TOKEN, no redirects. Screenshots are sent with
+  sides a multiple of 28 (long edge 1288), so UI-TARS-1.5's pixel coordinates need no rescaling. Auto order: OpenRouter,
+  Hugging Face, Claude, local. Not run live (no keys). Tests: all passing.
+- Keys now live in `keys.env` in the project folder (git-ignored; the old %LOCALAPPDATA% file is still read).
+- Live check of OpenRouter UI-TARS-1.5-7B on a drawn stand-in LMS page (no real screen content sent): "Assignments"
+  and "Drop Box" in the left menu and the "Computer Security" course tab were all hit inside their boxes, 1.7–2.5 s
+  each. Not yet seen in a real walkthrough, since vision only runs when the page tree can't find a control.
+
+## 3 November 2026 — Voice questions about the Drop Box went to the assignment guide
+
+- Transcription is faster-whisper base.en (local, CPU, int8). With clear speech it heard all 11 LMS questions right;
+  the bug was in the guide search: "how do I upload my assignment in dropbox" chose the assignment guide because one
+  "dropbox" word scored below "upload" + "assignment". LMS guides now list the names of their place (`names:`, e.g.
+  drop box, dropbox, drop bucks, drawbox); a question naming a place goes to that guide. 14/14 sample questions right.
+- Whisper's vocabulary hint now includes the LMS words (Drop Box, Syllabus, Tests & Quizzes, Resources, Announcements…).
+- Fixed a race in guided steps: a late empty page lookup could clear the pointer the vision model had just found and
+  ask the model again. Tests: all passing.
+
+## 3 November 2026 — Natural voice
+
+- Klicky now reads with Microsoft Edge's neural voices through edge-tts (default Ava; Andrew, Emma, Sonia, and Indian
+  English Neerja / Prabhat in Settings). The Pakistani English voices (Uzma, Asad) are no longer offered by the service.
+  Online: the text read is sent to Microsoft; it's an unofficial use of Edge's Read Aloud service.
+- First audio took 1.1–4 s per line on this connection, so: every line of an answer is fetched at once (the next
+  plays while the previous is fetched), audio is cached on disk (%LOCALAPPDATA%\Klicky\voice-cache), and at start-up
+  the 194 common lines (guide steps, intros, fixed phrases) are cached in the background once.
+- Offline or no answer within 6 s: the rest of that answer is read by the Windows voice, with the same callbacks.
+  Settings: Voice type (Natural / Windows), Natural voice. Tests: 368 passed.

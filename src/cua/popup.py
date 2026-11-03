@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 from PySide6.QtCore import QThread, Signal
 from .config import UserError
 from .models import Cancelled
+from .rag import display_name
 
 
 class AnswerWorker(QThread):
@@ -12,9 +13,9 @@ class AnswerWorker(QThread):
     status = Signal(str, str)
     answered = Signal(object)
 
-    def __init__(self, settings, question, factory=None):
+    def __init__(self, settings, question, factory=None, platform=None):
         super().__init__()
-        self.settings, self.question = settings, question
+        self.settings, self.question, self.platform = settings, question, platform
         self.stop_event = threading.Event()
         self.factory = factory
 
@@ -23,7 +24,7 @@ class AnswerWorker(QThread):
             from .assistant import build_assistant
             helper = self.factory() if self.factory else build_assistant(self.settings)
             self.status.emit("processing", "Finding the guide and writing your answer" if self.settings.text_model else "Finding the guide")
-            answer = helper.answer(self.question, self.stop_event)
+            answer = helper.answer(self.question, self.stop_event, platform=self.platform)
             if self.stop_event.is_set():
                 raise Cancelled()
             self.answered.emit(answer)
@@ -44,7 +45,7 @@ def answer_html(answer, profile, step=0, show_title=True):
     if show_title:
         parts.append(f'<p style="font-size:large; font-weight:bold; margin-bottom:2px;">{html.escape(answer.title)}</p>')
     if answer.apps:
-        parts.append(f'<p style="color:{c["muted"]}; margin-top:0;">For {html.escape(", ".join(a.title() for a in answer.apps))}</p>')
+        parts.append(f'<p style="color:{c["muted"]}; margin-top:0;">For {html.escape(", ".join(display_name(a) for a in answer.apps))}</p>')
     one_step = profile.one_step and answer.grounded and len(answer.steps) > 1
     if one_step:
         parts.append(f'<p style="{line} color:{c["accent"]}; font-weight:bold;">Step {step + 1} of {len(answer.steps)}</p>'
@@ -60,4 +61,6 @@ def answer_html(answer, profile, step=0, show_title=True):
     if answer.grounded:
         origin = "Written by your local answer model from the guide" if answer.generated else "From Klicky's checked guide"
         parts.append(f'<p style="color:{c["muted"]};">{origin}{" · " + links if links else ""}</p>')
+        if answer.evidence:
+            parts.append(f'<p style="color:{c["muted"]};">Shown in: {html.escape("; ".join(answer.evidence))}</p>')
     return "".join(parts), one_step

@@ -2,6 +2,7 @@
 from dataclasses import asdict, dataclass
 import json
 import math
+import re
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -38,6 +39,8 @@ class Settings:
     voice_model: str = "base.en"
     read_aloud: bool = True
     tts_voice: str = ""
+    voice_engine: str = "natural"           # "natural": Edge neural voices (online, text sent to Microsoft); "windows"
+    neural_voice: str = "en-US-AvaNeural"
     speech_rate: float = 1.0
     barge_in: bool = True
     screen_reader_quiet: bool = True
@@ -45,6 +48,11 @@ class Settings:
     companion_speed: str = "normal"
     click_ripple: bool = True
     actions: bool = True  # let Klicky do simple browser tasks when asked ("open a new tab for me")
+    # When a guided step's control can't be found in the page's accessibility tree, look at a screenshot of the browser:
+    # "auto" uses the first with a key: hosted UI-TARS on OpenRouter (OPENROUTER_API_KEY) or Hugging Face (HF_TOKEN),
+    # Claude (ANTHROPIC_API_KEY), else the local model above. "off" never looks.
+    vision: str = "auto"
+    vision_model: str = "claude-haiku-5-5"
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -62,7 +70,8 @@ class Settings:
             if not isinstance(value, str) or len(value) > 200:
                 raise UserError(f"Enter the {key.replace('_', ' ')} identifier shown in your local server, or leave it empty.")
         for key, choices in {"adapter": {"ui_tars", "json"}, "browser": {"default", "edge", "chrome", "firefox"}, "engine": {"bing", "google", "duckduckgo"},
-                             "profile": {"default", "low_vision", "cognitive", "motor"}, "rag_app": {"auto", "edge", "chrome", "firefox"}}.items():
+                             "profile": {"default", "low_vision", "cognitive", "motor"}, "rag_app": {"auto", "edge", "chrome", "firefox"},
+                             "vision": {"auto", "openrouter", "huggingface", "claude", "local", "off"}}.items():
             if getattr(self, key) not in choices:
                 raise UserError(f"Unsupported {key} setting.")
         for key, lo, hi, integer in [
@@ -86,8 +95,13 @@ class Settings:
             raise UserError("Invalid companion speed.")
         if not isinstance(self.tts_voice, str) or len(self.tts_voice) > 200:
             raise UserError("Invalid reading voice.")
+        if self.voice_engine not in {"natural", "windows"} or not isinstance(self.neural_voice, str) \
+                or not re.fullmatch(r"[a-z]{2}-[A-Z]{2}-[A-Za-z]+Neural", self.neural_voice):
+            raise UserError("Invalid natural voice setting.")
         if type(self.speech_rate) not in (int, float) or not math.isfinite(self.speech_rate) or not .5 <= self.speech_rate <= 1.5:
             raise UserError("speech_rate must be between 0.5 and 1.5.")
+        if not isinstance(self.vision_model, str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,100}", self.vision_model):
+            raise UserError("Enter a vision model identifier such as claude-haiku-5-5.")
         if self.hotkey:
             parse_hotkey(self.hotkey)
         return self

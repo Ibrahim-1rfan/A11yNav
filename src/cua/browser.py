@@ -34,6 +34,16 @@ def foreground_app():
     return hwnd, next((app for app, exe in EXECUTABLES.items() if exe == name), None)
 
 
+def window_title(hwnd):
+    """A window's title; for a browser, the page title then the browser's name. Used only to pick guides."""
+    if os.name != "nt" or not hwnd:
+        return ""
+    user32 = ctypes.windll.user32
+    buffer = ctypes.create_unicode_buffer(min(user32.GetWindowTextLengthW(wintypes.HWND(hwnd)), 1024) + 1)
+    user32.GetWindowTextW(wintypes.HWND(hwnd), buffer, len(buffer))
+    return buffer.value
+
+
 def executable_for(preference):
     if preference == "default":
         return None

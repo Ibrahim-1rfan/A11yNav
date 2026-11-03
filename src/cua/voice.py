@@ -13,8 +13,9 @@ RATE = 16000
 CHUNK_MS = 50
 CHUNK = RATE * CHUNK_MS // 1000  # 50 ms: fine enough for the orb to follow the voice smoothly
 # Primes Whisper with the words Klicky's questions use, so "Chrome" is not heard as "crow".
-VOCABULARY = ("Questions about the web browsers Chrome, Edge and Firefox: zoom, text size, reader mode, read aloud, "
-              "dark mode, captions, caret browsing, tabs, bookmarks, favorites, history.")
+VOCABULARY = ("Questions about the IBA LMS: course outline, Syllabus, Resources, lecture slides, Assignments, submit, "
+              "Drop Box, Tests & Quizzes, Announcements, Calendar, HCI. And about the web browsers Chrome, Edge and "
+              "Firefox: zoom, text size, reader mode, read aloud, dark mode, captions, tabs, bookmarks, favorites, history.")
 MODELS = {"tiny.en": "Systran/faster-whisper-tiny.en", "base.en": "Systran/faster-whisper-base.en",
           "small.en": "Systran/faster-whisper-small.en"}
 FILLERS = {"thank you", "thanks", "you", "bye", "thanks for watching"}

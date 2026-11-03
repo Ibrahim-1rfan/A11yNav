@@ -304,6 +304,13 @@ class Highlighter(QObject):
             except (AttributeError, OSError):
                 self.overlay.hide()
 
+    def show_page(self, rect):
+        """A link or button inside the web page (physical rect), found by a guided page walkthrough."""
+        self.wanted = None
+        logical = to_logical(rect)
+        self.overlay.show_ring(logical, "")
+        self.on_located(logical)
+
     @property
     def current_target(self):
         return self.wanted[1] if self.wanted else None

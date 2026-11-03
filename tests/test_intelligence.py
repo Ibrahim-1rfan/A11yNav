@@ -7,7 +7,7 @@ from cua.config import Settings, UserError
 from cua.models import Cancelled
 from cua.planning import route, HelpQuestion, SearchTask
 from cua import profiles
-from cua.rag import load_corpus, Index, BM25, fuse, detect_app, tokens
+from cua.rag import load_corpus, Index, BM25, fuse, detect_app, detect_platform, display_name, tokens
 
 
 @pytest.fixture(scope="module")
@@ -16,10 +16,11 @@ def corpus():
 
 
 def test_corpus_has_sectioned_cited_guides(corpus):
-    assert len(corpus) >= 25
-    assert {c.app for c in corpus} == {"edge", "chrome", "firefox"}
-    for chunk in corpus:
-        assert chunk.platform == "browsers" and chunk.title and chunk.steps
+    browsers = [c for c in corpus if c.platform == "browsers"]
+    assert len(browsers) >= 25
+    assert {c.app for c in browsers} == {"edge", "chrome", "firefox"}
+    for chunk in browsers:
+        assert chunk.title and chunk.steps
         assert chunk.source.startswith("https://")
     edge = next(c for c in corpus if c.id == "browsers/zoom-and-text-size#edge")
     assert "microsoft.com" in edge.source and edge.steps[0].startswith("Select Settings and more")
@@ -184,3 +185,89 @@ def test_everyday_guides_cover_chrome_and_edge_and_lead_with_the_button(corpus):
         for app in ("chrome", "edge"):
             chunk = next(c for c in corpus if c.id == f"browsers/{topic}#{app}")
             assert target_for(chunk.steps[0]) == target, (topic, app)  # the companion can point from step 1
+
+
+# ---- IBA LMS (Sakai) guides, evidenced by the student walkthrough video ------------------------------------
+def test_lms_guides_each_cite_where_they_were_seen(corpus):
+    lms = [c for c in corpus if c.platform == "lms"]
+    assert len(lms) >= 9 and {c.app for c in lms} == {"lms"}
+    for chunk in lms:
+        assert chunk.steps and chunk.evidence and any("video" in e and " to " in e for e in chunk.evidence)
+        assert chunk.walk == 0  # the pointer only finds browser buttons, so site guides are never walked
+
+
+@pytest.mark.parametrize("question,app,platform,topic", [
+    ("How do I submit my assignment?", "edge", None, "submit-assignment"),       # browser context doesn't hide site guides
+    ("Where is the course outline?", "chrome", "lms", "course-outline"),
+    ("Where can I find the syllabus?", None, None, "course-outline"),
+    ("Where are my lecture slides?", "chrome", "lms", "resources"),
+    ("I forgot to submit, how do I send my file to the teacher?", "edge", "lms", "drop-box"),
+    ("How do I take a quiz?", None, "lms", "tests-and-quizzes"),
+    ("How do I check the calendar on LMS?", None, None, "calendar"),
+    ("My new course is not showing in the top bar", "chrome", "lms", "favourite-sites"),
+    ("Where are my notifications?", None, "lms", "notifications"),
+])
+def test_lms_questions_find_the_lms_guide(corpus, question, app, platform, topic):
+    hits = Index(corpus).retrieve(question, app=app, platform=platform)
+    assert hits and hits[0].chunk.id == f"lms/{topic}#lms"
+
+
+@pytest.mark.parametrize("question,app,expected", [
+    ("How do I make text bigger?", "edge", "browsers/zoom-and-text-size#edge"),
+    ("How do I bookmark this page?", "edge", "browsers/bookmarks#edge"),
+    ("How do I open a new tab?", "chrome", "browsers/new-tab#chrome"),
+])
+def test_browser_questions_still_win_on_the_lms(corpus, question, app, expected):
+    assert Index(corpus).retrieve(question, app=app, platform="lms")[0].chunk.id == expected
+
+
+def test_platform_is_recognised_from_question_title_or_host():
+    assert detect_platform("how do I upload to the LMS drop box") == "lms"
+    assert detect_platform(title="Sakai : Computer Security : Assignments - Google Chrome") == "lms"
+    assert detect_platform(url="https://lms.iba.edu.pk/portal/site/abc") == "lms"
+    assert detect_platform("how do I zoom in", title="News - Microsoft Edge", url="https://example.com/lms.iba.edu.pk") is None
+    assert display_name("lms") == "IBA LMS" and display_name("edge") == "Edge"
+
+
+def test_lms_answer_carries_its_evidence_and_no_browser_link(corpus):
+    settings = Settings()
+    answer = Assistant(settings, Index(corpus)).answer("how do I upload a file to my drop box", threading.Event(), platform="lms")
+    assert answer.grounded and answer.apps == ("lms",) and answer.sources == ()
+    assert answer.evidence == ("IBA LMS student walkthrough video, 3:40 to 4:51",)
+    assert answer.steps[0] == "Open your course from the course tabs at the top." and answer.ask == "course"
+    assert answer.points[2:4] == ("control: Actions", "control: Upload Files")
+
+
+COURSE_GUIDES = {"course-outline": "Syllabus", "calendar": "Calendar", "announcements": "Announcements", "resources": "Resources",
+                 "tests-and-quizzes": "Tests & Quizzes", "drop-box": "Drop Box", "submit-assignment": "Assignments"}
+
+
+@pytest.mark.parametrize("topic,menu", COURSE_GUIDES.items())
+def test_every_course_guide_asks_for_the_course_and_points_at_its_menu(corpus, topic, menu):
+    chunk = next(c for c in corpus if c.id == f"lms/{topic}#lms")
+    assert chunk.ask == "course" and len(chunk.points) == len(chunk.steps)
+    assert chunk.points[0] == "course" and "{course}" in chunk.steps[0]
+    assert chunk.points[1] == f"link: {menu}" and menu in chunk.steps[1]
+    specs = chunk.points
+    assert all(s in ("course", "any", "tip") or s.split(":")[0] in ("link", "button", "control") for s in specs)
+    assert "tip" not in specs or all(s == "tip" for s in specs[specs.index("tip"):])  # tips only at the end
+
+
+@pytest.mark.parametrize("question,topic", [
+    ("how do I upload my assignment in dropbox", "drop-box"),          # the place named wins over "assignment"
+    ("how do I put my assignment in the drop box", "drop-box"),
+    ("how do I upload in drop bucks", "drop-box"),                      # common mishearings of "Drop Box"
+    ("how do I upload to the drawbox", "drop-box"),
+    ("how do I upload my assignment", "submit-assignment"),            # no place named: the assignment guide
+    ("where are the lecture slides for my assignment", "resources"),
+    ("which quizzes do I have", "tests-and-quizzes"),
+])
+def test_a_named_lms_place_decides_the_guide(corpus, question, topic):
+    assert Index(corpus).retrieve(question, app="chrome", platform="lms")[0].chunk.id == f"lms/{topic}#lms"
+
+
+def test_named_places_never_take_over_browser_questions(corpus):
+    index = Index(corpus)
+    for question, expected in [("how do I make text bigger", "zoom-and-text-size"), ("how do I bookmark this page", "bookmarks"),
+                               ("how do I open a new tab", "new-tab")]:
+        assert index.retrieve(question, app="chrome", platform="lms")[0].chunk.id == f"browsers/{expected}#chrome"

@@ -16,7 +16,7 @@ from cua.answer_card import AnswerCard, rich_step, VISIBLE_STEPS
 from cua.assistant import Answer, build_assistant
 from cua.config import Settings
 from cua.dock import LIGHT, last_two_lines
-from cua.dockstate import CLOSED, DONE, ERROR, IDLE, LISTENING, SPEAKING, THINKING, TYPING, DockState
+from cua.dockstate import CLOSED, DONE, ERROR, IDLE, LISTENING, SPEAKING, THINKING, TYPING, WAITING, DockState
 from cua.highlighter import target_for
 from cua.orb import Orb
 from cua.tts import intro, sapi_rate, spoken
@@ -319,6 +319,20 @@ def test_steps_that_mention_the_menu_point_at_it_while_read(dock_setup):
     assert s.pointed[-1] is None  # highlights removed when the card closes
 
 
+def test_on_the_lms_its_guide_answers_with_evidence_and_never_points_at_browser_buttons(dock_setup, monkeypatch):
+    s = dock_setup
+    monkeypatch.setattr("cua.dock.window_title", lambda hwnd: "Sakai : Computer Security : Favourites - Google Chrome")
+    s.listeners.append(FakeListener("how do I add a course to my top bar"))
+    s.window.summon()
+    assert s.dock.context_platform == "lms"
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
+    assert s.dock.answer.apps == ("lms",) and s.dock.walk is None
+    assert s.dock.card.evidence.isVisibleTo(s.dock.card) and "walkthrough video" in s.dock.card.evidence.text()
+    star = next(i for i, step in enumerate(s.dock.card.visible_steps) if "star" in step)  # would match the browser's star
+    s.dock.tts.calls[-1].line(star + 1)
+    assert not [p for p in s.pointed if p]
+
+
 def test_a_new_answer_replaces_the_old_steps_immediately():
     app = QApplication.instance() or QApplication([])
     card = AnswerCard()
@@ -329,3 +343,202 @@ def test_a_new_answer_replaces_the_old_steps_immediately():
     card.show_answer(second, LIGHT)  # no event-loop pass in between
     shown = [label.text() for label in card.findChildren(QLabel, "step") if label.isVisible()]
     assert len(shown) == 2 and "Alpha." in shown[0] and "Beta." in shown[1]
+
+
+# ---- guided steps inside the LMS page -----------------------------------------------------------------------
+LMS_COURSES = ["Computer Security (Class No 101765) - Fall 2026", "HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026",
+               "Introduction to Cloud Computing ( Class : 102201 ) Fall 2026"]
+BOXES = {"course": (500, 260, 900, 300), "link: Assignments": (20, 480, 240, 520), "control: Proceed|Submit": (280, 700, 380, 740),
+         "control: Submit": (300, 500, 400, 540)}
+
+
+@pytest.fixture
+def lms_dock(dock_setup, monkeypatch):
+    from PySide6.QtCore import QRect
+    s = dock_setup
+    monkeypatch.setattr("cua.pagewalk.PAGE_SETTLE_MS", 10)
+    monkeypatch.setattr("cua.dock.window_title", lambda hwnd: s.title)
+    s.title = "Sakai : Home : Overview - Google Chrome"
+    s.looked = []
+    s.dock.page_courses = lambda hwnd: list(LMS_COURSES)
+    s.dock.page_find = lambda hwnd, spec, chosen: (s.looked.append((spec, chosen)), (BOXES.get(spec), False))[1]
+    s.seen, s.vision = [], lambda spec: None   # the vision fallback: a fake that, by default, sees nothing
+    s.dock.page_seer = lambda hwnd, spec, chosen, step: (s.seen.append(spec), s.vision(spec))[1]
+    rect = lambda b: QRect(b[0], b[1], b[2] - b[0], b[3] - b[1])
+    s.dock.highlighter.show_page = lambda b: (s.pointed.append(("page", b)), s.dock.guide_companion(rect(b)))
+    s.dock.highlighter.clear = lambda: (s.pointed.append(None), s.dock.guide_companion(None))
+    s.rect = rect
+    return s
+
+
+def click(s, box):
+    from PySide6.QtCore import QPoint
+    r = s.rect(box)
+    s.dock.walk.clicked(QPoint(r.center()))
+
+
+def say(s, text):
+    s.listeners.append(FakeListener(text))
+
+
+def test_lms_asks_which_course_then_points_at_each_link_and_waits_for_clicks(lms_dock):
+    s = lms_dock
+    dock = s.dock
+    say(s, "how do I upload my assignment")
+    s.window.summon()
+    assert wait_for(s.app, lambda: dock.state == SPEAKING and dock.choice)
+    assert dock.card.title.text() == "Which course?" and len(dock.card.step_labels) == 3
+    question = dock.tts.calls[-1]
+    assert question.lines[0] == "Which course? Computer Security, Human Computer Interaction, or Introduction to Cloud Computing."
+    say(s, "HCI")
+    question.end()                                          # Klicky listens for the answer right away
+    assert wait_for(s.app, lambda: dock.walk is not None and dock.state == SPEAKING)
+    step = dock.tts.calls[-1]
+    assert step.lines[0] == "Okay, Human Computer Interaction." and "Human Computer Interaction" in step.lines[1]
+    step.line(1)                                            # reading step 1: point at the course's tab
+    assert wait_for(s.app, lambda: ("page", BOXES["course"]) in s.pointed)
+    assert s.looked[-1] == ("course", LMS_COURSES[1])
+    step.end()
+    assert dock.state == WAITING and s.captions[-1] == "Your turn: open Human Computer Interaction from the course tabs at the top."
+    click(s, BOXES["link: Assignments"])                    # a click somewhere else isn't the step
+    assert dock.state == WAITING
+    click(s, BOXES["course"])
+    assert wait_for(s.app, lambda: dock.walk.index == 1 and dock.state == SPEAKING)
+    assert dock.card.step_labels[0].text().startswith('<b') and "2." in dock.card.step_labels[0].text()  # card moved on
+    dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Assignments"]) in s.pointed and dock.state == WAITING)
+    click(s, BOXES["link: Assignments"])
+    for index in (2, 3):                                    # choose the assignment, type the answer: any click
+        assert wait_for(s.app, lambda: dock.walk.index == index and dock.state == SPEAKING)
+        dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
+        assert dock.pointed_rect is None
+        dock.walk.clicked(__import__("PySide6.QtCore").QtCore.QPoint(900, 900))
+    assert wait_for(s.app, lambda: dock.walk.index == 4 and dock.state == SPEAKING)
+    assert "Proceed" in dock.tts.calls[-1].lines[0]         # the live page's button: Proceed, then Submit next
+    dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["control: Proceed|Submit"]) in s.pointed and dock.state == WAITING)
+    click(s, BOXES["control: Proceed|Submit"])
+    assert wait_for(s.app, lambda: dock.walk.index == 5 and dock.state == SPEAKING)
+    dock.tts.calls[-1].line(0); dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["control: Submit"]) in s.pointed)
+    walk = dock.walk
+    click(s, BOXES["control: Submit"])
+    assert dock.tts.calls[-1].lines == ["That's it, well done."] and not walk.active
+    dock.tts.calls[-1].end()
+    assert dock.state == DONE
+
+
+def test_a_course_named_in_the_question_skips_the_question_and_step_one_if_already_there(lms_dock):
+    s = lms_dock
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    say(s, "how do I submit my computer security assignment")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    assert s.dock.choice is None and s.dock.walk.index == 1
+    assert s.dock.tts.calls[-1].lines[0] == "Okay, Computer Security. You're already in Computer Security."
+
+
+def test_an_unclear_course_is_asked_again_then_given_up_and_typing_works(lms_dock):
+    s = lms_dock
+    say(s, "how do I submit an assignment")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING and s.dock.choice)
+    say(s, "biology")
+    s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING and s.dock.tts.calls[-1].lines[0].startswith("Sorry, which course?"))
+    s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: s.dock.state == LISTENING or s.dock.state == THINKING)
+    s.dock.start_typing("")                                 # the person types instead
+    s.dock.input.setText("cloud")
+    s.dock.submit_typed()
+    assert wait_for(s.app, lambda: s.dock.walk is not None)
+    assert "Introduction to Cloud Computing" in s.dock.answer.steps[0]
+
+
+def test_off_the_lms_or_unreadable_page_reads_the_steps_without_asking(lms_dock):
+    s = lms_dock
+    s.dock.page_courses = lambda hwnd: []
+    say(s, "how do I submit an assignment")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
+    assert s.dock.choice is None and s.dock.walk is None and "your course" in s.dock.answer.steps[0]
+    s.dock.reposition()
+    s.app.processEvents()
+    for label in s.dock.card.step_labels:  # wrapped steps get their full height, none cut off mid-line
+        assert label.height() >= label.heightForWidth(label.width())
+
+
+def test_inside_a_course_it_uses_that_course_and_tips_are_read_at_the_end(lms_dock):
+    s = lms_dock
+    s.title = "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    BOXES["link: Tests & Quizzes"] = (20, 530, 240, 570)
+    say(s, "which tests do I have")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)   # no "Which course?"
+    walk = s.dock.walk
+    assert s.dock.choice is None and walk.index == 1                                       # already there: step 1 skipped
+    assert s.dock.tts.calls[-1].lines[0] == "You're in Human Computer Interaction, so I'll use it."
+    s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["link: Tests & Quizzes"]) in s.pointed and s.dock.state == WAITING)
+    click(s, BOXES["link: Tests & Quizzes"])
+    lines = s.dock.tts.calls[-1].lines
+    assert lines[0] == "That's it, well done." and len(lines) == 3 and "Take an Assessment" in lines[1] and not walk.active
+    assert "3." in s.dock.card.step_labels[0].text()   # the card shows the tips being read
+
+
+def test_a_different_course_named_while_inside_one_wins(lms_dock):
+    s = lms_dock
+    s.title = "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    say(s, "how do I see the cloud computing announcements")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+    assert s.dock.walk.index == 0 and s.dock.tts.calls[-1].lines[0] == "Okay, Introduction to Cloud Computing."
+
+
+
+def test_when_the_tree_cannot_find_a_control_the_vision_model_points_at_it(lms_dock, monkeypatch):
+    from cua.vision import Seen
+    s = lms_dock
+    monkeypatch.setattr("cua.pagewalk.CHECK_MS", 20)
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    BOXES.pop("link: Assignments")                         # renamed or hidden: the tree finds nothing
+    s.vision = lambda spec: Seen((20, 480, 240, 520)) if spec == "link: Assignments" else None
+    try:
+        say(s, "how do I submit my computer security assignment")
+        s.window.summon()
+        assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+        s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
+        assert wait_for(s.app, lambda: ("page", (20, 480, 240, 520)) in s.pointed)
+        from cua.pagewalk import LOOK_LIMIT
+        assert set(s.seen) == {"link: Assignments"} and 1 <= len(s.seen) <= LOOK_LIMIT   # looked, within the per-step limit
+        assert s.looked.count(("link: Assignments", "Computer Security (Class No 101765) - Fall 2026")) >= 2   # names first
+        click(s, (20, 480, 240, 520))
+        assert wait_for(s.app, lambda: s.dock.walk.index == 2)
+    finally:
+        BOXES["link: Assignments"] = (20, 480, 240, 520)
+
+
+def test_a_control_folded_into_a_menu_points_at_the_menu_first(lms_dock, monkeypatch):
+    from cua.vision import Seen
+    s = lms_dock
+    monkeypatch.setattr("cua.pagewalk.CHECK_MS", 20)
+    monkeypatch.setattr("cua.pagewalk.CLICK_MENU_MS", 10)
+    s.title = "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    menu = (10, 200, 50, 240)
+    BOXES.pop("link: Assignments")
+    s.vision = lambda spec: Seen(menu, reveals=True)        # a narrow page: the left menu is behind a menu button
+    try:
+        say(s, "how do I submit my computer security assignment")
+        s.window.summon()
+        assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
+        s.dock.tts.calls[-1].line(1); s.dock.tts.calls[-1].end()
+        assert wait_for(s.app, lambda: ("page", menu) in s.pointed and s.dock.walk.revealing)
+        assert s.captions[-1] == "It's inside this menu. Open it first."
+        BOXES["link: Assignments"] = (20, 480, 240, 520)  # the menu unfolds: now the tree can see the link
+        click(s, menu)
+        assert s.dock.walk.index == 1                       # opening the menu isn't the step
+        assert wait_for(s.app, lambda: ("page", (20, 480, 240, 520)) in s.pointed and not s.dock.walk.revealing)
+        click(s, (20, 480, 240, 520))
+        assert wait_for(s.app, lambda: s.dock.walk.index == 2)
+    finally:
+        BOXES["link: Assignments"] = (20, 480, 240, 520)

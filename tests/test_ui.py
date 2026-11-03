@@ -77,7 +77,7 @@ def test_question_shows_answer_and_cognitive_stepping(monkeypatch):
     window=MainWindow(replace(Settings(),profile="cognitive"))
     answer=Answer("Make pages bigger",("edge",),("Press Ctrl and Plus.","Press Ctrl and 0 to reset."),("https://support.microsoft.com/x",),True)
     class Helper:
-        def answer(self,question,stop): return answer
+        def answer(self,question,stop,platform=None): return answer
     window.ask("How do I zoom in Edge?",Helper)
     assert wait_for(app,lambda: window.answer is not None and not window.worker.isRunning())
     app.processEvents()
@@ -96,7 +96,7 @@ def test_question_stop_and_default_profile_lists_all_steps(monkeypatch):
     app=QApplication.instance() or QApplication([])
     window=MainWindow(Settings())
     class Slow:
-        def answer(self,question,stop):
+        def answer(self,question,stop,platform=None):
             stop.wait(2)
             raise Cancelled()
     window.ask("How do I zoom?",Slow)

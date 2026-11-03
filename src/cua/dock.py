@@ -17,7 +17,8 @@ from .highlighter import Highlighter
 from .morph import orb_center, overshoot, panel_rect
 from .orb import Orb
 from .popup import AnswerWorker
-from .rag import detect_app
+from .browser import window_title
+from .rag import APPS, detect_app, detect_platform
 from .tts import ReadAloud, intro, spoken
 
 LIGHT = {"surface": "#FFFFFF", "border": "#D5DDDA", "text": "#14231E", "muted": "#46564F", "accent_text": "#0F6E56",
@@ -85,6 +86,17 @@ class SidePanel(QWidget):
         self.dock.keyPressEvent(event)  # typing anywhere in Klicky switches to the text box
 
 
+def common_lines():
+    """What Klicky says most, in spoken form: every guide step without a {course} blank, each guide's intro, and the
+    fixed phrases. The natural voice caches these ahead of time."""
+    from .rag import load_corpus
+    lines = ["That's it, well done.", "Which course?", "I didn't catch the course. Ask me again when you're ready."]
+    for chunk in load_corpus():
+        lines.append(intro(chunk))
+        lines += [spoken(step) for step in chunk.steps if "{" not in step]
+    return lines
+
+
 class Dock(QWidget):
     def __init__(self, owner):
         super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
@@ -93,11 +105,14 @@ class Dock(QWidget):
         self.setObjectName("dock")
         self.owner = owner
         self.machine = DockState(self.on_state)
-        self.context_app = self.return_hwnd = None
+        self.context_app = self.return_hwnd = self.context_platform = None
         self.listener = self.monitor = self.worker = None
         self.answer, self.colors, self.answered = None, LIGHT, False
         self.walk, self.pointed_rect = None, None
         self.probe_factory = None  # tests inject a fake control lookup for walkthroughs
+        self.choice, self.last_question, self.choice_misses = None, "", 0  # "Which course?" waiting for an answer
+        self.page_courses = self.page_find = self.page_seer = None  # tests inject fakes; None means the real page and model
+        self.page_worker = None
         self.action_factory = None  # tests inject a fake action runner
         self.actor = None
         self.asked_by_voice = False
@@ -129,7 +144,8 @@ class Dock(QWidget):
         layout.addWidget(self.caption)
         layout.addWidget(self.input)
         layout.addWidget(self.card)
-        layout.addStretch()
+        # No trailing stretch: the panel is sized to its contents, and a stretch would take the height the card
+        # asked for (height-for-width), leaving wrapped steps cut off at their one-line size.
         self.orb = Orb()
         self.orb.clicked.connect(self.orb_clicked)
         orb_layout = QVBoxLayout(self)
@@ -181,6 +197,7 @@ class Dock(QWidget):
         """anchor: where the orb's centre should be (the companion's spot); defaults to the pointer."""
         if self.state == CLOSED:
             self.context_app, self.return_hwnd = app, hwnd
+            self.context_platform = self.platform_of(hwnd)
             self.highlighter.cache.clear()
             self.answer = None
             self.card.hide()
@@ -200,12 +217,21 @@ class Dock(QWidget):
             self.outside.start()
         elif hwnd:
             self.context_app, self.return_hwnd = app, hwnd
+            self.context_platform = self.platform_of(hwnd)
         self.raise_()
         self.activateWindow()
         self.orb.setFocus()
         self.reposition()
         if listen:
             self.listen_now()
+
+    @staticmethod
+    def platform_of(hwnd):
+        """The site the hotkey was pressed on (e.g. the LMS), from the browser's title, so its guides rank first."""
+        try:
+            return detect_platform(title=window_title(hwnd))
+        except Exception:
+            return None
 
     def screen_area(self, point):
         screen = QGuiApplication.screenAt(point) or QGuiApplication.primaryScreen()
@@ -362,6 +388,10 @@ class Dock(QWidget):
     def on_heard(self, text):
         if self.state != THINKING:
             return
+        if self.choice:
+            self.set_caption(f"“{text}”")
+            self.answer_choice(text)
+            return
         self.set_caption(f"“{text}”  Finding the answer...")
         self.asked_by_voice = True
         self.route(text, spoken_question=True)
@@ -391,6 +421,10 @@ class Dock(QWidget):
     def submit_typed(self):
         text = self.input.text().strip()
         if not text or self.state != TYPING:
+            return
+        if self.choice:  # the answer to "Which course?", not a new question
+            self.machine.fire("submit")
+            self.answer_choice(text)
             return
         try:
             from .planning import route
@@ -422,11 +456,12 @@ class Dock(QWidget):
 
     def ask(self, question):
         settings = self.settings
+        self.last_question, self.choice = question, None
         # A browser named in the question wins; otherwise answer for the browser the hotkey was pressed in.
         if self.context_app and settings.rag_app == "auto" and detect_app(question) is None:
             settings = replace(settings, rag_app=self.context_app)
         self.answered = False
-        self.worker = AnswerWorker(settings, question, self.answer_factory)
+        self.worker = AnswerWorker(settings, question, self.answer_factory, self.context_platform)
         self.worker.answered.connect(self.on_answer)
         self.worker.status.connect(lambda state, message: self.on_fail(message) if state == "error" and not self.answered else None)
         self.worker.start()
@@ -478,15 +513,19 @@ class Dock(QWidget):
             return
         self.answered = True
         self.answer = answer
+        if answer.ask and answer.grounded and self.return_hwnd and self.context_platform in answer.apps:
+            self.start_choice(answer)  # on the LMS page itself: ask which course, then guide inside the page
+            return
         self.card.show_answer(answer, self.colors)
         self.card.show()
-        self.highlighter.prefetch(self.card.visible_steps, self.return_hwnd)  # pointing is instant when each step is read
+        if self.points_at_browser():
+            self.highlighter.prefetch(self.card.visible_steps, self.return_hwnd)  # pointing is instant when each step is read
         announce(self, answer.spoken() if answer.grounded else answer.note)
         read = self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
         from .walkthrough import Walkthrough, actionable_steps
         steps = self.card.visible_steps
         # Only guides that declare a sequence become walkthroughs; alternatives in a list are read as usual.
-        actionable = min(answer.walk, actionable_steps(steps)) if answer.grounded and self.return_hwnd else 0
+        actionable = min(answer.walk, actionable_steps(steps)) if answer.grounded and self.return_hwnd and self.points_at_browser() else 0
         if read and actionable >= 2 and self.machine.fire("answer_read"):
             # Several steps that each need the person to act: guide them one at a time and wait.
             self.walk = Walkthrough(self, steps, actionable, self.return_hwnd, self.probe_factory)
@@ -498,25 +537,162 @@ class Dock(QWidget):
             self.point_at_first_step()
         self.orb.setFocus()
 
+    # ---- guided steps inside the page: "Which course?" then point at each link ----------------------------
+    def reading(self):
+        return self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
+
+    def start_choice(self, answer):
+        from . import page
+        self.set_caption("Checking your courses...")
+        self.page_worker = page.PageWorker(self.page_courses or page.courses, self.return_hwnd)
+        self.page_worker.result.connect(lambda names, answer=answer: self.on_courses(answer, names or []))
+        self.page_worker.start()
+
+    def on_courses(self, answer, names):
+        from .page import MAX_OPTIONS, pick, short_name
+        if self.state != THINKING or self.answer is not answer:
+            return
+        full = {}
+        for name in names:
+            full.setdefault(short_name(name), name)
+        options = list(full)[:MAX_OPTIONS]
+        if not options:  # couldn't read the courses: give the steps as written
+            self.show_plain(answer)
+            return
+        chosen = pick(self.last_question, options, numbers=False)  # "how do I submit my HCI assignment" names it already
+        if chosen:
+            self.begin_guide(answer, chosen, full[chosen])
+            return
+        current = next((name for name in names if name in self.page_title()), None)  # the course you're in, if any
+        if current:  # inside a course and none named: that's the one (ask only from Home)
+            self.begin_guide(answer, short_name(current), current, lead=f"You're in {short_name(current)}, so I'll use it.")
+            return
+        self.choice, self.choice_misses = (answer, options, full, current), 0
+        self.card.show_choice("Which course?", options, self.colors)
+        self.card.show()
+        question = (f"Which course? {', '.join(options[:-1])}, or {options[-1]}." if 1 < len(options) <= MAX_OPTIONS
+                    else f"Which course? Say its name, for example {options[0]}.")
+        self.ask_choice(question)
+
+    def ask_choice(self, question):
+        announce(self, question)
+        self.reposition()
+        if self.reading() and self.machine.fire("answer_read"):
+            self.speak([question], on_end=self.listen_for_choice)
+        else:
+            self.machine.fire("answer_quiet")
+            self.set_caption(question)
+
+    def listen_for_choice(self):
+        if self.state == SPEAKING and self.choice:
+            self.machine.fire("finished")
+            self.start_listening()
+
+    def answer_choice(self, text):
+        from .page import THIS_ONE, pick, short_name
+        answer, options, full, current = self.choice
+        chosen = pick(text, options)
+        if not chosen and current and THIS_ONE.search(text):  # "this one" while inside a course
+            chosen = short_name(current)
+            full = {**full, chosen: current}
+        if chosen:
+            self.choice = None
+            self.begin_guide(answer, chosen, full[chosen])
+            return
+        self.choice_misses += 1
+        if self.choice_misses >= 2:
+            self.choice = None
+            self.machine.fire("fail")
+            self.set_caption("I didn't catch the course. Ask me again when you're ready.")
+            return
+        self.ask_choice(f"Sorry, which course? Say its name, for example {options[0]}.")
+
+    def begin_guide(self, answer, short, full, lead=None):
+        from .assistant import fill
+        from .pagewalk import PageWalkthrough
+        steps = fill(answer.template, answer.ask, short)
+        self.answer = guided = replace(answer, steps=steps)
+        self.card.show_answer(guided, self.colors)
+        self.card.show()
+        here = full in self.page_title()  # e.g. "Sakai : Computer Security (Class No ...) : Overview"
+        start = 1 if here and answer.points[:1] == ("course",) else 0
+        lead = lead or f"Okay, {short}." + (f" You're already in {short}." if start else "")
+        if not (self.reading() and self.machine.fire("answer_read")):
+            self.machine.fire("answer_quiet")
+            announce(self, guided.spoken())
+            return
+        self.walk = PageWalkthrough(self, steps, answer.points, self.return_hwnd, full, start, lead, finder=self.page_find,
+                                    seer=self.page_seer or self.vision_seer())
+        self.walk.start()
+
+    def vision_seer(self):
+        """The screenshot fallback for guided page steps, or None when vision is off or no backend is available."""
+        from . import vision
+        from .keys import load_keys
+        load_keys()  # a key saved in keys.env while Klicky runs counts from the next walkthrough on
+        settings = self.settings
+        if vision.backend(settings) is None:
+            return None
+        return lambda hwnd, spec, chosen, step: vision.see(hwnd, spec, chosen, step, settings)
+
+    def page_title(self):
+        try:
+            return window_title(self.return_hwnd) or ""
+        except Exception:
+            return ""
+
+    def show_plain(self, answer):
+        """The steps as written, read aloud, without pointing (the page couldn't be read)."""
+        self.card.show_answer(answer, self.colors)
+        self.card.show()
+        announce(self, answer.spoken())
+        if self.reading() and self.machine.fire("answer_read"):
+            self.read_answer()
+        else:
+            self.machine.fire("answer_quiet")
+
     def lines(self):
         if not self.answer.grounded:
             return [self.answer.note]
         return [intro(self.answer)] + [spoken(step) for step in self.card.visible_steps]
 
-    def speak(self, lines, on_line_start=None, on_end=None):
+    def warm_voice(self):
+        """At start-up: begin caching the natural voice's common lines, so the first answer already sounds quick."""
+        if self.settings.voice_engine == "natural" and type(self.tts) is ReadAloud:
+            try:
+                self.reader()
+            except Exception:
+                pass
+
+    def reader(self):
+        """The voice to read with, switched when the setting changes. The Windows voice stays as the fallback."""
+        from .neural_tts import NeuralReadAloud
+        natural = self.settings.voice_engine == "natural"
+        if natural and type(self.tts) is ReadAloud:
+            self.tts = NeuralReadAloud(fallback=self.tts)
+            self.tts.neural_voice = self.settings.neural_voice
+            self.tts.prewarm(common_lines(), self.settings.speech_rate)
+        elif not natural and isinstance(self.tts, NeuralReadAloud):
+            neural, self.tts = self.tts, self.tts.fallback
+            neural.stop()
+            neural.closed = True
         self.tts.voice_name = self.settings.tts_voice
-        self.tts.speak(lines, self.settings.speech_rate, on_line_start=on_line_start, on_end=on_end)
+        if isinstance(self.tts, NeuralReadAloud):
+            self.tts.neural_voice = self.settings.neural_voice
+        return self.tts
+
+    def speak(self, lines, on_line_start=None, on_end=None):
+        self.reader().speak(lines, self.settings.speech_rate, on_line_start=on_line_start, on_end=on_end)
 
     def read_answer(self):
-        self.tts.voice_name = self.settings.tts_voice
-        self.tts.speak(self.lines(), self.settings.speech_rate, on_line_start=self.on_line, on_end=self.on_read_end)
+        self.reader().speak(self.lines(), self.settings.speech_rate, on_line_start=self.on_line, on_end=self.on_read_end)
         self.start_monitor()
 
     def on_line(self, index):
         step = index - 1  # line 0 is the spoken intro
         self.card.set_active(step)
         steps = self.card.visible_steps
-        if 0 <= step < len(steps):
+        if 0 <= step < len(steps) and self.points_at_browser():
             self.highlighter.point(steps[step], self.return_hwnd)
 
     def on_read_end(self):
@@ -555,7 +731,14 @@ class Dock(QWidget):
         self.anchor = orb_center(wanted, area, self.orb.diameter // 2)
         self.reposition()
 
+    def points_at_browser(self):
+        """Only browser guides point at controls: the pointer finds the browser's own buttons, not a site's page,
+        and words like "star" or "Back" in a site's guide would otherwise land on the browser's buttons."""
+        return bool(self.answer and any(app in APPS for app in self.answer.apps))
+
     def point_at_first_step(self):
+        if not self.points_at_browser():
+            return
         for step in self.card.visible_steps:
             from .highlighter import target_for
             if target_for(step):
@@ -638,6 +821,7 @@ class Dock(QWidget):
             self.machine.fire("close")
 
     def finish_close(self):
+        self.choice = None
         self.stop_listener()
         if self.worker and self.worker.isRunning():
             self.worker.stop_event.set()

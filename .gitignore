@@ -11,3 +11,7 @@ config/settings.json
 *.log
 klicky_research_pitch(1)(1).pdf
 /deliverables
+
+# API keys for the vision fallback: never committed
+keys.env
+*.env
