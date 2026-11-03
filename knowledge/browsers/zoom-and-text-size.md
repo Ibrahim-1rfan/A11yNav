@@ -1,6 +1,7 @@
 ---
 title: Make pages and text bigger (zoom and font size)
 task: make pages and text bigger
+walkthrough: 2
 keywords: zoom, bigger, larger, magnify, enlarge, text size, font size, smaller, shrink, reset zoom, default zoom, minimum font, cannot read, too small, tiny, tiny words, hard to see, eyes, squint
 sources:
 - https://support.microsoft.com/en-us/accessibility/edge/accessibility-features-in-microsoft-edge
@@ -8,16 +9,16 @@ sources:
 - https://support.mozilla.org/en-US/kb/font-size-and-zoom-increase-size-of-web-pages
 ---
 ## Edge
-1. To zoom in on the current page, press Ctrl and Plus (+) together. Each press zooms in by 25%.
-2. To zoom out, press Ctrl and Minus (-). To go back to normal size, press Ctrl and 0.
-3. You can also hold Ctrl and roll the mouse wheel up or down.
-4. With the mouse, open Settings and more (the three dots at the top right, or press Alt and F) and use Zoom in or Zoom out.
+1. Select Settings and more, the three dots at the top right of the window.
+2. Next to Zoom, select Zoom in, the plus, to make everything larger, or Zoom out, the minus, to make it smaller.
+3. From the keyboard, press Ctrl and Plus (+) to zoom in, Ctrl and Minus (-) to zoom out, and Ctrl and 0 to go back to normal.
+4. You can also hold Ctrl and roll the mouse wheel up or down.
 5. To make every website bigger by default, open Settings and more, choose Settings, then Accessibility, and pick a size from the Page zoom list under Visibility.
 
 ## Chrome
-1. To zoom in on the current page, press Ctrl and Plus (+) together.
-2. To zoom out, press Ctrl and Minus (-). To go back to normal size, press Ctrl and 0.
-3. With the mouse, select More (the three dots at the top right) and use Zoom in or Zoom out next to Zoom.
+1. Select More, the three dots at the top right of the window.
+2. Next to Zoom, select Zoom in, the plus, to make everything larger, or Zoom out, the minus, to make it smaller.
+3. From the keyboard, press Ctrl and Plus (+) to zoom in, Ctrl and Minus (-) to zoom out, and Ctrl and 0 to go back to normal.
 4. To make every website bigger by default, select More, then Settings, then Appearance, and choose a size next to Page zoom.
 5. To make only the text bigger on all sites, go to the same Appearance page and choose a size next to Font size. Customize fonts has more options. Some sites do not allow text-only resizing.
 

@@ -1,6 +1,7 @@
 ---
 title: Open the browser settings
 task: open the settings
+walkthrough: 2
 keywords: settings, preferences, options, open settings, browser settings, configure, change settings, setup
 sources:
 - https://support.google.com/chrome/answer/157179

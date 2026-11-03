@@ -29,6 +29,7 @@ class Chunk:
     keywords: tuple[str, ...]
     sources: tuple[str, ...]
     task: str = ""
+    walk: int = 0  # leading steps that form a guided sequence (front matter "walkthrough: N")
 
     @property
     def source(self):
@@ -78,7 +79,8 @@ def load_corpus(root: Path | None = None) -> list[Chunk]:
             app = heading.strip().lower()
             if text.strip():
                 chunks.append(Chunk(f"{path.parent.name}/{path.stem}#{app}", path.parent.name, app,
-                                    meta.get("title", path.stem), text.strip(), keywords, sources, str(meta.get("task", ""))))
+                                    meta.get("title", path.stem), text.strip(), keywords, sources, str(meta.get("task", "")),
+                                    int(meta.get("walkthrough") or 0)))
     return chunks
 
 

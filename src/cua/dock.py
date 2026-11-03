@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QWidget
 from .answer_card import AnswerCard
 from .config import UserError
 from .dockstate import (CAPTIONS, CLOSED, DONE, ERROR, IDLE, LISTENING, ORB_LABELS, SPEAKING, THINKING, TYPING,
-                        DockState)
+                        WAITING, DockState)
 from .highlighter import Highlighter
 from .morph import orb_center, overshoot, panel_rect
 from .orb import Orb
@@ -96,6 +96,8 @@ class Dock(QWidget):
         self.context_app = self.return_hwnd = None
         self.listener = self.monitor = self.worker = None
         self.answer, self.colors, self.answered = None, LIGHT, False
+        self.walk, self.pointed_rect = None, None
+        self.probe_factory = None  # tests inject a fake control lookup for walkthroughs
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
         self.highlighter = Highlighter(self.guide_companion)
@@ -238,7 +240,10 @@ class Dock(QWidget):
         down = bool(ctypes.windll.user32.GetAsyncKeyState(0x01) & 0x8000)
         if down and not self.button_was_down:
             pos = QCursor.pos()
-            if not (self.frameGeometry().contains(pos) or self.panel.isVisible() and self.panel.frameGeometry().contains(pos)):
+            inside = self.frameGeometry().contains(pos) or self.panel.isVisible() and self.panel.frameGeometry().contains(pos)
+            if self.walk and self.walk.active:
+                self.walk.clicked(pos)
+            elif not inside:
                 self.close_dock()
         self.button_was_down = down
 
@@ -311,7 +316,7 @@ class Dock(QWidget):
         """Hotkey while open: listen, or barge in over an answer being read."""
         if self.state == SPEAKING:
             self.barge_in()
-        elif self.state in (IDLE, DONE, ERROR, TYPING):
+        elif self.state in (IDLE, DONE, ERROR, TYPING, WAITING):
             self.start_listening()
 
     def start_listening(self):
@@ -424,7 +429,15 @@ class Dock(QWidget):
         self.highlighter.prefetch(self.card.visible_steps, self.return_hwnd)  # pointing is instant when each step is read
         announce(self, answer.spoken() if answer.grounded else answer.note)
         read = self.settings.read_aloud and not (self.settings.screen_reader_quiet and screen_reader_running())
-        if read and self.machine.fire("answer_read"):
+        from .walkthrough import Walkthrough, actionable_steps
+        steps = self.card.visible_steps
+        # Only guides that declare a sequence become walkthroughs; alternatives in a list are read as usual.
+        actionable = min(answer.walk, actionable_steps(steps)) if answer.grounded and self.return_hwnd else 0
+        if read and actionable >= 2 and self.machine.fire("answer_read"):
+            # Several steps that each need the person to act: guide them one at a time and wait.
+            self.walk = Walkthrough(self, steps, actionable, self.return_hwnd, self.probe_factory)
+            self.walk.start()
+        elif read and self.machine.fire("answer_read"):
             self.read_answer()
         else:
             self.machine.fire("answer_quiet")
@@ -435,6 +448,10 @@ class Dock(QWidget):
         if not self.answer.grounded:
             return [self.answer.note]
         return [intro(self.answer)] + [spoken(step) for step in self.card.visible_steps]
+
+    def speak(self, lines, on_line_start=None, on_end=None):
+        self.tts.voice_name = self.settings.tts_voice
+        self.tts.speak(lines, self.settings.speech_rate, on_line_start=on_line_start, on_end=on_end)
 
     def read_answer(self):
         self.tts.voice_name = self.settings.tts_voice
@@ -451,18 +468,38 @@ class Dock(QWidget):
     def on_read_end(self):
         self.stop_monitor()
         self.card.set_active(-1)
+        self.walk = None
         self.machine.fire("finished")
 
     def guide_companion(self, rect):
         """The companion flies out of the orb to the control being explained, or stops pointing."""
+        self.pointed_rect = rect
+        if rect is not None and self.state != CLOSED:
+            self.move_out_of_the_way(rect)
         companion = getattr(self.owner, "companion", None)
         if companion is None:
             return
         if rect is None or not self.settings.companion or self.state == CLOSED:
             companion.stop_guide()
             return
-        # Tip rests on the lower middle of the control so its icon stays visible above the pointer.
-        companion.guide(self.anchor, QPoint(rect.center().x(), rect.bottom() - 4))
+        if getattr(self.highlighter, "current_target", None) == "zoom":
+            # The zoom row is minus, percentage, plus: point at the plus at its right end.
+            tip = QPoint(rect.right() - rect.height() // 2, rect.bottom() - 4)
+        else:
+            # Tip rests on the lower middle of the control so its icon stays visible above the pointer.
+            tip = QPoint(rect.center().x(), rect.bottom() - 4)
+        companion.guide(self.anchor, tip)
+
+    def move_out_of_the_way(self, rect):
+        """Klicky must never cover the control it asks the person to click (menus open at the top right)."""
+        target = rect.adjusted(-12, -12, 12, 12)
+        if not (self.frameGeometry().intersects(target) or self.panel.isVisible() and self.panel.frameGeometry().intersects(target)):
+            return
+        area = self.screen_area(rect.center())
+        # Below and to the left of the control, with the card to the orb's left or right as space allows.
+        wanted = QPoint(rect.left() - self.panel_width() - 70, rect.bottom() + 90)
+        self.anchor = orb_center(wanted, area, self.orb.diameter // 2)
+        self.reposition()
 
     def point_at_first_step(self):
         for step in self.card.visible_steps:
@@ -489,14 +526,17 @@ class Dock(QWidget):
             self.monitor.stop_event.set()
 
     def barge_in(self):
-        if self.state != SPEAKING:
+        if self.state != SPEAKING or self.walk:
             return
         self.quiet()
         if self.machine.fire("barge_in"):
             self.listen(cue=False)  # the person is already talking; no beep over their words
 
     def quiet(self):
-        """Stop reading, stop listening for barge-in, and clear highlights."""
+        """Stop reading, stop guiding or listening for barge-in, and clear highlights."""
+        if self.walk:
+            self.walk.stop()
+            self.walk = None
         self.tts.stop()
         self.stop_monitor()
         self.card.set_active(-1)
@@ -508,7 +548,7 @@ class Dock(QWidget):
             self.start_listening()
         elif self.state == LISTENING:
             self.stop_listener()
-        elif self.state == SPEAKING:
+        elif self.state in (SPEAKING, WAITING):
             self.stop_reading()
 
     def escape(self):
@@ -517,7 +557,7 @@ class Dock(QWidget):
             if self.worker and self.worker.isRunning():
                 self.worker.stop_event.set()
             self.machine.fire("cancel")
-        elif self.state == SPEAKING:
+        elif self.state in (SPEAKING, WAITING):
             self.stop_reading()
         else:
             self.machine.fire("close")

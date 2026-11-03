@@ -22,7 +22,8 @@ def test_corpus_has_sectioned_cited_guides(corpus):
         assert chunk.platform == "browsers" and chunk.title and chunk.steps
         assert chunk.source.startswith("https://")
     edge = next(c for c in corpus if c.id == "browsers/zoom-and-text-size#edge")
-    assert "microsoft.com" in edge.source and edge.steps[0].startswith("To zoom in")
+    assert "microsoft.com" in edge.source and edge.steps[0].startswith("Select Settings and more")
+    assert edge.walk == 2 and next(c for c in corpus if c.id == "browsers/zoom-and-text-size#firefox").walk == 2
 
 
 @pytest.mark.parametrize("question,topic,app", [
@@ -94,7 +95,7 @@ def test_extractive_answer_without_a_text_model(corpus):
     helper, _ = assistant(corpus)
     answer = helper.answer("How do I zoom in Chrome?", threading.Event())
     assert answer.grounded and not answer.generated and answer.apps == ("chrome",)
-    assert answer.steps[0].startswith("To zoom in") and "google.com" in answer.sources[0]
+    assert answer.steps[0].startswith("Select More, the three dots") and "google.com" in answer.sources[0] and answer.walk == 2
     assert answer.spoken().startswith(answer.title)
 
 

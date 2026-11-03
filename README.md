@@ -52,6 +52,11 @@ the reading-mode button), the companion flies out of the orb and
 points at the real control while that step is read, with a ring around it. If the control cannot be found, an
 arrow at the screen edge shows where it is. Klicky never moves your own mouse pointer.
 
+- **Guided walkthroughs** for tasks that go through a menu, such as zooming or opening Settings: Klicky reads one
+  step, points at its control and waits ("Your turn"). When the menu opens (by click or Alt+F) it moves on and points
+  inside the menu, for example at the zoom minus and plus. A click on the last control finishes ("That's it"). If the
+  menu closes early, Klicky asks you to open it again; after 20 s it gives one reminder. Clicks in the browser do not
+  close Klicky while it guides, and it moves aside if it would cover the control. The orb or Esc stops guiding.
 - **Talk over the answer** to stop it and ask again. **Esc** or clicking the orb stops reading; Esc again closes.
 - The card shows the first three steps of the guide. Reading speed and voice are in Settings.
 - Start typing at any time to switch to a text box. Without a microphone, typing takes over automatically.

@@ -3,8 +3,8 @@
 idle -> listening -> thinking -> speaking -> done, with error and typing as side states. Events that are not
 valid in the current state are ignored, so a late microphone or model result can never jump the dock around.
 """
-IDLE, LISTENING, TYPING, THINKING, SPEAKING, DONE, ERROR, CLOSED = (
-    "idle", "listening", "typing", "thinking", "speaking", "done", "error", "closed")
+IDLE, LISTENING, TYPING, THINKING, SPEAKING, WAITING, DONE, ERROR, CLOSED = (
+    "idle", "listening", "typing", "thinking", "speaking", "waiting", "done", "error", "closed")
 
 TRANSITIONS = {
     (IDLE, "start"): LISTENING, (DONE, "start"): LISTENING, (ERROR, "start"): LISTENING, (TYPING, "start"): LISTENING,
@@ -17,6 +17,9 @@ TRANSITIONS = {
     (SPEAKING, "finished"): DONE,
     (SPEAKING, "stop"): DONE,                # Esc or orb click while reading
     (SPEAKING, "barge_in"): LISTENING,       # the user started talking over the answer
+    (SPEAKING, "wait"): WAITING,             # walkthrough: the person's turn to do the step just read
+    (WAITING, "next"): SPEAKING,             # the browser shows the step was done (or a reminder/step back)
+    (WAITING, "stop"): DONE, (WAITING, "start"): LISTENING, (WAITING, "close"): CLOSED, (WAITING, "fail"): DONE,
     (LISTENING, "stop_listening"): IDLE,
     (LISTENING, "fail"): ERROR, (THINKING, "fail"): ERROR, (TYPING, "fail"): ERROR, (SPEAKING, "fail"): DONE,
     (LISTENING, "cancel"): CLOSED, (THINKING, "cancel"): CLOSED,   # Esc while listening or thinking closes
@@ -31,13 +34,14 @@ CAPTIONS = {
     TYPING: "Type your question and press Enter",
     THINKING: "Got it, finding the answer...",
     SPEAKING: "",
+    WAITING: "",
     DONE: "",
     ERROR: "Couldn't hear that. Tap the orb to try again.",
 }
 
 ORB_LABELS = {
     IDLE: "Start listening", LISTENING: "Stop listening", TYPING: "Start listening", THINKING: "Finding the answer",
-    SPEAKING: "Stop reading", DONE: "Ask another question", ERROR: "Try again", CLOSED: "Start listening",
+    SPEAKING: "Stop reading", WAITING: "Stop guiding", DONE: "Ask another question", ERROR: "Try again", CLOSED: "Start listening",
 }
 
 

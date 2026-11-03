@@ -182,3 +182,15 @@
 - Lookups searched the web page too (about 3 s each on a WhatsApp tab); they now skip the page's Document subtree and
   take 0.1-0.2 s. Live: Chrome found all eight buttons; Edge found all but the star, which its New tab page does not
   show. Firefox sections for these guides are still to do. Tests: 208 passed.
+
+## 3 November 2026 — guided walkthroughs
+
+- Zoom and Settings are now walkthroughs (guides declare "walkthrough: 2"): open the three-dot menu, then use the zoom
+  buttons or the Settings item inside it. Klicky waits in a new "waiting" state and advances when the next control
+  appears (menu opened by click or Alt+F), finishes on a click on the last control, steps back if the menu closes,
+  and reminds once after 20 s. Menu controls are searched in the browser's popup windows and never cached.
+- Walkthroughs were first inferred from "leading steps that point at controls", but the extensions guide lists
+  alternatives that fit that pattern, so sequences are now declared explicitly in the guide.
+- Klicky moves its orb and card aside when they would cover the control it points at.
+- Not verified live: the zoom button and Settings item names inside a real open menu (both browsers were minimized);
+  names match both Chromium spellings ("Zoom in"/"Make text larger"). Tests: 216 passed.

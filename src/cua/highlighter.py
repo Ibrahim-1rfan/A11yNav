@@ -16,6 +16,11 @@ TEAL = "#1D9E75"
 # Names and classes were read from real Chrome and Edge windows; the profile button is named after the profile,
 # so it is matched by class, and every tab has its own close button, so the selected tab's one is chosen.
 TARGETS = {
+    # Inside the browser's open main menu (its own popup window). Chromium browsers name the zoom buttons
+    # "Zoom in"/"Zoom out" or, in other versions, "Make text larger"/"Make text smaller".
+    "zoom": (r"\bNext to Zoom, select Zoom in\b", "Button", r"^(Zoom in|Make text larger|Zoom out|Make text smaller)\b",
+             "Zoom is in the menu", "right"),
+    "menusettings": (r"\bSelect Settings near the bottom of the menu\b", "MenuItem", r"^Settings\b", "Settings is in the menu", "right"),
     # First match wins: "the plus sign ... The cursor appears in the address bar" is about the plus sign.
     "newtab": (r"\bplus sign\b|\bplus button\b|\bNew tab, the plus\b", "Button", r"^(New tab|New Tab|Open a new tab.*|New tab \(Ctrl\+T\))$",
                "New tab is up here", "left"),
@@ -36,6 +41,9 @@ TARGETS = {
     "address": (r"\baddress bar\b", "Edit", r"^(Address and search bar|Address bar|Search or enter address|Search with .* or enter address)$",
                 "The address bar is up here", "left"),
 }
+
+
+POPUP_TARGETS = {"zoom", "menusettings"}   # only exist while the menu is open; never cached
 
 
 def target_for(step):
@@ -59,6 +67,22 @@ def window_rect(hwnd):
     rect = wintypes.RECT()
     ctypes.windll.user32.GetWindowRect(wintypes.HWND(hwnd), ctypes.byref(rect))
     return rect.left, rect.top, rect.right, rect.bottom
+
+
+def process_windows(hwnd):
+    """Visible top-level windows of the same process, the main window first (menus are separate windows)."""
+    user32 = ctypes.windll.user32
+    pid = wintypes.DWORD()
+    user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+    found = []
+    def visit(h, _):
+        owner = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(h, ctypes.byref(owner))
+        if owner.value == pid.value and user32.IsWindowVisible(h) and not user32.IsIconic(h) and h != hwnd:
+            found.append(h)
+        return True
+    user32.EnumWindows(ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)(visit), 0)
+    return [hwnd] + found
 
 
 def browser_chrome(root, max_depth=14):
@@ -100,21 +124,29 @@ class ControlLocator(QThread):
 
     def locate(self):
         from pywinauto import Desktop
+        from pywinauto.controls.uiawrapper import UIAWrapper
         _pattern, control_type, name_pattern, *_rest = TARGETS[self.target]
-        window = Desktop(backend="uia").window(handle=self.hwnd).wrapper_object()
         by_class = name_pattern.startswith("class:")
         matcher = re.compile(name_pattern[6:] if by_class else name_pattern, re.I)
-        from pywinauto.controls.uiawrapper import UIAWrapper
+        popup = self.target in POPUP_TARGETS
         top = window_rect(self.hwnd)[1]
-        for info in browser_chrome(window.element_info):
-            if info.control_type != control_type:
-                continue
-            text = info.class_name if by_class else info.name
-            if matcher.match(text or "") or (self.target == "address" and (info.automation_id or "") == "urlbar-input"):
-                r = info.rectangle
-                # Browser chrome sits in the top band of the window.
-                if r.width() > 0 and r.top - top < 220 and info.visible and self.on_current_tab(UIAWrapper(info)):
-                    return r.left, r.top, r.right, r.bottom
+        matches = []
+        # Menus open in their own window owned by the browser process, so search all of its windows for those.
+        for hwnd in (process_windows(self.hwnd) if popup else [self.hwnd]):
+            window = Desktop(backend="uia").window(handle=hwnd).wrapper_object()
+            for info in browser_chrome(window.element_info):
+                if info.control_type != control_type:
+                    continue
+                text = info.class_name if by_class else info.name
+                if matcher.match(text or "") or (self.target == "address" and (info.automation_id or "") == "urlbar-input"):
+                    r = info.rectangle
+                    # Toolbar controls sit in the top band of the window; menu items can be anywhere in the menu.
+                    if r.width() > 0 and (popup or r.top - top < 220) and info.visible and self.on_current_tab(UIAWrapper(info)):
+                        if self.target != "zoom":
+                            return r.left, r.top, r.right, r.bottom
+                        matches.append((r.left, r.top, r.right, r.bottom))
+        if matches:  # the zoom row: one ring around both the minus and the plus
+            return min(m[0] for m in matches), min(m[1] for m in matches), max(m[2] for m in matches), max(m[3] for m in matches)
         return None
 
     def on_current_tab(self, control):
@@ -214,7 +246,7 @@ class Highlighter(QObject):
         """Look up every control an answer mentions as soon as it arrives, so pointing is instant when read."""
         for step in steps:
             target = self.target(step, hwnd)
-            if target:
+            if target and target not in POPUP_TARGETS:
                 self.locate(hwnd, target)
 
     def point(self, step, hwnd):
@@ -224,7 +256,7 @@ class Highlighter(QObject):
             return
         key = (hwnd, target)
         self.wanted = key
-        if key in self.cache:
+        if key in self.cache and target not in POPUP_TARGETS:
             self.show(target, self.cache[key], hwnd)
         else:
             self.locate(hwnd, target)
@@ -242,7 +274,8 @@ class Highlighter(QObject):
 
     def located(self, key, rect):
         self.pending.discard(key)
-        self.cache[key] = rect
+        if key[1] not in POPUP_TARGETS:
+            self.cache[key] = rect
         if self.wanted == key:
             self.show(key[1], rect, key[0])
 
@@ -258,6 +291,10 @@ class Highlighter(QObject):
                 self.overlay.show_callout(to_logical(window_rect(hwnd)), side, text)
             except (AttributeError, OSError):
                 self.overlay.hide()
+
+    @property
+    def current_target(self):
+        return self.wanted[1] if self.wanted else None
 
     def clear(self):
         self.wanted = None

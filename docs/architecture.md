@@ -42,6 +42,7 @@ search URL rather than typing into a page-specific search field.
 | companion_asset.py | The companion's SVG and size, kept apart so the design can be swapped |
 | ripple.py | Click ripple windows |
 | morph.py | Orb clamping and card placement beside the orb; overshoot easing |
+| walkthrough.py | Multi-step guidance: read a step, wait for the browser to show it done, advance or step back |
 | highlighter.py | Rings the browser's real toolbar control through UI Automation, or shows an edge callout |
 | voice.py | Microphone capture with end-of-speech detection and on-device Whisper; audio stays in memory |
 

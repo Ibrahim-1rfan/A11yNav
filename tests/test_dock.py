@@ -178,7 +178,7 @@ def dock_setup(monkeypatch):
     dock = window.dock
     dock.tts = FakeTTS()
     listeners, monitors, captions, focused = [], [], [], []
-    dock.voice_factory = lambda: listeners[-1] if listeners and not listeners[-1].isRunning() and not listeners[-1].isFinished() else listeners.append(FakeListener("how do I make the text bigger")) or listeners[-1]
+    dock.voice_factory = lambda: listeners[-1] if listeners and not listeners[-1].isRunning() and not listeners[-1].isFinished() else listeners.append(FakeListener("how do I make the text bigger in firefox")) or listeners[-1]
     dock.monitor_factory = lambda: monitors.append(FakeMonitor()) or monitors[-1]
     dock.answer_factory = lambda: build_assistant(Settings())
     pointed = []
@@ -204,9 +204,9 @@ def test_hotkey_listens_captions_thinks_and_reads_each_step(dock_setup):
     assert "Got it, finding the answer..." in s.captions           # thinking, triggered by end of speech
     call = dock.tts.calls[-1]
     assert call.lines[0] == "Here's how to make pages and text bigger."
-    assert "Control and Plus" in call.lines[1] and "+" not in call.lines[1] and "Ctrl" not in call.lines[1]
+    assert "Control" in call.lines[1] and "Plus" in call.lines[1] and "+" not in call.lines[1] and "Ctrl" not in call.lines[1]
     assert len(dock.card.step_labels) <= 3 and len(call.lines) == len(dock.card.step_labels) + 1
-    assert dock.answer.apps == ("chrome",)                        # the browser the hotkey was pressed in
+    assert dock.answer.apps == ("firefox",)                       # a browser named in the question wins
     assert dock.orb.accessibleName() == "Stop reading" and s.monitors and s.monitors[-1].isRunning()  # barge-in armed
     call.line(1)
     assert dock.card.step_labels[0].property("active") == "true"
@@ -307,10 +307,12 @@ def test_text_sizes_meet_the_minimums(dock_setup):
 
 def test_steps_that_mention_the_menu_point_at_it_while_read(dock_setup):
     s = dock_setup
+    s.listeners.append(FakeListener("how do I open my extensions"))
     s.window.summon()
     assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
     steps = s.dock.card.visible_steps
-    menu = next(i for i, step in enumerate(steps) if target_for(step) == "menu")  # Chrome step 3: "select More (the three dots..."
+    menu = next(i for i, step in enumerate(steps) if target_for(step) == "menu")  # Chrome step 2: "select More (the three dots..."
+    assert s.dock.walk is None                                     # alternatives, not a sequence: read, not walked
     s.dock.tts.calls[-1].line(menu + 1)
     assert s.pointed[-1] == (steps[menu], 12345)
     s.dock.escape(); s.dock.escape()
