@@ -110,6 +110,7 @@ class ControlLocator(QThread):
         super().__init__()
         self.hwnd, self.target = hwnd, target
         self.kind = "control"  # or "row": only the menu row was found, not the exact buttons
+        self.info = None       # the matched UI Automation element, so an action can press it
 
     def run(self):
         import sys
@@ -149,6 +150,7 @@ class ControlLocator(QThread):
                     # Toolbar controls sit in the top band of the window; menu items can be anywhere in the menu.
                     if r.width() > 0 and (popup or r.top - top < 220) and info.visible and self.on_current_tab(UIAWrapper(info)):
                         if self.target != "zoom":
+                            self.info = info
                             return r.left, r.top, r.right, r.bottom
                         matches.append((r.left, r.top, r.right, r.bottom))
         if matches:  # the zoom row: one ring around both the minus and the plus

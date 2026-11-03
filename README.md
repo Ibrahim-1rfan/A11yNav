@@ -52,6 +52,12 @@ the reading-mode button), the companion flies out of the orb and
 points at the real control while that step is read, with a ring around it. If the control cannot be found, an
 arrow at the screen edge shows where it is. Klicky never moves your own mouse pointer.
 
+- **Ask Klicky to do it**: "open a new tab for me", "refresh it", "zoom in", "go back", "close this tab", "reopen the
+  tab", "bookmark this page", "open my history", "open settings", "open my extensions". The companion flies to the
+  real button and clicks it; Klicky presses that exact button through Windows accessibility (your pointer never moves)
+  and falls back to the browser's own shortcut. Zoom uses Ctrl+Plus/Minus/0. Only this fixed list can run, only as a
+  short single request in the browser you were using; anything else, or "how do I…", gets guidance instead. Turn it off
+  in Settings → "Let Klicky do simple browser tasks when I ask".
 - **Guided walkthroughs** for tasks that go through a menu, such as zooming or opening Settings: Klicky reads one
   step, points at its control and waits ("Your turn"). Click the control it points at and Klicky moves straight on
   (opening the menu with Alt+F also counts), pointing inside the menu, for example at the zoom minus and plus. A click on the last control finishes ("That's it"). If the

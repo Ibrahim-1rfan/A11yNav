@@ -169,6 +169,17 @@ class Companion(QWidget):
         self.scale = 1.0
         self.timer.setInterval(self.frame_ms())
 
+    def press(self):
+        """Show a click on the control it is pointing at (squish and ripple); the real press happens separately."""
+        if self.guiding is None:
+            return
+        if not self.reduced:
+            self.squish_started = self.clock
+            if self.settings().click_ripple:
+                from .ripple import Ripple
+                Ripple(QPoint(round(self.guiding.x()), round(self.guiding.y())))
+        self.timer.setInterval(self.frame_ms())
+
     def stop_guide(self):
         if self.guiding is not None:
             self.guiding = None

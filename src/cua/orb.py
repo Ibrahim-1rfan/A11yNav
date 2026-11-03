@@ -10,7 +10,7 @@ from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QPushButton
 
 TEAL, TEAL_DARK, RING = "#1D9E75", "#0F6E56", "#9FE1CB"
-ICONS = {"idle": "mic", "listening": "mic", "typing": "mic", "done": "mic", "error": "mic", "thinking": "sparkle", "speaking": "speaker"}
+ICONS = {"idle": "mic", "listening": "mic", "typing": "mic", "done": "mic", "error": "mic", "thinking": "sparkle", "acting": "sparkle", "speaking": "speaker"}
 
 
 def reduced_motion():
@@ -78,7 +78,7 @@ class Orb(QPushButton):
             self.level += (self.target - self.level) * .25
             l = self.level
             self.scales = (1 + l * .12, 1 + l * .45, 1 + l * .85)
-        elif self.mode == "thinking":
+        elif self.mode in ("thinking", "acting"):
             p = (1 - math.cos(2 * math.pi * t / 2.8)) / 2  # slow, steady breathing; not voice-driven
             self.scales = (1 + p * .05, 1 + p * .18, 1 + p * .3)
         elif self.mode == "speaking":
@@ -101,7 +101,7 @@ class Orb(QPushButton):
             ring.setAlphaF(alpha)
             painter.setBrush(ring)
             painter.drawEllipse(center, radius * scale, radius * scale)
-        painter.setBrush(QColor(TEAL_DARK if self.mode == "thinking" else TEAL))
+        painter.setBrush(QColor(TEAL_DARK if self.mode in ("thinking", "acting") else TEAL))
         painter.drawEllipse(center, radius * orb, radius * orb)
         if self.hasFocus():
             painter.setBrush(Qt.BrushStyle.NoBrush)

@@ -3,8 +3,8 @@
 idle -> listening -> thinking -> speaking -> done, with error and typing as side states. Events that are not
 valid in the current state are ignored, so a late microphone or model result can never jump the dock around.
 """
-IDLE, LISTENING, TYPING, THINKING, SPEAKING, WAITING, DONE, ERROR, CLOSED = (
-    "idle", "listening", "typing", "thinking", "speaking", "waiting", "done", "error", "closed")
+IDLE, LISTENING, TYPING, THINKING, SPEAKING, WAITING, ACTING, DONE, ERROR, CLOSED = (
+    "idle", "listening", "typing", "thinking", "speaking", "waiting", "acting", "done", "error", "closed")
 
 TRANSITIONS = {
     (IDLE, "start"): LISTENING, (DONE, "start"): LISTENING, (ERROR, "start"): LISTENING, (TYPING, "start"): LISTENING,
@@ -14,6 +14,8 @@ TRANSITIONS = {
     (TYPING, "submit"): THINKING,
     (THINKING, "answer_read"): SPEAKING,     # auto read-aloud on
     (THINKING, "answer_quiet"): DONE,        # read-aloud off, or a screen reader will read it
+    (THINKING, "act"): ACTING,               # "open a new tab for me": Klicky does it
+    (ACTING, "acted"): DONE, (ACTING, "fail"): ERROR, (ACTING, "cancel"): CLOSED, (ACTING, "close"): CLOSED,
     (SPEAKING, "finished"): DONE,
     (SPEAKING, "stop"): DONE,                # Esc or orb click while reading
     (SPEAKING, "barge_in"): LISTENING,       # the user started talking over the answer
@@ -35,13 +37,14 @@ CAPTIONS = {
     THINKING: "Got it, finding the answer...",
     SPEAKING: "",
     WAITING: "",
+    ACTING: "",
     DONE: "",
     ERROR: "Couldn't hear that. Tap the orb to try again.",
 }
 
 ORB_LABELS = {
     IDLE: "Start listening", LISTENING: "Stop listening", TYPING: "Start listening", THINKING: "Finding the answer",
-    SPEAKING: "Stop reading", WAITING: "Stop guiding", DONE: "Ask another question", ERROR: "Try again", CLOSED: "Start listening",
+    SPEAKING: "Stop reading", WAITING: "Stop guiding", ACTING: "Doing it", DONE: "Ask another question", ERROR: "Try again", CLOSED: "Start listening",
 }
 
 

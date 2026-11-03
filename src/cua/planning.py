@@ -41,6 +41,44 @@ class HelpQuestion:
 HELP_START = re.compile(r"\s*(?:please\s+)?(?:how\s+(?:do|can|to|would|should)\b|how\b|where\s+(?:is|are|do|can)\b|what\s+(?:is|are|does)\b|help\s+me\b|can\s+you\s+(?:show|tell|explain)\b|show\s+me\s+how\b|i\s+(?:can't|cannot|can not|want\s+to|need\s+to)\b|is\s+there\s+a\s+way\b)", re.I)
 
 
+@dataclass(frozen=True)
+class BrowserAction:
+    """One of a fixed set of simple browser actions Klicky may do for the person."""
+    action: str
+
+
+# Spoken or typed requests, e.g. "open a new tab for me", "refresh it", "zoom in please". The whole request must be
+# one short command: anything compound ("... and then ...") or unknown is never acted on.
+ACTION_PATTERNS = [
+    ("newtab", r"(?:open|make|start|add|give me)\s+(?:a\s+|another\s+)?new\s+(?:tab|page)|new\s+tab"),
+    ("reopen", r"re-?open\s+(?:the\s+|that\s+|my\s+)?(?:closed\s+|last\s+)?(?:tab|page)|bring\s+(?:it|the\s+tab|that\s+tab)\s+back|undo\s+close"),
+    ("closetab", r"(?:close|cancel|shut)\s+(?:this|the|that|my|current)?\s*(?:tab|page)"),
+    ("refresh", r"refresh|reload"),
+    ("back", r"go\s+back(?:\s+(?:a|one)\s+page)?|back\s+(?:a\s+|one\s+)?page|previous\s+page"),
+    ("forward", r"go\s+forward(?:\s+(?:a|one)\s+page)?|forward\s+(?:a\s+|one\s+)?page|next\s+page"),
+    ("zoomreset", r"reset\s+(?:the\s+)?zoom|(?:normal|actual|original)\s+size|zoom\s+(?:back\s+)?to\s+(?:normal|100)"),
+    ("zoomin", r"zoom\s+in|(?:make|making)\s+(?:it|the\s+\w+|everything|this|things)?\s*(?:bigger|larger)|bigger|enlarge"),
+    ("zoomout", r"zoom\s+out|(?:make|making)\s+(?:it|the\s+\w+|everything|this|things)?\s*smaller|smaller"),
+    ("bookmark", r"(?:bookmark|favou?rite|save)\s+(?:this|the|that)\s+(?:page|site|tab)|add\s+(?:this|it|the\s+page)\s+to\s+(?:my\s+)?(?:favou?rites|bookmarks)"),
+    ("history", r"(?:open|show)\s+(?:me\s+)?(?:my\s+|the\s+)?history"),
+    ("settings", r"(?:open|show)\s+(?:me\s+)?(?:the\s+|my\s+)?(?:browser\s+)?settings"),
+    ("extensions", r"(?:open|show)\s+(?:me\s+)?(?:my\s+|the\s+)?(?:extensions|add-?ons)"),
+]
+COURTESY = r"(?:(?:hey\s+)?klicky[,\s]+)?(?:please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|will\s+you\s+|just\s+)*"
+TAIL = r"(?:\s+(?:the\s+)?(?:page|screen|it|this|browser|tab))?(?:\s+for\s+me)?(?:\s+please)?[\s.!?]*"
+
+
+def parse_action(text: str):
+    """A short command naming exactly one allowed action, or None."""
+    words = " ".join(text.lower().split())
+    if not words or len(words) > 80 or re.search(r"\b(?:and|then|also|after)\b", words):
+        return None
+    for name, pattern in ACTION_PATTERNS:
+        if re.fullmatch(rf"\s*{COURTESY}(?:{pattern}){TAIL}", words):
+            return BrowserAction(name)
+    return None
+
+
 def route(text: str, engine: str):
     """Deterministic routing; no model decides which capability runs."""
     try:
@@ -48,6 +86,10 @@ def route(text: str, engine: str):
     except UserError:
         pass
     question = " ".join(text.split())
+    if not HELP_START.match(question):
+        action = parse_action(question)
+        if action:
+            return action
     if HELP_START.match(question) or question.endswith("?"):
         if not 3 <= len(question) <= 500:
             raise UserError("Ask one question of up to 500 characters.")

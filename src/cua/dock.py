@@ -11,8 +11,8 @@ from PySide6.QtGui import QCursor, QFont, QFontMetrics, QGuiApplication, QKeySeq
 from PySide6.QtWidgets import QLabel, QLineEdit, QVBoxLayout, QWidget
 from .answer_card import AnswerCard
 from .config import UserError
-from .dockstate import (CAPTIONS, CLOSED, DONE, ERROR, IDLE, LISTENING, ORB_LABELS, SPEAKING, THINKING, TYPING,
-                        WAITING, DockState)
+from .dockstate import (ACTING, CAPTIONS, CLOSED, DONE, ERROR, IDLE, LISTENING, ORB_LABELS, SPEAKING, THINKING,
+                        TYPING, WAITING, DockState)
 from .highlighter import Highlighter
 from .morph import orb_center, overshoot, panel_rect
 from .orb import Orb
@@ -98,6 +98,12 @@ class Dock(QWidget):
         self.answer, self.colors, self.answered = None, LIGHT, False
         self.walk, self.pointed_rect = None, None
         self.probe_factory = None  # tests inject a fake control lookup for walkthroughs
+        self.action_factory = None  # tests inject a fake action runner
+        self.actor = None
+        self.asked_by_voice = False
+        self.auto_close = QTimer(self)
+        self.auto_close.setSingleShot(True)
+        self.auto_close.timeout.connect(lambda: self.state == DONE and self.answer is None and self.close_dock())
         self.voice_factory = self.monitor_factory = self.answer_factory = None  # tests inject fakes here
         self.tts = ReadAloud()
         self.highlighter = Highlighter(self.guide_companion)
@@ -357,6 +363,7 @@ class Dock(QWidget):
         if self.state != THINKING:
             return
         self.set_caption(f"“{text}”  Finding the answer...")
+        self.asked_by_voice = True
         self.route(text, spoken_question=True)
 
     # ---- typing fallback -----------------------------------------------------------------------------------
@@ -392,11 +399,16 @@ class Dock(QWidget):
             self.set_caption(str(exc))
             return
         self.machine.fire("submit")
+        self.asked_by_voice = False
         self.route(text, spoken_question=False)
 
     # ---- answering -----------------------------------------------------------------------------------------
     def route(self, text, spoken_question):
-        from .planning import parse_task
+        from .planning import HELP_START, parse_action, parse_task
+        action = parse_action(text) if self.settings.actions and self.return_hwnd and not HELP_START.match(text) else None
+        if action:
+            self.act(action.action)
+            return
         try:
             parse_task(text, self.settings.engine)
             is_search = True
@@ -418,6 +430,48 @@ class Dock(QWidget):
         self.worker.answered.connect(self.on_answer)
         self.worker.status.connect(lambda state, message: self.on_fail(message) if state == "error" and not self.answered else None)
         self.worker.start()
+
+    # ---- doing it for the person -----------------------------------------------------------------------
+    def act(self, action):
+        """Do one allowed browser action: the companion flies to the button and Klicky presses it."""
+        from .browser_actions import SPECS, ActionWorker
+        if not self.machine.fire("act"):
+            return
+        self.answer = None
+        self.card.hide()
+        self.set_caption(SPECS[action]["doing"] + "...")
+        factory = self.action_factory or ActionWorker
+        self.actor = factory(self.return_hwnd, action, self.context_app)
+        self.actor.located.connect(self.on_action_located)
+        self.actor.pressing.connect(self.on_action_pressing)
+        self.actor.done.connect(self.on_action_done)
+        self.actor.failed.connect(self.on_fail)
+        self.actor.start()
+
+    def on_action_located(self, rect):
+        if rect is None or self.state != ACTING:
+            return
+        from .highlighter import to_logical
+        logical = to_logical(rect)
+        overlay = getattr(self.highlighter, "overlay", None)
+        if overlay is not None:
+            overlay.show_ring(logical, "")
+        self.guide_companion(logical)
+
+    def on_action_pressing(self):
+        companion = getattr(self.owner, "companion", None)
+        if companion is not None and self.state == ACTING:
+            companion.press()
+
+    def on_action_done(self, message):
+        if self.state != ACTING:
+            return
+        self.machine.fire("acted")
+        self.set_caption(message)
+        if self.settings.read_aloud or self.asked_by_voice:
+            self.speak([message])
+        QTimer.singleShot(900, self.quiet)  # the ring and the companion stay a moment on what was pressed
+        self.auto_close.start(4000)        # then Klicky gets out of the way
 
     def on_answer(self, answer):
         if self.state != THINKING:
@@ -552,10 +606,12 @@ class Dock(QWidget):
             self.stop_reading()
 
     def escape(self):
-        if self.state in (LISTENING, THINKING):
+        if self.state in (LISTENING, THINKING, ACTING):
             self.stop_listener()
             if self.worker and self.worker.isRunning():
                 self.worker.stop_event.set()
+            if self.actor and self.actor.isRunning():
+                self.actor.stop_event.set()
             self.machine.fire("cancel")
         elif self.state in (SPEAKING, WAITING):
             self.stop_reading()
@@ -576,7 +632,7 @@ class Dock(QWidget):
             self.set_caption(message if "orb" in message or "type" in message.lower() else f"{message} Tap the orb to try again.")
 
     def close_dock(self):
-        if self.state in (LISTENING, THINKING):
+        if self.state in (LISTENING, THINKING, ACTING):
             self.machine.fire("cancel")
         elif self.state != CLOSED:
             self.machine.fire("close")

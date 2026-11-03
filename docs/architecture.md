@@ -42,6 +42,7 @@ search URL rather than typing into a page-specific search field.
 | companion_asset.py | The companion's SVG and size, kept apart so the design can be swapped |
 | ripple.py | Click ripple windows |
 | morph.py | Orb clamping and card placement beside the orb; overshoot easing |
+| browser_actions.py | Fixed list of browser actions done on request: press the real button via UI Automation, else the browser shortcut |
 | walkthrough.py | Multi-step guidance: read a step, wait for the browser to show it done, advance or step back |
 | highlighter.py | Rings the browser's real toolbar control through UI Automation, or shows an edge callout |
 | voice.py | Microphone capture with end-of-speech detection and on-device Whisper; audio stays in memory |
@@ -92,6 +93,13 @@ grounded. No motion is used. It remains operable while model inference runs on a
 Qt UI changes are delivered by queued signals; native Windows COM use is initialized in the task thread.
 
 ## Safety and privacy
+
+Browser actions on request are a second, separately bounded capability: a deterministic grammar maps one short
+command to one entry in `browser_actions.SPECS` (new tab, refresh, back, forward, zoom, close/reopen tab, history,
+bookmark, settings, extensions). Each presses that browser button through UI Automation or sends that browser's
+shortcut to the window the person was using. No model output selects or shapes an action; compound or unknown
+requests are never acted on.
+
 
 Only browser search is authorized. Out-of-scope actions are rejected, including sensitive actions that
 would require confirmation in a future broader agent. There is no hidden confirmation bypass.

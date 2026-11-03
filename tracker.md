@@ -199,3 +199,14 @@
   recognising the open menu remains a backup for keyboard users. "The menu closed" only counts after the menu was seen,
   so unrecognised menus no longer cause false step-backs; with no control found, any click outside Klicky completes
   the step. If the zoom buttons are unnamed, the whole Zoom row is ringed. Tests: 217 passed.
+
+## 3 November 2026 — Klicky does simple browser tasks on request
+
+- "Open a new tab for me", "refresh it", "zoom in", "go back", "close this tab", "reopen the tab", "bookmark this page",
+  "open my history/settings/extensions": a deterministic grammar maps one short request to one fixed action; questions
+  ("how do I...") and anything compound or unknown get guidance instead. A new "acting" state shows "Opening a new tab...".
+- Toolbar actions locate the real button, the companion flies to it and shows a click, and Klicky presses that
+  button through UI Automation's Invoke (the pointer is never moved); if it cannot, the browser shortcut is sent to
+  the browser window after bringing it forward. Zoom uses Ctrl+=/-/0; settings and extensions open the browser's own
+  page in a new tab through the verified address-bar path. Setting "actions" turns this off.
+- Not run live in the person's browser by the developer; tests use fake buttons and keys. Tests: 251 passed.

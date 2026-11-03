@@ -44,6 +44,7 @@ class Settings:
     companion: bool = True
     companion_speed: str = "normal"
     click_ripple: bool = True
+    actions: bool = True  # let Klicky do simple browser tasks when asked ("open a new tab for me")
 
     def validate(self):
         u = urlsplit(self.endpoint)
@@ -79,7 +80,7 @@ class Settings:
             raise UserError("Invalid shortcut setting.")
         if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
             raise UserError("Invalid voice setting.")
-        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple")):
+        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions")):
             raise UserError("Invalid read-aloud setting.")
         if self.companion_speed not in {"gentle", "normal", "snappy"}:
             raise UserError("Invalid companion speed.")
