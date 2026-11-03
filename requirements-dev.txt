@@ -1,3 +1,4 @@
+# Running the tests and building Klicky.exe
 -r requirements.txt
 pytest>=8,<10
 pyinstaller>=6,<7

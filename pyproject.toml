@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "klicky-cua"
 version = "0.1.0"
-description = "A bounded local-first accessible browser-search assistant"
+description = "Klicky: an accessible AI teacher that guides students through the IBA LMS and web browsers"
 requires-python = ">=3.10"
 dynamic = ["dependencies"]
 

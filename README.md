@@ -1,269 +1,409 @@
 # Klicky
 
-A local-first Windows assistant for accessible browser search, inspired by the supplied
-Klicky HCI research pitch. This is an initial assisted-search prototype, not a general desktop agent.
+Klicky is an accessible "AI teacher" for Windows. It sits quietly next to your browser and, when you ask
+("how do I submit my assignment?"), it answers out loud and **shows you where to click, one step at a time**:
+a small companion pointer flies to the real link or button on the page and waits for you to click it.
 
-## Start here
+It is built for the **IBA LMS** (Sakai, `lms.iba.edu.pk`) and for everyday tasks in **Edge, Chrome and Firefox**.
+Every answer comes from a checked guide (a RAG knowledge base), so it doesn't make things up, and each answer
+says where its steps came from.
 
-**Packaged app:** open `dist/Klicky/Klicky.exe`. Keep the entire `dist/Klicky` folder together.
-The model is **not** bundled. First-run Settings explains how to connect it.
+Klicky never moves your own mouse and never clicks or types inside a web page for you. It points, you click.
 
-**From source:** install 64-bit Python 3.10 or later, double-click `scripts/setup.bat` once,
-then double-click `scripts/run.bat`. Setup downloads Python packages, not model weights.
-`requirements-lock.txt` records the exact versions used for testing; teammates can install it
-instead of the version-range requirements when reproducing the environment.
+---
 
-Run `scripts/create_shortcut.bat` to create a desktop shortcut. To pin the packaged app,
-open it, right-click its taskbar icon and choose **Pin to taskbar** (Windows may place this
-under **Show more options**). The small Klicky widget stays available while the main window is hidden.
-Close the main window to exit; closing it during a task first requests Stop.
+## Contents
+
+1. [What it does](#what-it-does)
+2. [Quick start](#quick-start)
+3. [Requirements](#requirements)
+4. [Models and services](#models-and-services)
+5. [API keys (optional)](#api-keys-optional)
+6. [Using Klicky](#using-klicky)
+7. [How it works](#how-it-works)
+8. [Access profiles](#access-profiles)
+9. [Settings](#settings)
+10. [Privacy and safety](#privacy-and-safety)
+11. [Project layout](#project-layout)
+12. [Adding guides](#adding-guides)
+13. [Testing and building](#testing-and-building)
+14. [Troubleshooting](#troubleshooting)
+15. [Known limits](#known-limits)
+
+---
 
 ## What it does
 
-- Accepts requests such as `Open my browser and search for accessible computer interfaces`.
-- Checks the local model, finds/opens a browser and uses a separate search tab.
-- Sends browser-window screenshots to a local vision-language model, one step at a time.
-- Accepts only the exact safe action required by the current search stage.
-- Uses the address bar with an encoded search URL, so multilingual topics work without clipboard access.
-- Checks focus and address values after actions; requires visual model confirmation plus the matching search URL before reporting success.
-- Provides large adjustable text, a persistent status ring with words, Stop, and optional local spoken feedback.
+- **Ask from anywhere.** Press **Win+Shift+K** (or Ctrl+Alt+F9 if another app owns that shortcut). A teal orb
+  appears by your pointer and listens. Speak your question, or just start typing.
+- **Guided LMS walkthroughs.** For course tasks (course outline, resources, assignments, quizzes, Drop Box,
+  announcements, calendar…) Klicky asks **"Which course?"**, unless you're already inside one, and then points
+  at each link or button in turn, waiting for your click before moving on.
+- **Browser how-tos.** Zoom and text size, reading mode, read aloud, dark mode, captions, caret browsing, find on
+  page, tabs, bookmarks, history, extensions, settings and more, for Edge, Chrome and Firefox. Each one cites the
+  official help page it was checked against.
+- **Simple browser actions on request.** "Open a new tab", "refresh it", "zoom in", "go back", "close this tab",
+  "bookmark this page", "open my history". Klicky presses that one browser button and nothing else.
+- **Natural voice.** Answers are read aloud with a neural voice (Andrew, Ava and others), each step highlighted as
+  it's spoken. Talk over it to interrupt and ask again.
+- **Access profiles** for low vision, cognitive and learning needs, and motor and dexterity needs.
+- **Web search agent** (the original prototype): "search for accessible interfaces" opens a search tab, driven
+  step by step by a local vision model under a strict action policy.
 
-It does not browse result links, fill forms, log in, send messages, make purchases, delete files,
-change system settings, run model-written code or handle arbitrary desktop tasks. Those actions
-are blocked rather than offered through a confirmation dialog. `click`, `double_click` and
-`scroll` can be parsed/validated for future adapters but are **not enabled in the demo executor**.
+---
 
-The ring stays in the widget because this workflow uses keyboard/native address controls and
-does not have a visually grounded click target. It does not pretend to point at a detected control.
-There are no animations, satisfying reduced-motion use without another setting.
+## Quick start
 
-## Ask from any app (global shortcut)
+You need Windows 10 or 11 (64-bit) and **Python 3.10 to 3.13** from [python.org](https://www.python.org/downloads/).
+Tick "Add python.exe to PATH" when installing.
 
-Klicky runs in the background with a "K" icon in the system tray. Over Chrome, Edge or Firefox a small teal
-**companion** pointer trails your mouse, down and to the right so it never covers what you point at. It dims after
-4 seconds without movement and hides while you type, in fullscreen, and outside the browser. Clicks still go to
-the page as normal; the companion just squishes and a small ripple marks the click. Press **Win+Shift+K** and the
-companion turns into a teal **orb** right where it was, with the answer card opening beside it, and starts
-listening; the browser stays visible and usable. Its rings follow your voice and captions show what it hears.
-Pause, and the orb "breathes" while it finds the answer. A short card appears with up to three steps and is
-**read aloud**, each step highlighted as it is spoken. When a step mentions a browser control (the New tab plus
-sign, Back, Refresh, the current tab's X, Extensions, your profile picture, the menu, the address bar, the star or
-the reading-mode button), the companion flies out of the orb and
-points at the real control while that step is read, with a ring around it. If the control cannot be found, an
-arrow at the screen edge shows where it is. Klicky never moves your own mouse pointer.
+### Option A: double-click
 
-- **Ask Klicky to do it**: "open a new tab for me", "refresh it", "zoom in", "go back", "close this tab", "reopen the
-  tab", "bookmark this page", "open my history", "open settings", "open my extensions". The companion flies to the
-  real button and clicks it; Klicky presses that exact button through Windows accessibility (your pointer never moves)
-  and falls back to the browser's own shortcut. Zoom uses Ctrl+Plus/Minus/0. Only this fixed list can run, only as a
-  short single request in the browser you were using; anything else, or "how do I…", gets guidance instead. Turn it off
-  in Settings → "Let Klicky do simple browser tasks when I ask".
-- **Guided walkthroughs** for tasks that go through a menu, such as zooming or opening Settings: Klicky reads one
-  step, points at its control and waits ("Your turn"). Click the control it points at and Klicky moves straight on
-  (opening the menu with Alt+F also counts), pointing inside the menu, for example at the zoom minus and plus. A click on the last control finishes ("That's it"). If the
-  menu closes early, Klicky asks you to open it again; after 20 s it gives one reminder. Clicks in the browser do not
-  close Klicky while it guides, and it moves aside if it would cover the control. The orb or Esc stops guiding.
-- **Talk over the answer** to stop it and ask again. **Esc** or clicking the orb stops reading; Esc again closes.
-- The card shows the first three steps of the guide. Reading speed and voice are in Settings.
-- Start typing at any time to switch to a text box. Without a microphone, typing takes over automatically.
-- Answers are for the browser that was in front unless your question names another one. "Search for …" runs
-  the search agent.
-- The tray menu has Ask, Open window, Settings and **Quit**. If another app owns Win+Shift+K, Klicky uses
-  Ctrl+Alt+F9. Settings has the shortcut, voice listening, **Read answers aloud**, reading voice and speed,
-  barge-in, and "let my screen reader read answers instead".
-- Windows "Show animations" off means no pulsing, scaling, lag, ripple or overshoot; state is shown by colour, icon and caption.
-- Settings: "Show Klicky companion", follow speed (Gentle, Normal, Snappy) and "Click ripple". With the companion off,
-  the hotkey opens the orb at the pointer. Clicking outside Klicky closes the orb; the companion comes back at the pointer.
+1. Double-click **`scripts\setup.bat`**. It creates `.venv` and installs everything in `requirements-dev.txt`.
+2. Double-click **`scripts\get_speech_model.bat`** once, to download the speech model (about 145 MB) for voice
+   questions. You can skip this and type your questions instead.
+3. Double-click **`scripts\run.bat`**. A "K" icon appears in the system tray.
+4. Open the LMS in Chrome or Edge, press **Win+Shift+K** and ask: *"How do I open the course outline?"*
 
-Demo: `launch.pyw --smoke-popup dock.png` opens the dock, answers a typed sample question silently and saves a
-screenshot of the dock.
+### Option B: terminal
 
-## Voice questions
+```powershell
+git clone https://github.com/Ibrahim-1rfan/A11yNav.git
+cd A11yNav
+git checkout azhab-dev
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts\get_speech_model.py          # optional: voice questions (145 MB)
+.\.venv\Scripts\pythonw.exe launch.pyw
+```
 
-When the Ask popup opens, Klicky beeps and starts listening. Say your question, for example "how do I make
-the text bigger", and pause: Klicky stops listening by itself, shows what it heard, finds the guide and reads
-the answer aloud. Start typing at any time to switch to the keyboard. **Speak**/**Stop** toggles the microphone;
-the first Escape stops listening or speaking, the next closes the popup.
+To reproduce the exact tested environment, install `requirements-lock.txt` instead of `requirements.txt`.
 
-- Speech recognition is local Whisper (faster-whisper, English `base.en` model, about 145 MB). Audio stays in
-  memory on this PC; it is never saved or sent anywhere. The model loads in the background when Klicky starts.
-- Install the model once with `scripts/get_speech_model.bat` (Klicky never downloads models by itself). Without it,
-  the popup works by typing and says how to enable voice.
-- Answers to spoken questions are read aloud even when Spoken feedback is off.
-- Turn listening off in Settings → "Start listening when the Ask popup opens". Windows must allow desktop apps to
-  use the microphone (Settings → Privacy → Microphone).
-- Checked on this PC with spoken test audio: four questions transcribed word for word in about one second each
-  after the model loaded, each matched to the right guide. Accuracy with your own voice and room still needs trying.
+That's all for the core features: guides, LMS walkthroughs, voice and the natural voice need **no AI model
+download and no API key**. The optional extras are below.
 
-## Ask how to do something (browser guides)
-
-Type a question instead of a search, for example `How do I make text bigger in Edge?` or
-`How can Chrome read this page aloud?`. A deterministic router sends "search for …" requests to the
-search agent and questions ("how do I…", "where is…", "I can't…", or anything ending in `?`) to the guide assistant.
-
-- Answers come only from the checked guides in `knowledge/browsers/` (everyday toolbar tasks: back, refresh, closing
-  the tab you are on, new tab, extensions, adding a favourite or bookmark, your profile and settings; plus zoom and text size, reading mode,
-  read aloud, dark mode and contrast, captions, caret browsing, find on page, tabs, bookmarks, history) for
-  Edge, Chrome and Firefox. Each guide cites the official help page it was checked against.
-- Students on the **IBA LMS** (Sakai, `lms.iba.edu.pk`) get guides from `knowledge/lms/`: course outline (Syllabus),
-  calendar, announcements, lectures in Resources, viewing and submitting an assignment, tests and quizzes, uploading to
-  the Drop Box, adding a course to the top bar, and notifications. Each step was taken from a recorded student
-  walkthrough, and the card says where (for example "IBA LMS student walkthrough video, 3:40 to 4:51"). When the hotkey
-  is pressed on an LMS page (recognised from the browser's title), or the question says "LMS", these guides rank first;
-  browser questions such as zoom still get the browser guide. The companion does not point for LMS answers yet, since
-  it only finds the browser's own buttons.
-- **Guided LMS tasks.** On the LMS, course tasks ask "Which course?" and then point at each link or button in turn,
-  waiting for your click. Controls are found by name in the page's accessibility tree (the structure screen readers
-  use), so colours, dark mode and text size don't matter. When a name can't be found (a narrow layout that folds the
-  menu away, a renamed button), Klicky looks at a screenshot of the browser window with a vision model
-  (Settings → Finding buttons by looking): UI-TARS-1.5-7B hosted by OpenRouter (`OPENROUTER_API_KEY`) or Hugging Face
-  (`HF_TOKEN`), Claude (`claude-haiku-5-5`, `ANTHROPIC_API_KEY`), or a local model in LM Studio. Hosted backends receive
-  a screenshot of the browser window; the local one keeps it on this PC. "Auto" uses the first with a key set. The guide still
-  decides every step; the vision model only says where the control is, and can say "it's inside this menu".
-- **Natural voice.** Answers are read with Microsoft Edge's neural voices (Settings → Voice type: Natural; default Ava).
-  This is online: the text read is sent to Microsoft. Common lines are cached on disk so they start at once; offline,
-  Klicky falls back to the Windows voice.
-- Retrieval runs locally: keyword ranking always works, and an optional LM Studio **embedding model**
-  (Settings → Embedding model) adds semantic matching, fused with reciprocal rank fusion. Vectors are cached
-  under `%LOCALAPPDATA%/Klicky/index/`.
-- An optional local **answer model** (Settings → Answer model, for example a small instruct model such as
-  Qwen2.5-3B-Instruct) rewrites the guide in your profile's style. Every step must cite a provided guide;
-  otherwise Klicky shows the guide as written. With no answer model, the guide is shown as written.
-- Questions with no matching guide get "I don't have a guide for that yet" rather than a made-up answer.
-- The guide assistant only shows text. It never presses keys or controls the browser.
-
-New platforms can be added later as `knowledge/<platform>/*.md` files with the same front matter
-(`title`, `keywords`, `sources` and/or `evidence`) and one `## <app>` section per application.
-
-## Access profiles
-
-Choose a profile from the main window or Settings. It applies at once and can be changed any time;
-the text size remains adjustable (16–40 px).
-
-| Profile | What changes |
-| --- | --- |
-| Standard | The original dark, large-text layout. |
-| Low vision | 30 px text, yellow-on-black high contrast, 5 px focus outline, larger widget, spoken feedback on, answers of at most 5 steps with key names spelled out. |
-| Cognitive and learning | Calm light colours, extra letter and line spacing, dyslexia-friendly font when installed (OpenDyslexic, Lexend, else Verdana), sentence-case status words, plain-language answers shown one step at a time with Back/Next, and a confirmation before a search starts. |
-| Motor and dexterity | Taller buttons with wide spacing, a larger Stop button, Enter starts (Shift+Enter for a new line), quick-pick examples, slightly slower pacing, and answers that use the fewest key presses. |
-
-Profiles change presentation and wording only. They never widen what the search agent may do.
-Their benefit has not yet been evaluated with users.
+---
 
 ## Requirements
 
-- Windows 10/11, 64-bit; unlocked interactive desktop, standard user session.
-- Edge, Chrome or Firefox with an English-language address bar exposed through UI Automation.
-  Preference is configurable; a missing preferred executable falls back to the system default.
-  Other default browsers can open but will be rejected if their process/control cannot be verified.
-- Internet access for web search. Model inference remains local.
-- LM Studio with a compatible vision-capable runtime and separately obtained model/projector.
-- Memory sufficient for weights, vision projector, context and runtime overhead. The roughly
-  2.45 GB Q4 model-plus-projector download is not a RAM requirement. Measure actual memory/latency;
-  no GPU configuration or minimum-memory benchmark has been validated here.
-- A display large enough for the controls (1280x800 recommended). Text size is 16–28 px;
-  the command input starts at 22 px.
+### System
 
-## Model setup
+| Need | Details |
+| --- | --- |
+| OS | Windows 10 or 11, 64-bit, normal signed-in desktop (not locked or remote-only) |
+| Python | 3.10 to 3.13, 64-bit (tested on 3.13.5) |
+| Browser | Microsoft Edge, Google Chrome or Firefox |
+| Microphone | Optional, for voice questions. Allow desktop apps under Windows Settings → Privacy → Microphone |
+| Internet | For the LMS itself, the natural voice and the optional hosted vision fallback. Guides and speech recognition work offline |
+| Screen | 1280×800 or larger recommended |
 
-1. Install/open [LM Studio](https://lmstudio.ai/) and update its inference runtime through the app.
-2. Search for [lmstudio-community/UI-TARS-2B-SFT-GGUF](https://huggingface.co/lmstudio-community/UI-TARS-2B-SFT-GGUF/tree/main).
-   The candidate is a Qwen2-VL-derived GUI model. Start with `UI-TARS-2B-SFT-Q4_K_M.gguf`
-   (listed as 1.12 GB) and its matching `mmproj-model-f16.gguf` (1.33 GB).
-   This is a deliberate multi-gigabyte download; Klicky never downloads it automatically.
-3. Load the model with the matching projector. Test image input in LM Studio first. If its
-   installed runtime cannot load Qwen2-VL/projector, stop and update the runtime; do not use text-only mode.
-4. In LM Studio's **Developer** tab, start the local server. Keep it bound to loopback.
-5. In Klicky **Settings**, use `http://127.0.0.1:1234/v1`, copy the exact server model identifier,
-   and select `ui_tars`. The default identifier is only a starting value and may differ locally.
-6. Click **Check connection**. This verifies the model listing, not vision capability. The first task
-   sends a real image. Unsupported image input, invalid actions, timeouts and memory/server failures
-   stop the task with a readable error.
-7. Keep a neutral browser page visible and select an example search. Press **Start search**.
+### Python packages (`requirements.txt`)
 
-The integration uses `/v1/models` and multimodal `/v1/chat/completions`, with in-memory PNG data URLs.
-UI-TARS's `Thought`/`Action` syntax is parsed as data using a strict AST whitelist; it is never executed.
-Original 2B normalized coordinates use 0–1000, not the absolute-coordinate convention of some newer models.
-The `json` adapter supports the documented action schema in `src/cua/models.py`; it is an extension
-interface, not a claim that any unspecified alternative model has been validated.
+| Package | What Klicky uses it for |
+| --- | --- |
+| `PySide6` | The tray icon, orb, answer card, companion pointer and settings window |
+| `pywinauto`, `pywin32` | Reading the browser's accessibility tree (UI Automation): finding LMS links and buttons by name |
+| `PyAutoGUI` | Keyboard input for the search agent and browser actions |
+| `Pillow` | Screenshots for the vision fallback and the search agent |
+| `requests` | Talking to LM Studio and to the hosted vision APIs |
+| `faster-whisper`, `numpy` | Local speech recognition (Whisper) |
+| `sounddevice` | Microphone input and audio playback |
+| `edge-tts`, `av` | The natural neural voice, and decoding its audio |
+| `pyttsx3` | The Windows voice, used when the natural voice is off or offline |
+| `anthropic` | Optional Claude vision backend (only when `ANTHROPIC_API_KEY` is set) |
 
-**Compatibility status:** the model files and documented GUI/vision capabilities were verified from
-publisher sources. During timeout investigation, UI-TARS passed a basic synthetic image/action check
-in 57 seconds, while the installed Qwen2.5-VL-7B exceeded 120 seconds. These single observations do
-not establish reliable browser reasoning. See `docs/testing_report.md` for live-search evidence.
+`requirements-dev.txt` adds `pytest` (tests) and `pyinstaller` (building `Klicky.exe`).
 
-## Controls and privacy
+---
 
-Use Tab/Shift+Tab to reach controls, Alt+S to start, and Alt+X or Escape to stop while the main
-window has focus. The always-visible widget has a Stop button during tasks. Only the "open Klicky"
-shortcut is global; Start and Stop shortcuts work inside Klicky's window. Move the mouse to the upper-left screen corner to trigger PyAutoGUI's additional
-fail-safe on its next keyboard action. Do not type or switch apps while Klicky is working; focus loss stops it.
+## Models and services
 
-Screenshots are captured only during a user-started task and cropped to the browser rectangle.
-Visible tabs, overlays or private content in that rectangle may still be captured; there is no
-automatic password redaction. Use a clean browser profile/tab for demos. Screenshots, query text and
-raw model replies are not written to logs or retained by Klicky. Your inference server may have its
-own logging, and the search engine receives the query. Disable model request/image logging there if needed.
+Nothing here is downloaded automatically. Klicky only uses what you set up.
 
-Settings live in `%LOCALAPPDATA%/Klicky/settings.json`. Advanced limits and prompt additions can be
-edited there using `config/settings.example.json` as a reference. Only local endpoints are accepted;
-redirects and environment proxies are disabled. Prompts cannot override the code-level action policy.
+| What | Needed for | Size / cost | How to get it |
+| --- | --- | --- | --- |
+| **Whisper `base.en`** (faster-whisper) | Voice questions | ~145 MB, runs on this PC | `scripts\get_speech_model.bat` (or `tiny.en` / `small.en` as an argument) |
+| **Edge neural voices** | Natural read-aloud | Free, online | Nothing to install. Settings → Voice type: Natural |
+| **UI-TARS-1.5-7B on OpenRouter** (recommended) | Finding a button by looking, when the accessibility tree can't | Pay per use, a few seconds per lookup | Make a key at [openrouter.ai](https://openrouter.ai/keys), put it in `keys.env` |
+| UI-TARS-1.5-7B on Hugging Face | Same, alternative | Hugging Face credits | Token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) in `keys.env` |
+| Claude Haiku (`claude-haiku-5-5`) | Same, alternative | Anthropic API pricing | Key from [console.anthropic.com](https://console.anthropic.com/) in `keys.env` |
+| **LM Studio** + a local model | The web search agent, or a fully local vision fallback | Multi-GB download | See [Local models (LM Studio)](#local-models-lm-studio) |
+| Local text / embedding model (optional) | Rewriting answers in your profile's style; semantic search | Multi-GB | LM Studio, then Settings → Answer model / Embedding model |
 
-### Repeated timeouts
+Without any vision key Klicky still works: it finds LMS controls through the accessibility tree, which covers
+almost every step. The vision model is only a fallback for the rare control the tree can't name.
 
-Settings now exposes separate **Model timeout** and **Whole-task limit** controls. A search needs
-at least four model replies. With a 120-second model timeout, allow at least 510 seconds overall;
-600 leaves additional room for browser work. The settings screen warns when these budgets conflict.
-Image longest edge and maximum reply tokens are also adjustable. Try 640–960 pixels and 256 tokens
-on slower machines; smaller images may make browser text harder for the model to read.
+### Local models (LM Studio)
 
-Transport failures and timeouts stop immediately without automatically sending more inference requests.
-Invalid action replies still have bounded retries. The status identifies the current step and wait limit.
-After a timeout or Stop, let LM Studio finish or stop its generation before restarting a task.
+Only needed for the web search agent, or if you want vision to stay on this PC.
 
-Qwen2.5-**VL** can use the `json` adapter; copy its exact loaded identifier into Settings.
-Ordinary text-only Qwen models cannot interpret screenshots. The installed Qwen2.5-VL-7B was tested
-with a synthetic 640×360 image on this machine and exceeded 120 seconds; switching to it is therefore
-not an established speed fix. Run `scripts/model_smoke.py --model YOUR_MODEL_ID --adapter json`
-with the project Python to check image-response timing without controlling the desktop.
+1. Install [LM Studio](https://lmstudio.ai/) and update its runtime from inside the app.
+2. Download a vision model, for example
+   [lmstudio-community/UI-TARS-2B-SFT-GGUF](https://huggingface.co/lmstudio-community/UI-TARS-2B-SFT-GGUF/tree/main):
+   `UI-TARS-2B-SFT-Q4_K_M.gguf` (1.12 GB) and its `mmproj-model-f16.gguf` (1.33 GB).
+3. Load it with its projector and start the local server in LM Studio's **Developer** tab (keep it on loopback).
+4. In Klicky's Settings: endpoint `http://127.0.0.1:1234/v1`, the exact model id from LM Studio, adapter `ui_tars`.
+   Click **Check connection**.
 
-Stop cancels model waiting immediately and rejects late replies. A request already received by the
-model may finish computing until its transport timeout. Windows UIA calls use two-second connection/
-transaction timeouts; an already-started native call cannot be rolled back. No further action starts
-after cancellation is checked. Avoid rapidly restarting tasks while a slow model is still computing.
+Klicky only accepts local endpoints for LM Studio; redirects and proxies are refused.
 
-Install [Intel One Mono](https://github.com/intel/intel-one-mono) if desired. The app detects the actual
-installed family and otherwise uses Consolas, DejaVu Sans Mono or the system fixed-width font.
-No font is silently downloaded. Native controls have accessible names, but screen-reader behavior
-and accessibility benefits require evaluation with users; they have not been established by tests.
+---
+
+## API keys (optional)
+
+The first time Klicky starts, it creates **`keys.env`** in the project folder (next to `launch.pyw`):
+
+```ini
+OPENROUTER_API_KEY=
+HF_TOKEN=
+ANTHROPIC_API_KEY=
+```
+
+Paste **one** key after its `=` sign and save. No quotes, no restart needed; Klicky reads it at each walkthrough.
+With Settings → Finding buttons by looking set to **Auto**, Klicky uses the first key it finds, in the order
+OpenRouter, Hugging Face, Anthropic. A key set as a Windows environment variable wins over the file.
+
+- `keys.env` is in `.gitignore`, so it is never committed. **Never paste keys into code, issues or chat.**
+- A packaged `Klicky.exe` reads `keys.env` from its own folder.
+
+---
+
+## Using Klicky
+
+### On the LMS
+
+1. Sign in to the LMS yourself, in Chrome or Edge.
+2. Press **Win+Shift+K** and ask, for example:
+   - "How do I see the course outline?"
+   - "Where are the lecture slides?"
+   - "How do I submit my assignment?"
+   - "How do I upload to the Drop Box?"
+   - "Where are my quizzes?"
+3. If you're not inside a course, Klicky asks **"Which course?"** and lists your course tabs. Say or type its name,
+   part of it, its initials, or "the second one". Inside a course, it just uses that one.
+4. The pointer flies to the first link and Klicky says the step. **Click it.** Klicky notices and moves on to
+   the next step, until "That's it".
+
+Esc or clicking the orb stops a walkthrough at any time.
+
+LMS guides cover: course outline (Syllabus), calendar, announcements, Resources (lectures), viewing and submitting
+an assignment, tests and quizzes, the Drop Box, adding a course to the top bar, and notifications. Their steps
+come from a recorded IBA student walkthrough, and the card shows the time in the video each one came from.
+
+### In the browser
+
+Ask "how do I zoom in?", "turn on dark mode", "read this page aloud" and similar. Klicky reads the steps, and
+for steps that go through the browser's menu it points at each control and waits for your click.
+
+Short requests such as "open a new tab for me" are done for you (a fixed list of safe browser buttons only).
+Turn this off under Settings → "Let Klicky do simple browser tasks when I ask".
+
+### Talking and listening
+
+- After the beep, speak and pause: Klicky stops listening by itself. Start typing at any time to switch to text.
+- Talk over an answer to stop it and ask again. The first Esc stops reading; the next closes the card.
+- The tray menu has Ask, Open window, Settings and Quit.
+
+---
+
+## How it works
+
+```
+ your question ──► router ──► "search for …"  ──► search agent (local vision model, strict action policy)
+                     │
+                     ├──► "open a new tab"  ──► browser action (one fixed button)
+                     │
+                     └──► "how do I …"      ──► RAG: BM25 over knowledge/*.md (+ optional embeddings)
+                                                 │      boosted for the site you're on (e.g. the LMS)
+                                                 ▼
+                                          checked guide steps + evidence
+                                                 │
+                         ┌───────────────────────┴───────────────────────┐
+                         ▼                                               ▼
+               read aloud (neural voice)              guided walkthrough, one step at a time
+                                                     1. accessibility tree: find the link/button by name
+                                                     2. fallback: screenshot → UI-TARS / Claude says where
+                                                     3. point at it, wait for your click, next step
+```
+
+- **The guide decides every step.** The vision model is never asked *what* to do, only *where* a named control is.
+  Its answer is checked before it's used.
+- **Accessibility tree first.** Chrome and Edge expose the page's links and buttons to Windows (the same structure
+  screen readers use), so Klicky finds "Assignments" or "Submit" by name. Colours, dark mode and zoom don't matter.
+- **No made-up answers.** A question with no matching guide gets "I don't have a guide for that yet". When an
+  optional answer model rewrites a guide, each step must cite a retrieved guide or Klicky shows the guide as written.
+
+More detail: `docs/architecture.md`.
+
+---
+
+## Access profiles
+
+Pick one in the main window or Settings. It applies at once.
+
+| Profile | What changes |
+| --- | --- |
+| Standard | The original dark, large-text layout |
+| Low vision | 30 px text, yellow-on-black high contrast, thick focus outline, larger widget, speech on, at most 5 steps with key names spelled out |
+| Cognitive and learning | Calm colours, extra letter and line spacing, a dyslexia-friendly font if installed (OpenDyslexic, Lexend, else Verdana), plain language, one step at a time with Back/Next |
+| Motor and dexterity | Taller buttons with wide spacing, a larger Stop button, Enter starts, quick-pick examples, slower pacing, fewest key presses |
+
+Profiles change presentation and wording only. Their benefit has not yet been evaluated with users.
+
+---
+
+## Settings
+
+Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.json`
+(`config/settings.example.json` lists every field).
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| Shortcut | Win+Shift+K | Falls back to Ctrl+Alt+F9 |
+| Voice questions | On | Listens when the orb opens. Needs the speech model |
+| Answers | Read aloud | |
+| Voice type | Natural | Natural = Edge neural voices (online); Windows = offline SAPI voice |
+| Natural voice | Ava | Andrew, Emma, Sonia, Neerja, Prabhat… |
+| Reading speed | 1.0 | |
+| Finding buttons by looking | Auto | Auto, UI-TARS on OpenRouter, UI-TARS on Hugging Face, Claude, Local model, Off (page names only) |
+| Show Klicky companion | On | Follow speed: Gentle, Normal, Snappy. Click ripple on/off |
+| Screen reader | On | "Let my screen reader read answers instead, when one is running" |
+| Browser tasks | On | "Let Klicky do simple browser tasks when I ask" |
+| Answer model / Embedding model (optional) | Empty | LM Studio models |
+| Profile | Standard | See above |
+
+Windows "Show animations" off means no pulsing, ripples or overshoot; state is shown by colour, icon and caption.
+
+---
+
+## Privacy and safety
+
+- **Klicky never clicks inside web pages for you** and never moves your mouse pointer. You do every click on the LMS.
+  It never logs in, fills forms, submits assignments, sends messages or buys anything.
+- **Microphone audio** stays in memory on this PC (local Whisper). It is never saved or sent.
+- **Natural voice:** the text being read is sent to Microsoft's speech service. Switch to the Windows voice to keep
+  it offline. Common lines are cached in `%LOCALAPPDATA%\Klicky\voice-cache`.
+- **Vision fallback:** only when the accessibility tree can't find a control, a screenshot of the browser window
+  is sent to the hosted backend you set up (OpenRouter, Hugging Face or Anthropic). Choose Local model or Off to keep
+  screenshots on this PC. Screenshots are never saved by Klicky.
+- **Keys** live only in `keys.env` or environment variables, are never logged or shown, and go only to their own provider.
+- The search agent captures the browser window only during a task you start, and only the exact next safe action is allowed.
+
+---
+
+## Project layout
+
+```
+A11yNav/
+├── launch.pyw                 start Klicky (no console window)
+├── keys.env                   your API keys (created on first run, git-ignored)
+├── requirements.txt           packages to run Klicky
+├── requirements-dev.txt       + pytest and pyinstaller
+├── requirements-lock.txt      exact tested versions
+├── Klicky.spec                PyInstaller build
+├── knowledge/
+│   ├── browsers/*.md          Edge, Chrome and Firefox guides (cite official help pages)
+│   └── lms/*.md               IBA LMS guides (cite the student walkthrough video)
+├── src/cua/
+│   ├── main.py                app start-up, tray, hotkey
+│   ├── dock.py                the orb, answer card and the whole ask → answer → guide flow
+│   ├── rag.py                 knowledge loading, BM25 + embeddings retrieval, platform detection
+│   ├── assistant.py           grounded answers from retrieved guides
+│   ├── page.py, pagewalk.py   LMS: reading course tabs and controls from the accessibility tree; guided steps
+│   ├── walkthrough.py         guided steps for the browser's own menus
+│   ├── vision.py              vision fallback: OpenRouter / Hugging Face UI-TARS, Claude, LM Studio
+│   ├── keys.py                reads keys.env
+│   ├── voice.py, speech.py    listening (Whisper)
+│   ├── neural_tts.py, tts.py  speaking (Edge neural voices, Windows voice)
+│   ├── companion.py, orb.py, highlighter.py, ripple.py   the pointer, orb and highlights
+│   ├── browser.py, browser_actions.py, actions.py        browser windows and the fixed browser actions
+│   ├── controller.py, models.py, planning.py, …         the web search agent
+│   └── profiles.py, config.py, ui.py                    access profiles, settings, settings window
+├── scripts/                   setup.bat, run.bat, get_speech_model.bat, build.bat, smoke tests
+├── tests/                     pytest suite
+├── docs/                      architecture, analysis, test cases and reports
+└── tracker.md                 dated log of decisions, fixes and test results
+```
+
+---
+
+## Adding guides
+
+A guide is a Markdown file in `knowledge/<platform>/`. No code changes are needed.
+
+```markdown
+---
+title: See a course outline (syllabus) on the LMS
+task: find your course outline
+keywords: course outline, outline, syllabus, course plan
+names: course outline, syllabus
+ask: course
+point:
+- course
+- link: Syllabus
+- any
+- tip
+evidence:
+- IBA LMS student walkthrough video, 0:31 to 1:06
+---
+## LMS
+1. Open {course} from the course tabs at the top.
+2. Select Syllabus in the left menu.
+3. Select the Course Outline item.
+4. The outline file is often also kept in Resources, in the Course Outline folder.
+```
+
+- `ask: course` makes Klicky ask which course and fill in `{course}`.
+- `point:` has one entry per step: `course`, `link: <name>`, `button: <name>`, `control: <name>`
+  (`A|B` for alternatives), `any` (wait for any click) or `tip` (just read it).
+- `sources:` (official URLs) or `evidence:` (where the steps were observed) is required, and shown on the card.
+
+---
 
 ## Testing and building
 
-For teammates using a terminal:
-
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe launch.pyw --smoke
-.\scripts\build.bat
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest -q          # 368 tests, about a minute
+.\.venv\Scripts\python.exe launch.pyw --smoke    # opens and closes the window
+.\scripts\build.bat                              # dist\Klicky\Klicky.exe
 ```
 
-`scripts/desktop_smoke.py` is an explicit real-desktop component test: it opens one Bing search tab.
-It uses predetermined approved actions, no model, and must not be described as AI end-to-end success.
-Prepare the desktop and run it only when interruption is acceptable.
+- `launch.pyw --smoke-popup dock.png` answers a sample question silently and saves a screenshot of the card.
+- `scripts/try_vision.py` tries the vision fallback on a screenshot.
+- `scripts/desktop_smoke.py` is a real-desktop test that opens one Bing search tab (no model involved).
 
-The packaging script creates a folder-based executable. It is unsigned and needs the entire folder;
-it includes Python/application dependencies but no AI weights or LM Studio. No installer, startup
-service or automatic background capture is installed.
+The build is a folder-based, unsigned executable. Keep the whole `dist\Klicky` folder together; it contains no AI
+weights. Put `keys.env` next to `Klicky.exe` for the vision fallback.
 
-## Project documentation
+---
 
-- `docs/project_analysis.md`: full reference review and scope reconciliation.
-- `docs/architecture.md`: interfaces, trust boundaries and state flow.
-- `docs/testing_report.md`: actual test results and remaining acceptance gates.
-- `docs/implementation_plan.md`: source plan and phases 1–8.
-- `deliverables/CUA_Implementation_Plan.docx`: editable university project plan.
-- `deliverables/CUA_Implementation_Plan.pdf`: matching rendered plan.
-- `tracker.md`: chronological decisions, failures, fixes and next steps.
+## Troubleshooting
 
-Planned only: speech recognition, profile memory beyond saved settings, multi-agent routing, documentation
-for platforms other than browsers, broader autonomous modes, additional apps and participant-based HCI evaluation.
+| Problem | Fix |
+| --- | --- |
+| The shortcut does nothing | Another app may own Win+Shift+K: try Ctrl+Alt+F9, or change it in Settings |
+| "The speech model is not installed yet" | Run `scripts\get_speech_model.bat` |
+| Klicky doesn't hear me | Check Windows Settings → Privacy → Microphone → "Let desktop apps access your microphone" |
+| Robotic voice | Settings → Voice type: Natural. Offline, Klicky falls back to the Windows voice |
+| It asks "Which course?" but lists nothing | Make sure the LMS page has finished loading and the course tabs are visible, then ask again |
+| The pointer can't find a button | Make the window wider (narrow layouts fold the LMS menu away), or add a vision key to `keys.env` |
+| An old version keeps running | Quit from the tray icon (or end `pythonw.exe` running `launch.pyw`) and start again |
+
+---
+
+## Known limits
+
+- Built and tested on one Windows 11 laptop with Chrome and Edge. Firefox, screen readers and other set-ups need trying.
+- LMS guides follow the student view of the IBA LMS. Instructor and admin tasks get guidance only.
+- The Drop Box names and the final assignment confirmation page have not yet been checked on a live account.
+- UMS is not covered yet.
+- The accessibility benefits have not yet been evaluated with users.
+
+## More documentation
+
+- `docs/architecture.md`: components, interfaces and trust boundaries
+- `docs/project_analysis.md`: the research pitch and scope
+- `docs/test_cases.md`, `docs/testing_report.md`: test cases and results
+- `docs/implementation_plan.md`: phases of the original plan
+- `tracker.md`: dated decisions, failures, fixes and next steps

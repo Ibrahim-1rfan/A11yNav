@@ -309,3 +309,12 @@
   the 194 common lines (guide steps, intros, fixed phrases) are cached in the background once.
 - Offline or no answer within 6 s: the rest of that answer is read by the Windows voice, with the same callbacks.
   Settings: Voice type (Natural / Windows), Natural voice. Tests: 368 passed.
+
+## 3 November 2026 — Focus on the LMS
+
+- Decision: Klicky is about the IBA LMS (and the browser) for now. The Blender experiment (bridge add-on, guides,
+  guided walkthrough) is taken out of the project; it is kept only as a local git stash on this PC, not committed.
+- README rewritten: quick start, every requirement and model with its size and where to get it, API keys in
+  keys.env, settings, privacy, project layout, how to add a guide, troubleshooting. requirements.txt now lists
+  every package the code imports (adds pywin32, numpy, av); requirements-lock.txt regenerated from the tested
+  environment (Python 3.13.5). Tests: 368 passed.

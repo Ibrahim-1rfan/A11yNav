@@ -1,10 +1,25 @@
+# Klicky: everything needed to run it from source on Windows 10/11 (64-bit), Python 3.10-3.13.
+#   py -3 -m venv .venv
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+# AI model weights are NOT installed by this file; see "Models and services" in README.md.
+
+# Window, tray, orb, answer card
 PySide6>=6.8,<7
+# Screenshots for the vision fallback and the search agent
 Pillow>=11,<13
+# Talking to LM Studio and the hosted vision APIs (OpenRouter, Hugging Face)
 requests>=2.32,<3
-PyAutoGUI>=0.9.54,<1
+# Reading the browser's accessibility tree (UI Automation), browser actions, keyboard input
 pywinauto>=0.6.9,<1
-pyttsx3>=2.98,<3
+pywin32>=306; sys_platform == "win32"
+PyAutoGUI>=0.9.54,<1
+# Voice input: local Whisper speech recognition and the microphone
 faster-whisper>=1.1,<2
 sounddevice>=0.5,<1
-anthropic>=2.4,<3
+numpy>=1.26
+# Voice output: natural Edge neural voices (decoded with PyAV), Windows voice as fallback
 edge-tts>=7.3,<8
+av>=12
+pyttsx3>=2.98,<3
+# Optional vision backend: Claude (only used when ANTHROPIC_API_KEY is set)
+anthropic>=2.4,<3
