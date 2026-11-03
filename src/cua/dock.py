@@ -424,8 +424,8 @@ class Dock(QWidget):
             return False
         if self.voice_factory:
             return True
-        from .voice import model_installed
-        return model_installed(self.settings.voice_model)
+        from .voice import hosted, model_installed
+        return model_installed(self.settings.voice_model) or hosted(self.settings)
 
     def listen_now(self):
         """Hotkey while open: listen, or barge in over an answer being read. In Type mode: the typing box."""
@@ -477,8 +477,8 @@ class Dock(QWidget):
             self.set_caption(caption)
 
     def listen(self, cue=True):
-        from .voice import VoiceWorker
-        self.listener = self.voice_factory() if self.voice_factory else VoiceWorker(self.settings.voice_model, cue=cue)
+        from .voice import VoiceWorker, transcriber_for
+        self.listener = self.voice_factory() if self.voice_factory else VoiceWorker(transcriber=transcriber_for(self.settings), cue=cue)
         self.listener.level.connect(self.orb.set_level)
         self.listener.partial.connect(self.show_partial)
         self.listener.stage.connect(self.on_stage)

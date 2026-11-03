@@ -250,7 +250,7 @@ set in Settings → Klicky opens in).
 
 ### Talking and listening
 
-- After the beep, speak and pause: Klicky stops listening by itself. Start typing at any time to switch to text.
+- After the beep, speak and pause: Klicky listens for as long as you talk and stops after 1.2 seconds of quiet. Start typing at any time to switch to text.
 - Talk over an answer to stop it and ask again. The first Esc stops reading; the next closes the card.
 - The tray menu has Ask, Open window, Settings and Quit.
 
@@ -321,6 +321,7 @@ Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.j
 | Show Klicky companion | On | Follow speed: Gentle, Normal, Snappy. Click ripple on/off |
 | Screen reader | On | "Let my screen reader read answers instead, when one is running" |
 | Browser tasks | On | "Let Klicky do simple browser tasks when I ask" |
+| Speech to text | Groq when its key is set | Groq's Whisper large (audio sent) or on this PC only |
 | Conversation | On | Chat back to small talk and questions no guide answers (what you say is sent) |
 | Assignment summaries | On | Summarize an unsubmitted assignment's instructions with AI (the instruction text is sent) |
 | Answer model / Embedding model (optional) | Empty | LM Studio models |
@@ -335,7 +336,10 @@ Windows "Show animations" off means no pulsing, ripples or overshoot; state is s
 - **Klicky never moves your mouse pointer.** When you ask it to go somewhere on the LMS ("show me the syllabus"),
   it opens only course tabs and menu links. Every button, choice and form is yours: it never logs in, fills forms,
   presses Proceed or Submit, submits assignments, sends messages or buys anything.
-- **Microphone audio** stays in memory on this PC (local Whisper). It is never saved or sent.
+- **Microphone audio** stays in memory and is never saved. With a `GROQ_API_KEY` in `keys.env` and Settings →
+  Speech to text on Groq (the default when the key is there), the finished question's clip is sent to Groq's hosted
+  Whisper large for a more accurate transcript; live captions stay on this PC, and if Groq can't be reached the
+  local model is used. Choose "On this PC only" and audio never leaves the PC.
 - **Natural voice:** the text being read is sent to Microsoft's speech service. Switch to the Windows voice to keep
   it offline. Common lines are cached in `%LOCALAPPDATA%\Klicky\voice-cache`.
 - **Assignment summaries:** only an unsubmitted assignment's title and instruction text are sent, to the AI service

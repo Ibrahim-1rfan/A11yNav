@@ -309,3 +309,8 @@ def test_named_places_never_take_over_browser_questions(corpus):
 def test_do_it_requests_are_told_apart_from_how_to_questions(text, do_it):
     from cua.planning import is_do_it
     assert is_do_it(text) is do_it
+
+
+@pytest.mark.parametrize("typed", ["thanks", "what's up", "hi", "bye klicky", "hey Klicky how are you"])
+def test_typed_small_talk_is_routed_as_a_question_not_rejected(typed):
+    assert route(typed, "duckduckgo") == HelpQuestion(typed)

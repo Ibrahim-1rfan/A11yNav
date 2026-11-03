@@ -94,7 +94,7 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   OpenRouter (`OPENROUTER_API_KEY` in keys.env; the owner added one) → Hugging Face → Claude Haiku → local.
 
 ### 4.3 Voice: committed
-- Voice in: local faster-whisper `base.en`. Voice out: Edge neural voices (the owner chose **Andrew**,
+- Voice in: Groq hosted Whisper large when GROQ_API_KEY is set (4.9c), else local faster-whisper `base.en`. Voice out: Edge neural voices (the owner chose **Andrew**,
   `en-US-AndrewNeural`), cached, Windows SAPI fallback.
 
 ### 4.4 Assignments in detail: committed 4 Nov
@@ -159,6 +159,14 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   lines, with the last 6 messages (forgotten after 10 min). Never step-by-step browser/LMS instructions.
   `Answer.chat`, card title "Klicky", setting `chat` (Settings → Conversation). Live check OK. Tests: 431 pass;
   conftest now also removes AI keys from the environment for every test.
+
+### 4.9c Groq speech-to-text: committed 4 Nov
+- Owner added `GROQ_API_KEY` to keys.env (keys.py now reads that name). `voice.HostedTranscriber`: the finished
+  question goes to Groq `whisper-large-v3-turbo` (WAV in memory, 8 s timeout); live captions and any failure use
+  local base.en. Setting `speech_service` "auto" (Groq when the key exists) / "local". Measured: Groq ~0.8 s vs
+  base.en ~1.9 s vs small.en ~6 s on this i3; all correct on three test questions. small.en is installed but unused.
+- Listening now lasts until 1.2 s of quiet (owner asked); the old 15 s limit is now a 2-minute safety net.
+  Typed small talk ("thanks") is no longer rejected by planning.route (it skipped the chat).
 
 ### 4.10 Docs: committed 4 Nov
 - README describes everything above (Speak/Type, assignments, go-there mode, summaries, privacy), tracker has

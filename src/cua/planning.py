@@ -106,6 +106,9 @@ def route(text: str, engine: str):
     except UserError:
         pass
     question = " ".join(text.split())
+    from .chat import is_small_talk
+    if question and len(question) <= 500 and is_small_talk(question):  # "thanks", "what's up": Klicky chats back
+        return HelpQuestion(question)
     if not HELP_START.match(question):
         action = parse_action(question)
         if action:

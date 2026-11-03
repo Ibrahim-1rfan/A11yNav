@@ -8,13 +8,15 @@ import os
 from pathlib import Path
 import sys
 
-KEY_NAMES = ("OPENROUTER_API_KEY", "HF_TOKEN", "ANTHROPIC_API_KEY")
+KEY_NAMES = ("OPENROUTER_API_KEY", "HF_TOKEN", "ANTHROPIC_API_KEY", "GROQ_API_KEY")
 TEMPLATE = """# Klicky API keys for finding buttons by looking (optional). Put a key after the = sign, no spaces or quotes needed.
 # Only one is needed. Klicky uses the first one that is filled in: OpenRouter, then Hugging Face, then Anthropic.
 # This file is in .gitignore: it stays on this PC and is never committed. Klicky reads it at each guided walkthrough.
 OPENROUTER_API_KEY=
 HF_TOKEN=
 ANTHROPIC_API_KEY=
+# Optional: hosted Whisper speech-to-text (Settings > Speech to text). Your voice clip is sent to Groq.
+GROQ_API_KEY=
 """
 
 

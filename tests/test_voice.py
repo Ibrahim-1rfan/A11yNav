@@ -113,3 +113,55 @@ def test_stop_silences_real_windows_speech_immediately():
     assert not speaker.speaking and speaker.stopped_cleanly
     assert speaker.cut_at - started < .1  # muted within 100 ms of Stop
     speaker.close(); speaker.thread.join(1)
+
+
+class GroqReply:
+    def __init__(self, text, status=200):
+        self.text, self.status = text, status
+    def raise_for_status(self):
+        if self.status >= 400:
+            raise RuntimeError(self.status)
+    def json(self):
+        return {"text": self.text}
+
+
+def test_groq_is_used_only_on_auto_with_a_key(monkeypatch):
+    from cua.voice import HostedTranscriber, hosted, transcriber_for
+    from cua.config import Settings
+    assert not hosted(Settings()) and isinstance(transcriber_for(Settings()), Transcriber)
+    monkeypatch.setenv("GROQ_API_KEY", "test-key")
+    assert hosted(Settings()) and isinstance(transcriber_for(Settings()), HostedTranscriber)
+    assert not hosted(Settings(speech_service="local")) and isinstance(transcriber_for(Settings(speech_service="local")), Transcriber)
+    with pytest.raises(UserError):
+        Settings(speech_service="cloud").validate()
+
+
+def test_groq_gets_the_clip_as_wav_and_its_text_is_used(monkeypatch):
+    import numpy as np
+    from cua import voice
+    monkeypatch.setenv("GROQ_API_KEY", "test-key")
+    sent = []
+    post = lambda url, **kw: (sent.append((url, kw)), GroqReply("  How do I submit my week 8 reading? "))[1]
+    hosted = voice.HostedTranscriber(Transcriber("base.en"), post)
+    assert hosted.transcribe(np.zeros(16000, dtype=np.float32), threading.Event()) == "How do I submit my week 8 reading?"
+    url, kw = sent[0]
+    assert url == voice.GROQ_URL and kw["allow_redirects"] is False and kw["headers"]["Authorization"] == "Bearer test-key"
+    name, audio, kind = kw["files"]["file"]
+    assert audio[:4] == b"RIFF" and kind == "audio/wav" and len(audio) == 44 + 32000   # one second, 16-bit, in memory
+    assert kw["data"]["model"] == "whisper-large-v3-turbo" and kw["data"]["language"] == "en"
+    assert hosted.partial([0.0]) == ""   # captions never go to Groq (and here no local model is installed)
+    with pytest.raises(UserError):        # a filler on silence is still "nothing heard"
+        voice.HostedTranscriber(Transcriber("base.en"), lambda url, **kw: GroqReply("Thank you.")).transcribe([0.0], threading.Event())
+
+
+def test_a_failed_groq_call_falls_back_to_this_pc_or_says_so(monkeypatch):
+    from cua import voice
+    monkeypatch.setenv("GROQ_API_KEY", "test-key")
+    def down(url, **kw):
+        raise TimeoutError()
+    local = SimpleNamespace(name="base.en", transcribe=lambda audio, stop: "zoom in", partial=lambda audio: "zoom")
+    with pytest.raises(UserError, match="speech service"):
+        voice.HostedTranscriber(local, down).transcribe([0.0], threading.Event())
+    monkeypatch.setattr(voice, "model_installed", lambda name: True)
+    hosted = voice.HostedTranscriber(local, lambda url, **kw: GroqReply("", 500))
+    assert hosted.transcribe([0.0], threading.Event()) == "zoom in" and hosted.partial([0.0]) == "zoom"

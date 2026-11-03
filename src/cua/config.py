@@ -37,6 +37,9 @@ class Settings:
     hotkey: str = "Win+Shift+K"
     voice: bool = True
     voice_model: str = "base.en"
+    # "auto": with GROQ_API_KEY in keys.env, the finished question's audio is sent to Groq's hosted Whisper large
+    # (captions and fallback stay on this PC). "local": audio never leaves this PC.
+    speech_service: str = "auto"
     read_aloud: bool = True
     tts_voice: str = ""
     voice_engine: str = "natural"           # "natural": Edge neural voices (online, text sent to Microsoft); "windows"
@@ -96,7 +99,7 @@ class Settings:
             raise UserError("Invalid speech or prompt setting.")
         if not isinstance(self.hotkey, str):
             raise UserError("Invalid shortcut setting.")
-        if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
+        if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"} or self.speech_service not in {"auto", "local"}:
             raise UserError("Invalid voice setting.")
         if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions", "summaries", "chat")):
             raise UserError("Invalid read-aloud setting.")

@@ -102,6 +102,10 @@ class SetupDialog(QDialog):
         self.hotkey = QLineEdit(settings.hotkey)
         self.listen = QCheckBox("Start listening when Klicky opens")
         self.listen.setChecked(settings.voice)
+        self.speech_service = QComboBox()
+        self.speech_service.addItem("Groq Whisper when its key is in keys.env (more accurate; your question's audio is sent)", "auto")
+        self.speech_service.addItem("On this PC only (audio never leaves the PC)", "local")
+        self.speech_service.setCurrentIndex(max(0, self.speech_service.findData(settings.speech_service)))
         self.read_aloud = QCheckBox("Read answers aloud")
         self.read_aloud.setChecked(settings.read_aloud)
         self.barge = QCheckBox("Stop reading when I start talking")
@@ -171,7 +175,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Klicky opens in",self.input_mode),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Assignment summaries",self.summaries),("Conversation",self.chat),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Klicky opens in",self.input_mode),("Voice questions",self.listen),("Speech to text",self.speech_service),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Assignment summaries",self.summaries),("Conversation",self.chat),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -208,7 +212,7 @@ class SetupDialog(QDialog):
         return replace(base, endpoint=self.endpoint.text().strip(), model=self.model.text().strip(), adapter=self.adapter.currentText(), browser=self.browser.currentText(), engine=self.engine.currentText(), font_px=self.size.value(), max_actions=self.limit.value(), request_timeout=self.timeout.value(), task_timeout=self.task_timeout.value(), max_image_edge=self.image_edge.value(), max_tokens=self.tokens.value(),
                        text_model=self.text_model.text().strip(), embed_model=self.embed_model.text().strip(), rag_app=self.rag_app.currentText(),
                        vision=self.vision.currentData(), vision_model=self.vision_model.text().strip(),
-                       hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked(),
+                       hotkey=self.hotkey.text().strip(), voice=self.listen.isChecked(), speech_service=self.speech_service.currentData(),
                        read_aloud=self.read_aloud.isChecked(), barge_in=self.barge.isChecked(),
                        screen_reader_quiet=self.reader_quiet.isChecked(), tts_voice=self.tts_voice.currentData(),
                        voice_engine=self.voice_engine.currentData(), neural_voice=self.neural_voice.currentData(),

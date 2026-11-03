@@ -1,6 +1,8 @@
-"""Local voice input: microphone capture with automatic end-of-speech detection, then on-device Whisper.
+"""Voice input: microphone capture with automatic end-of-speech detection, then Whisper.
 
-Audio stays in memory on this computer. It is never written to disk, logged or sent anywhere.
+Audio stays in memory: it is never written to disk or logged. With Settings > Speech to text on "auto" and a
+GROQ_API_KEY in keys.env, the finished question's clip is sent to Groq's hosted Whisper large (more accurate, fast);
+live captions and any failed call use on-device Whisper. "local" never sends audio anywhere.
 """
 from dataclasses import dataclass
 import os
@@ -18,6 +20,9 @@ VOCABULARY = ("Questions about the IBA LMS: course outline, Syllabus, Resources,
               "Firefox: zoom, text size, reader mode, read aloud, dark mode, captions, tabs, bookmarks, favorites, history.")
 MODELS = {"tiny.en": "Systran/faster-whisper-tiny.en", "base.en": "Systran/faster-whisper-base.en",
           "small.en": "Systran/faster-whisper-small.en"}
+GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+GROQ_MODEL = "whisper-large-v3-turbo"
+GROQ_TIMEOUT_S = 8
 FILLERS = {"thank you", "thanks", "you", "bye", "thanks for watching"}
 NO_MIC = "I can't use the microphone. Check that one is connected and that Windows Settings > Privacy > Microphone allows desktop apps. You can type instead."
 
@@ -40,7 +45,7 @@ class Endpointer:
     """
     chunk_ms: int = CHUNK_MS
     pause_ms: int = 1200       # 1.2 s of quiet after speech ends the question
-    max_ms: int = 15000        # hard limit
+    max_ms: int = 120000       # only a safety net (a noisy room never "pauses"): the pause is what ends a question
     no_speech_ms: int = 7000   # give up when nobody speaks
     floor_ms: int = 150
     min_level: float = .012
@@ -148,10 +153,71 @@ class Transcriber:
         text = self._text(audio, beam_size=5, vad_filter=True)
         if stop.is_set():
             raise Cancelled()
-        # Whisper can invent a polite filler on near-silence; treat that as nothing heard.
-        if not text or text.lower().strip(" .!?") in FILLERS:
-            raise UserError("Couldn't hear that. Tap the orb to try again, or start typing.")
-        return text
+        return heard(text)
+
+
+def heard(text):
+    # Whisper can invent a polite filler on near-silence; treat that as nothing heard.
+    if not text or text.lower().strip(" .!?") in FILLERS:
+        raise UserError("Couldn't hear that. Tap the orb to try again, or start typing.")
+    return text
+
+
+def hosted(settings):
+    """True when the finished question goes to Groq's hosted Whisper."""
+    return getattr(settings, "speech_service", "auto") == "auto" and bool(os.environ.get("GROQ_API_KEY"))
+
+
+def wav_bytes(audio):
+    """16 kHz mono 16-bit WAV, in memory only."""
+    import io
+    import wave
+    import numpy as np
+    out = io.BytesIO()
+    with wave.open(out, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(RATE)
+        w.writeframes((np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes())
+    return out.getvalue()
+
+
+class HostedTranscriber:
+    """Groq's Whisper large for the finished question; on-device Whisper for live captions and as the fallback."""
+
+    def __init__(self, local, post=None):
+        self.local, self.post = local, post
+
+    def partial(self, audio):
+        return self.local.partial(audio) if model_installed(self.local.name) else ""
+
+    def ask_groq(self, audio):
+        import requests
+        response = (self.post or requests.post)(
+            GROQ_URL, headers={"Authorization": f"Bearer {os.environ.get('GROQ_API_KEY', '')}"},
+            files={"file": ("question.wav", wav_bytes(audio), "audio/wav")},
+            data={"model": GROQ_MODEL, "language": "en", "temperature": "0", "response_format": "json", "prompt": VOCABULARY},
+            timeout=GROQ_TIMEOUT_S, allow_redirects=False)
+        response.raise_for_status()
+        return " ".join(str(response.json().get("text", "")).split())
+
+    def transcribe(self, audio, stop):
+        if stop.is_set():
+            raise Cancelled()
+        try:
+            text = self.ask_groq(audio)
+        except Exception:
+            if not model_installed(self.local.name):
+                raise UserError("I couldn't reach the speech service. Check the internet, or type your question.")
+            return self.local.transcribe(audio, stop)
+        if stop.is_set():
+            raise Cancelled()
+        return heard(text)
+
+
+def transcriber_for(settings, post=None):
+    local = Transcriber(settings.voice_model)
+    return HostedTranscriber(local, post) if hosted(settings) else local
 
 
 def preload(name):
@@ -186,7 +252,7 @@ class VoiceWorker(QThread):
         super().__init__()
         self.stop_event = threading.Event()
         self.microphone = microphone or Microphone()
-        self.transcriber = transcriber or Transcriber(model_name)
+        self.transcriber = transcriber or Transcriber(model_name)  # or transcriber_for(settings): Groq when chosen
         self.cue = cue
 
     def run(self):

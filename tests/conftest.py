@@ -18,7 +18,7 @@ def no_real_settings_file(monkeypatch, tmp_path):
 @pytest.fixture(autouse=True)
 def no_real_ai_calls(monkeypatch):
     """Tests never reach a hosted AI service with the person's keys; tests that need one set a fake key and transport."""
-    for name in ("OPENROUTER_API_KEY", "ANTHROPIC_API_KEY", "HF_TOKEN"):
+    for name in ("OPENROUTER_API_KEY", "ANTHROPIC_API_KEY", "HF_TOKEN", "GROQ_API_KEY"):
         monkeypatch.delenv(name, raising=False)
     import cua.chat
     monkeypatch.setattr(cua.chat, "HISTORY", cua.chat.History())
