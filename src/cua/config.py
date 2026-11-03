@@ -56,6 +56,9 @@ class Settings:
     # Summarize an unsubmitted assignment's instructions with the first AI service in keys.env (the instruction text
     # is sent to it). Off: the first sentences are read instead and nothing is sent.
     summaries: bool = True
+    # Talk back to small talk and to questions no guide answers, with the first AI service in keys.env (what you said
+    # and Klicky's last few replies are sent, never the page). Off: short built-in replies and nothing is sent.
+    chat: bool = True
     # How the hotkey opens: "speak" listens; "type" opens the typing box (answers then come as text, without sound).
     input_mode: str = "speak"
 
@@ -95,7 +98,7 @@ class Settings:
             raise UserError("Invalid shortcut setting.")
         if type(self.voice) is not bool or self.voice_model not in {"tiny.en", "base.en", "small.en"}:
             raise UserError("Invalid voice setting.")
-        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions", "summaries")):
+        if any(type(getattr(self, key)) is not bool for key in ("read_aloud", "barge_in", "screen_reader_quiet", "companion", "click_ripple", "actions", "summaries", "chat")):
             raise UserError("Invalid read-aloud setting.")
         if self.companion_speed not in {"gentle", "normal", "snappy"}:
             raise UserError("Invalid companion speed.")

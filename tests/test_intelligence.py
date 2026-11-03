@@ -132,9 +132,34 @@ def test_cancelled_generation_propagates(corpus):
 
 
 def test_unknown_question_never_invents_an_answer(corpus):
-    helper, text = assistant(corpus, "1. Paris. [1]", text_model="qwen")
+    helper, text = assistant(corpus, "1. Paris. [1]", text_model="qwen", chat=False)
     answer = helper.answer("What is the capital of France?", threading.Event())
     assert not answer.grounded and answer.note == NO_GUIDE and text.calls == []
+
+
+@pytest.mark.parametrize("question", ["hey Klicky, how are you?", "what's up", "How's everything?", "thanks Klicky!",
+                                      "who are you", "Clicky", "good morning", "what can you do?"])
+def test_small_talk_gets_a_reply_and_never_a_guide(corpus, question):
+    heard = []
+    helper = Assistant(Settings(), Index(corpus), talk=lambda q, small: (heard.append((q, small)), "Doing great, you?")[1])
+    answer = helper.answer(question, threading.Event())
+    assert answer.chat and not answer.grounded and answer.steps == () and answer.note == "Doing great, you?"
+    assert answer.spoken() == "Doing great, you?" and heard == [(question, True)]
+
+
+@pytest.mark.parametrize("question", ["How do I zoom in Chrome?", "how do I submit my assignment", "show me the syllabus",
+                                      "how do I open a new tab"])
+def test_how_to_questions_still_go_to_the_guides(corpus, question):
+    helper = Assistant(Settings(), Index(corpus), talk=lambda q, small: pytest.fail("chatted"))
+    assert helper.answer(question, threading.Event()).grounded
+
+
+def test_a_question_no_guide_answers_is_chatted_about_and_falls_back_to_the_no_guide_message(corpus):
+    helper = Assistant(Settings(), Index(corpus), talk=lambda q, small: "Paris!" if not small else "")
+    answer = helper.answer("What is the capital of France?", threading.Event())
+    assert answer.chat and answer.note == "Paris!"
+    helper = Assistant(Settings(), Index(corpus), talk=lambda q, small: "")
+    assert helper.answer("What is the capital of France?", threading.Event()).note == NO_GUIDE
 
 
 def test_guide_text_is_inert_in_prompts(corpus):

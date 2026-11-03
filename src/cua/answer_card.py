@@ -45,10 +45,6 @@ class AnswerCard(QFrame):
         self.note.setObjectName("note")
         self.note.setWordWrap(True)
         layout.addWidget(self.note)
-        self.evidence = QLabel()  # where the guide's steps were seen, e.g. a recorded walkthrough and its times
-        self.evidence.setObjectName("note")
-        self.evidence.setWordWrap(True)
-        layout.addWidget(self.evidence)
         self.step_labels = []
         self.fade = QGraphicsOpacityEffect(self)
         self.fade.setOpacity(1.0)
@@ -57,7 +53,7 @@ class AnswerCard(QFrame):
     def show_answer(self, answer, colors):
         self.answer, self.colors, self.active, self.found = answer, colors, -1, ""
         self.offset, self.limit = 0, VISIBLE_STEPS
-        title = re.sub(r"\s*\(.*?\)", "", answer.title).strip() if answer.grounded else "No guide for that yet"
+        title = re.sub(r"\s*\(.*?\)", "", answer.title).strip() if answer.grounded else answer.title if answer.chat else "No guide for that yet"
         self.title.setText(title)
         self.title.setToolTip(answer.title)
         self.render()
@@ -112,9 +108,6 @@ class AnswerCard(QFrame):
         note = self.found or (self.answer.note if self.answer and not self.answer.grounded else "")
         self.note.setText(note)
         self.note.setVisible(bool(note))
-        evidence = "; ".join(self.answer.evidence) if self.answer and self.answer.grounded else ""
-        self.evidence.setText(f"Shown in: {evidence}" if evidence else "")
-        self.evidence.setVisible(bool(evidence))
         self.set_active(self.active)
 
     def set_active(self, index):

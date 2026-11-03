@@ -1,10 +1,11 @@
-"""Grounded how-to guidance. Answers come only from retrieved guides and are shown, never executed."""
+"""Grounded how-to guidance. Answers come only from retrieved guides and are shown, never executed.
+Small talk and questions no guide answers get a conversational reply instead (chat.py), never made-up steps."""
 from dataclasses import dataclass
 import re
 import threading
 from .config import UserError
 from .models import Cancelled
-from . import profiles
+from . import chat, profiles
 from .rag import display_name
 
 NO_GUIDE = ("I don't have a guide for that yet. I can help with zoom, reading mode, read aloud, dark mode, captions, keyboard browsing, "
@@ -27,6 +28,7 @@ class Answer:
     ask: str = ""                     # e.g. "course": Klicky asks which one, then guides with the steps filled in
     points: tuple[str, ...] = ()      # per step, what the guided walkthrough points at inside the page
     template: tuple[str, ...] = ()    # the steps with their {course} placeholder, for filling in after the choice
+    chat: bool = False                # Klicky talking back (the reply is the note), not a guide
 
     def spoken(self):
         if not self.grounded:
@@ -88,19 +90,32 @@ def extractive(hits, profile, note=""):
 
 
 class Assistant:
-    def __init__(self, settings, index, text_client=None):
+    def __init__(self, settings, index, text_client=None, talk=None):
         self.settings, self.index, self.text = settings, index, text_client
+        self.talk = talk or (lambda question, small_talk: chat.reply(question, self.settings, small_talk))
+
+    def chatted(self, question, small_talk):
+        said = self.talk(question, small_talk)
+        return Answer("Klicky", (), (), (), False, False, said, chat=True) if said else None
 
     def answer(self, question, stop, platform=None):
         """platform: the site the person is on (e.g. "lms"), so its own guides rank first."""
         if not isinstance(question, str) or not 1 <= len(question.strip()) <= 500:
             raise UserError("Ask one question of up to 500 characters.")
+        if chat.is_small_talk(question):  # "hey Klicky, how are you?" is not a question for the guides
+            answer = self.chatted(question, True)
+            if stop.is_set():
+                raise Cancelled()
+            return answer
         app = None if self.settings.rag_app == "auto" else self.settings.rag_app
         hits = self.index.retrieve(question, app=app, k=3, stop=stop, platform=platform)
         if stop.is_set():
             raise Cancelled()
         if not hits:
-            return Answer("No guide found", (), (), (), False, False, NO_GUIDE)
+            answer = self.chatted(question, False)
+            if stop.is_set():
+                raise Cancelled()
+            return answer or Answer("No guide found", (), (), (), False, False, NO_GUIDE)
         profile = profiles.get(self.settings.profile)
         if not (self.text and self.settings.text_model) or hits[0].chunk.ask:  # guided steps are kept as written
             return extractive(hits, profile)

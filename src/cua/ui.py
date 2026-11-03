@@ -120,6 +120,8 @@ class SetupDialog(QDialog):
         self.allow_actions.setChecked(settings.actions)
         self.summaries = QCheckBox("Summarize assignment instructions with AI (the instruction text is sent to the AI service in keys.env)")
         self.summaries.setChecked(settings.summaries)
+        self.chat = QCheckBox("Chat with me when no guide fits (what I say is sent to the AI service in keys.env)")
+        self.chat.setChecked(settings.chat)
         from .tts import list_voices
         self.tts_voice = QComboBox()
         self.tts_voice.addItem("Windows default", "")
@@ -169,7 +171,7 @@ class SetupDialog(QDialog):
             control.setRange(lo,hi)
             control.setValue(value)
         self.profile.currentIndexChanged.connect(self.profile_changed)
-        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Klicky opens in",self.input_mode),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Assignment summaries",self.summaries),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
+        for label, control in [("Access profile",self.profile),("Shortcut to open Klicky from any app",self.hotkey),("Klicky opens in",self.input_mode),("Voice questions",self.listen),("Answers",self.read_aloud),("Voice type",self.voice_engine),("Natural voice",self.neural_voice),("Windows voice",self.tts_voice),("Reading speed",self.speech_rate),("Barge-in",self.barge),("Screen reader",self.reader_quiet),("Companion",self.show_companion),("Companion follow speed",self.companion_speed),("Click ripple",self.click_ripple),("Browser tasks",self.allow_actions),("Assignment summaries",self.summaries),("Conversation",self.chat),("Local server",self.endpoint),("Model identifier",self.model),("Model adapter",self.adapter),("Answer model (optional)",self.text_model),("Embedding model (optional)",self.embed_model),("Guides for browser",self.rag_app),("Finding buttons by looking",self.vision),("Claude vision model",self.vision_model),("Browser preference",self.browser),("Search engine",self.engine),("Text size",self.size),("Action limit",self.limit),("Model timeout in seconds",self.timeout),("Whole-task limit in seconds",self.task_timeout),("Image longest edge in pixels",self.image_edge),("Maximum reply tokens",self.tokens)]:
             control.setAccessibleName(label)
             form.addRow(label,control)
             if control is self.profile:
@@ -212,7 +214,7 @@ class SetupDialog(QDialog):
                        voice_engine=self.voice_engine.currentData(), neural_voice=self.neural_voice.currentData(),
                        speech_rate=self.speech_rate.currentData(), companion=self.show_companion.isChecked(),
                        companion_speed=self.companion_speed.currentData(), click_ripple=self.click_ripple.isChecked(),
-                       actions=self.allow_actions.isChecked(), summaries=self.summaries.isChecked(),
+                       actions=self.allow_actions.isChecked(), summaries=self.summaries.isChecked(), chat=self.chat.isChecked(),
                        input_mode=self.input_mode.currentData()).validate()
 
     def update_budget_note(self):

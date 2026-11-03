@@ -28,8 +28,11 @@ class AnswerWorker(QThread):
             if self.stop_event.is_set():
                 raise Cancelled()
             self.answered.emit(answer)
-            self.status.emit("success" if answer.grounded else "error",
-                             "Here is how to do it." if answer.grounded else "I don't have a guide for that yet.")
+            if answer.chat:
+                self.status.emit("success", "Klicky replied.")
+            else:
+                self.status.emit("success" if answer.grounded else "error",
+                                 "Here is how to do it." if answer.grounded else "I don't have a guide for that yet.")
         except Cancelled:
             self.status.emit("inactive", "Question stopped")
         except UserError as exc:
@@ -61,6 +64,4 @@ def answer_html(answer, profile, step=0, show_title=True):
     if answer.grounded:
         origin = "Written by your local answer model from the guide" if answer.generated else "From Klicky's checked guide"
         parts.append(f'<p style="color:{c["muted"]};">{origin}{" · " + links if links else ""}</p>')
-        if answer.evidence:
-            parts.append(f'<p style="color:{c["muted"]};">Shown in: {html.escape("; ".join(answer.evidence))}</p>')
     return "".join(parts), one_step

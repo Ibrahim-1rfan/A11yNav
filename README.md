@@ -203,6 +203,14 @@ Anthropic, then a local LM Studio answer model). Only the assignment's title and
 name, grades or submission. Turn this off in Settings → Assignment summaries: Klicky then reads the first sentences
 of the instructions and sends nothing.
 
+### Just talking to Klicky
+
+Klicky also chats. "Hey Klicky, how are you?", "what's up", "thanks!" or "who are you?" get a friendly reply instead
+of "no guide", and it remembers the last few turns (forgotten after 10 quiet minutes). Questions no guide answers get a
+short conversational answer too. It never makes up browser or LMS steps: those come only from the checked guides.
+Replies come from the same AI service as summaries; without one, or with Settings → Conversation off, short built-in
+replies are used.
+
 On the **Syllabus** page, Klicky boxes the **Course Outline** item and points at it for you to click.
 
 **Or let Klicky go there.** Say it as a request instead of a question: *"show me the syllabus of Computer
@@ -313,6 +321,7 @@ Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.j
 | Show Klicky companion | On | Follow speed: Gentle, Normal, Snappy. Click ripple on/off |
 | Screen reader | On | "Let my screen reader read answers instead, when one is running" |
 | Browser tasks | On | "Let Klicky do simple browser tasks when I ask" |
+| Conversation | On | Chat back to small talk and questions no guide answers (what you say is sent) |
 | Assignment summaries | On | Summarize an unsubmitted assignment's instructions with AI (the instruction text is sent) |
 | Answer model / Embedding model (optional) | Empty | LM Studio models |
 | Profile | Standard | See above |
@@ -332,6 +341,8 @@ Windows "Show animations" off means no pulsing, ripples or overshoot; state is s
 - **Assignment summaries:** only an unsubmitted assignment's title and instruction text are sent, to the AI service
   in `keys.env`. Whether it's submitted, and its due date, are read on this PC. Settings → Assignment summaries off
   sends nothing.
+- **Conversation:** small talk and questions no guide answers, with Klicky's last few replies, are sent to the AI
+  service in `keys.env`. Never the page. Settings → Conversation off sends nothing.
 - **Vision fallback:** only when the accessibility tree can't find a control, a screenshot of the browser window
   is sent to the hosted backend you set up (OpenRouter, Hugging Face or Anthropic). Choose Local model or Off to keep
   screenshots on this PC. Screenshots are never saved by Klicky.
@@ -408,7 +419,7 @@ evidence:
 - `point:` has one entry per step: `course`, `link: <name>`, `button: <name>`, `control: <name>`
   (`A|B` for alternatives), `any` (wait for any click), `assignment` (read the Assignments list, ask which one,
   then report whether it's submitted or summarize it) or `tip` (just read it).
-- `sources:` (official URLs) or `evidence:` (where the steps were observed) is required, and shown on the card.
+- `sources:` (official URLs) or `evidence:` (where the steps were observed) is required. Official links are shown on the card; `evidence:` is kept in the guide only.
 
 ---
 

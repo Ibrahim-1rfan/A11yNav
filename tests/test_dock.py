@@ -328,7 +328,7 @@ def test_on_the_lms_its_guide_answers_with_evidence_and_never_points_at_browser_
     assert s.dock.context_platform == "lms"
     assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
     assert s.dock.answer.apps == ("lms",) and s.dock.walk is None
-    assert s.dock.card.evidence.isVisibleTo(s.dock.card) and "walkthrough video" in s.dock.card.evidence.text()
+    assert "walkthrough video" not in s.dock.card.note.text() and not hasattr(s.dock.card, "evidence")  # the source video is not shown
     star = next(i for i, step in enumerate(s.dock.card.visible_steps) if "star" in step)  # would match the browser's star
     s.dock.tts.calls[-1].line(star + 1)
     assert not [p for p in s.pointed if p]

@@ -10,7 +10,7 @@ what to do next. `tracker.md` has the dated history in more detail; `README.md` 
 
 **Klicky** is an accessible "AI teacher" for Windows, built for an HCI course project (7th semester, IBA Karachi).
 It sits next to the browser; you press a hotkey and ask ("how do I submit my assignment?"). It answers from checked
-guides (RAG, no made-up answers, with evidence shown), and **points at the real link/button on the page**, waiting for
+guides (RAG, no made-up answers, evidence kept in the guides), and **points at the real link/button on the page**, waiting for
 your click, one step at a time.
 
 Target: the **IBA LMS** (Sakai, `lms.iba.edu.pk`) plus everyday **Edge / Chrome / Firefox** tasks.
@@ -57,7 +57,7 @@ things live and reports visually (screenshots). Calls the companion "the duplica
 
 ```powershell
 cd D:\Classess\Projects\Klickyy\A11yNav
-.\.venv\Scripts\python.exe -m pytest -q          # 412 tests, about 1 minute; all passing at handoff
+.\.venv\Scripts\python.exe -m pytest -q          # 431 tests, about 1 minute; all passing at handoff
 .\.venv\Scripts\pythonw.exe launch.pyw           # start Klicky (tray icon "K"); hotkey Win+Shift+K
 ```
 
@@ -78,7 +78,7 @@ cd D:\Classess\Projects\Klickyy\A11yNav
 ### 4.1 Intelligence layer (RAG): committed
 - `knowledge/browsers/*.md` (17 guides, Edge/Chrome/Firefox, each cites official help) and `knowledge/lms/*.md`
   (9 guides: course outline, calendar, announcements, resources, submit assignment, tests and quizzes, drop box,
-  favourite sites, notifications), steps taken from the IBA student walkthrough video (evidence shown on the card).
+  favourite sites, notifications), steps taken from the IBA student walkthrough video (evidence kept in the guide, no longer shown on the card: owner asked, 4 Nov).
 - `src/cua/rag.py`: BM25 (+ optional LM Studio embeddings with RRF), platform detection (LMS from the tab title),
   platform boost ×1.5, `names:` front-matter boost (e.g. "drop box" beats "assignment").
 - `src/cua/assistant.py`: grounded answers; guided guides (`ask`/`point`) are always shown as written.
@@ -151,6 +151,14 @@ cd D:\Classess\Projects\Klickyy\A11yNav
 ### 4.9 Other: committed 4 Nov
 - Local step log `%LOCALAPPDATA%\Klicky\klicky.log` (`main.walk_log`, logger `klicky.walk`; numbers/counts only).
 - "how do I submit my week 8 reading" now goes to the assignment guide (was Calendar): reading keywords added.
+
+### 4.9b Conversation: committed 4 Nov
+- The owner wanted Klicky to be conversational ("hey Klicky, how are you?" said "no guide"; "what's up" even matched
+  the "Open your profile" guide). `src/cua/chat.py`: small talk is caught before retrieval (`is_small_talk`); it and
+  questions with no guide hits get a short reply from OpenRouter Claude Haiku 5.5 → Anthropic → local → built-in
+  lines, with the last 6 messages (forgotten after 10 min). Never step-by-step browser/LMS instructions.
+  `Answer.chat`, card title "Klicky", setting `chat` (Settings → Conversation). Live check OK. Tests: 431 pass;
+  conftest now also removes AI keys from the environment for every test.
 
 ### 4.10 Docs: committed 4 Nov
 - README describes everything above (Speak/Type, assignments, go-there mode, summaries, privacy), tracker has
