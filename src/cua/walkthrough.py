@@ -12,6 +12,7 @@ from .tts import intro, spoken
 CHECK_MS = 400        # how often the browser is checked while waiting for the person
 REMIND_AFTER_S = 20   # one gentle spoken reminder if nothing happens
 MISSING_CHECKS = 2    # a menu counts as closed after this many checks without its control
+CLICK_SETTLE_MS = 350 # after a click on the pointed control, let the menu open before pointing into it
 
 
 def actionable_steps(steps):
@@ -41,6 +42,8 @@ class Walkthrough(QObject):
         self.probe = None
         self.phase = 0
         self.missing = 0
+        self.seen = False
+        self.advancing = False  # a click was accepted; ignore more clicks until the next step is read
         self.waiting_since = 0.0
         self.reminded = False
         self.timer = QTimer(self)
@@ -53,6 +56,7 @@ class Walkthrough(QObject):
 
     def say_step(self, index, lead=""):
         self.timer.stop()
+        self.advancing = False
         self.index = index
         if self.dock.state != "speaking":
             self.dock.machine.fire("next")
@@ -71,7 +75,7 @@ class Walkthrough(QObject):
         self.show_step(index)  # in case the line callback raced the end
         self.dock.machine.fire("wait")
         self.dock.set_caption(short_turn(self.steps[index]))
-        self.waiting_since, self.reminded, self.missing, self.phase = time.monotonic(), False, 0, 0
+        self.waiting_since, self.reminded, self.missing, self.phase, self.seen = time.monotonic(), False, 0, 0, False
         self.timer.start()
 
     def finish(self):
@@ -108,8 +112,13 @@ class Walkthrough(QObject):
         self.phase ^= 1
 
     def own_control(self, rect):
-        self.missing = 0 if rect else self.missing + 1
-        if self.missing >= MISSING_CHECKS:
+        # Only a control that was seen and then vanished means the menu closed. If Klicky cannot recognise the
+        # menu's controls at all, it keeps waiting for the person's click instead of wrongly stepping back.
+        if rect:
+            self.seen, self.missing = True, 0
+            return
+        self.missing += 1
+        if self.seen and self.missing >= MISSING_CHECKS:
             self.step_back()
 
     def run_probe(self, target, then):
@@ -118,11 +127,22 @@ class Walkthrough(QObject):
         self.probe.start()
 
     def clicked(self, point):
-        """A click while waiting: on the last step's control, that step is done."""
+        """The person clicked the control Klicky is pointing at: that step is done, so say the next one."""
         rect = self.dock.pointed_rect
-        if (self.active and self.dock.state == "waiting" and self.index == self.actionable - 1
-                and rect is not None and rect.adjusted(-6, -6, 6, 6).contains(point)):
+        if not (self.active and self.dock.state == "waiting") or self.advancing:
+            return
+        # Normally the click must land on the pointed control. If Klicky could not find that control, any click
+        # outside Klicky counts: the person did the step themselves, and waiting forever would be a dead end.
+        if rect is not None and not rect.adjusted(-6, -6, 6, 6).contains(point):
+            return
+        if self.index >= self.actionable - 1:
             self.finish()
+        else:
+            # Give the browser a moment to open the menu before pointing inside it.
+            self.advancing = True
+            nxt = self.index + 1
+            QTimer.singleShot(CLICK_SETTLE_MS, lambda: self.active and self.say_step(nxt))
+            self.timer.stop()
 
     def stop(self):
         self.active = False

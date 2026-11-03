@@ -128,6 +128,7 @@ def test_menu_closing_midway_steps_back(walk_setup):
     s.browser.menu_open = True
     assert check_until(s, lambda: s.dock.state == SPEAKING)
     finish_speaking(s)
+    assert check_until(s, lambda: s.dock.walk.seen)                                       # Klicky sees the open menu
     s.browser.menu_open = False                                                           # clicked away, menu gone
     assert check_until(s, lambda: s.dock.state == SPEAKING and s.dock.walk.index == 0)
     assert s.dock.tts.calls[-1].lines[0] == "The menu closed. Let's open it again."
@@ -177,3 +178,21 @@ def test_klicky_moves_aside_rather_than_cover_the_control_it_points_at(walk_setu
     before = dock.anchor
     dock.guide_companion(elsewhere)                                  # nothing covered: Klicky stays put
     assert dock.anchor == before
+
+
+def test_clicking_the_pointed_button_moves_on_without_waiting_for_the_menu(walk_setup):
+    s = walk_setup
+    finish_speaking(s)
+    assert s.dock.state == WAITING and s.dock.walk.index == 0
+    s.dock.pointed_rect = QRect(1380, 55, 60, 60)                    # the three dots, as found on screen
+    s.dock.walk.clicked(QPoint(1405, 88))                            # the person just clicks them
+    s.dock.walk.clicked(QPoint(1405, 88))                            # a double click does not skip a step
+    assert wait_for(s.app, lambda: s.dock.state == SPEAKING and s.dock.walk.index == 1)
+    assert "Zoom in, the plus" in s.dock.tts.calls[-1].lines[0]
+    finish_speaking(s)
+    assert s.dock.state == WAITING and s.dock.walk.index == 1
+    # The menu's buttons could not be recognised: no step back, and the next click still finishes.
+    s.dock.pointed_rect = None
+    assert not check_until(s, lambda: s.dock.walk.index == 0, rounds=4)
+    s.dock.walk.clicked(QPoint(1345, 317))                           # the plus in the real menu
+    assert s.dock.state == SPEAKING and s.dock.tts.calls[-1].lines[0] == "That's it, well done."

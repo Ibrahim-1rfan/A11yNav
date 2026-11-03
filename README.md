@@ -53,8 +53,8 @@ points at the real control while that step is read, with a ring around it. If th
 arrow at the screen edge shows where it is. Klicky never moves your own mouse pointer.
 
 - **Guided walkthroughs** for tasks that go through a menu, such as zooming or opening Settings: Klicky reads one
-  step, points at its control and waits ("Your turn"). When the menu opens (by click or Alt+F) it moves on and points
-  inside the menu, for example at the zoom minus and plus. A click on the last control finishes ("That's it"). If the
+  step, points at its control and waits ("Your turn"). Click the control it points at and Klicky moves straight on
+  (opening the menu with Alt+F also counts), pointing inside the menu, for example at the zoom minus and plus. A click on the last control finishes ("That's it"). If the
   menu closes early, Klicky asks you to open it again; after 20 s it gives one reminder. Clicks in the browser do not
   close Klicky while it guides, and it moves aside if it would cover the control. The orb or Esc stops guiding.
 - **Talk over the answer** to stop it and ask again. **Esc** or clicking the orb stops reading; Esc again closes.

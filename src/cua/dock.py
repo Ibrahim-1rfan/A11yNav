@@ -482,7 +482,7 @@ class Dock(QWidget):
         if rect is None or not self.settings.companion or self.state == CLOSED:
             companion.stop_guide()
             return
-        if getattr(self.highlighter, "current_target", None) == "zoom":
+        if getattr(self.highlighter, "current_target", None) == "zoom" and getattr(self.highlighter, "current_kind", "control") != "row":
             # The zoom row is minus, percentage, plus: point at the plus at its right end.
             tip = QPoint(rect.right() - rect.height() // 2, rect.bottom() - 4)
         else:

@@ -109,6 +109,7 @@ class ControlLocator(QThread):
     def __init__(self, hwnd, target):
         super().__init__()
         self.hwnd, self.target = hwnd, target
+        self.kind = "control"  # or "row": only the menu row was found, not the exact buttons
 
     def run(self):
         import sys
@@ -130,11 +131,16 @@ class ControlLocator(QThread):
         matcher = re.compile(name_pattern[6:] if by_class else name_pattern, re.I)
         popup = self.target in POPUP_TARGETS
         top = window_rect(self.hwnd)[1]
-        matches = []
+        matches, rows = [], []
         # Menus open in their own window owned by the browser process, so search all of its windows for those.
         for hwnd in (process_windows(self.hwnd) if popup else [self.hwnd]):
             window = Desktop(backend="uia").window(handle=hwnd).wrapper_object()
             for info in browser_chrome(window.element_info):
+                if self.target == "zoom" and info.control_type != control_type and re.match(r"^Zoom\b", info.name or "", re.I):
+                    r = info.rectangle
+                    if r.width() > 0 and info.visible:
+                        rows.append((r.left, r.top, r.right, r.bottom))  # the whole "Zoom" row, if the buttons are unnamed
+                    continue
                 if info.control_type != control_type:
                     continue
                 text = info.class_name if by_class else info.name
@@ -147,6 +153,9 @@ class ControlLocator(QThread):
                         matches.append((r.left, r.top, r.right, r.bottom))
         if matches:  # the zoom row: one ring around both the minus and the plus
             return min(m[0] for m in matches), min(m[1] for m in matches), max(m[2] for m in matches), max(m[3] for m in matches)
+        if rows:
+            self.kind = "row"
+            return rows[0]
         return None
 
     def on_current_tab(self, control):
@@ -233,7 +242,7 @@ class Highlighter(QObject):
         self.on_located = on_located
         self.label_rings = True  # the companion pointing makes the ring's text label unnecessary
         self.overlay = Overlay()
-        self.cache, self.pending = {}, set()
+        self.cache, self.pending, self.kinds = {}, set(), {}
         self.wanted = None     # the (hwnd, target) the step being read points at
         self.locators = set()  # running lookups stay referenced until they finish
 
@@ -268,11 +277,12 @@ class Highlighter(QObject):
         self.pending.add(key)
         locator = ControlLocator(hwnd, target)
         self.locators.add(locator)
-        locator.found.connect(lambda t, rect, key=key: self.located(key, rect))
+        locator.found.connect(lambda t, rect, key=key, locator=locator: self.located(key, rect, getattr(locator, "kind", "control")))
         locator.finished.connect(lambda locator=locator: self.locators.discard(locator))
         locator.start()
 
-    def located(self, key, rect):
+    def located(self, key, rect, kind="control"):
+        self.kinds[key] = kind
         self.pending.discard(key)
         if key[1] not in POPUP_TARGETS:
             self.cache[key] = rect
@@ -295,6 +305,10 @@ class Highlighter(QObject):
     @property
     def current_target(self):
         return self.wanted[1] if self.wanted else None
+
+    @property
+    def current_kind(self):
+        return self.kinds.get(self.wanted, "control") if self.wanted else "control"
 
     def clear(self):
         self.wanted = None

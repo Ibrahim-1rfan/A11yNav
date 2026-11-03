@@ -194,3 +194,8 @@
 - Klicky moves its orb and card aside when they would cover the control it points at.
 - Not verified live: the zoom button and Settings item names inside a real open menu (both browsers were minimized);
   names match both Chromium spellings ("Zoom in"/"Make text larger"). Tests: 216 passed.
+- Live feedback: clicking the three dots in Edge left Klicky waiting, because steps only advanced when the menu's
+  buttons were recognised. Now a click on the pointed control completes any step (350 ms later the next step is read);
+  recognising the open menu remains a backup for keyboard users. "The menu closed" only counts after the menu was seen,
+  so unrecognised menus no longer cause false step-backs; with no control found, any click outside Klicky completes
+  the step. If the zoom buttons are unnamed, the whole Zoom row is ringed. Tests: 217 passed.
