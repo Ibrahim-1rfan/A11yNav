@@ -43,7 +43,7 @@ def clean(reply):
 
 def ask_openrouter(title, instructions, post=None):
     import requests
-    body = {"model": OPENROUTER_MODEL, "temperature": 0, "max_tokens": 120, "stream": False,
+    body = {"model": OPENROUTER_MODEL, "max_tokens": 400, "stream": False, "reasoning": {"effort": "low"},
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt(title, instructions)}]}
     headers = {"Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY', '')}"}
     response = (post or requests.post)(OPENROUTER_URL, json=body, headers=headers, timeout=TIMEOUT_S, allow_redirects=False)

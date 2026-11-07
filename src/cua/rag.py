@@ -14,9 +14,11 @@ from urllib.parse import urlsplit
 
 APPS = {"edge": ("edge", "microsoft edge"), "chrome": ("chrome", "google chrome"), "firefox": ("firefox", "mozilla")}
 SOURCE_HOSTS = {"edge": "microsoft.com", "chrome": "google.com", "firefox": "mozilla.org"}
-APP_NAMES = {"edge": "Edge", "chrome": "Chrome", "firefox": "Firefox", "lms": "IBA LMS"}
+APP_NAMES = {"edge": "Edge", "chrome": "Chrome", "firefox": "Firefox", "lms": "IBA LMS", "mart": "Klicky Mart"}
 # Platforms with their own guides (knowledge/<platform>/), recognised from the question, the window title or the page's host.
-PLATFORMS = {"lms": {"words": ("lms", "sakai"), "titles": ("sakai", "lms"), "hosts": ("lms.iba.edu.pk",)}}
+PLATFORMS = {"lms": {"words": ("lms", "sakai"), "titles": ("sakai", "lms"), "hosts": ("lms.iba.edu.pk",)},
+             # The usability study's shop (study/klicky-mart), served on this PC only.
+             "mart": {"words": ("klicky mart",), "titles": ("klicky mart",), "hosts": ()}}
 PLATFORM_BOOST = 1.5  # guides for the site the person is on outrank equally worded general ones
 NAME_BOOST, NAME_BONUS = 2.0, 5.0  # a guide whose place is named in the question (front matter "names")
 STOPWORDS = set("""a an and are as at be by can could do does for from get go how i if in into is it its me my of on

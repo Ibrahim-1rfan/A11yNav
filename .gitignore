@@ -15,3 +15,5 @@ klicky_research_pitch(1)(1).pdf
 # API keys for the vision fallback: never committed
 keys.env
 *.env
+study/results/
+study/recordings/

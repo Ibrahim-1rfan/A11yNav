@@ -160,7 +160,8 @@ class SetupDialog(QDialog):
             combo.setCurrentText(current)
         self.vision = QComboBox()
         for value, text in [("auto", "Auto: the first one with a key set, else the local model"),
-                            ("openrouter", "UI-TARS on OpenRouter (screenshot sent to OpenRouter)"),
+                            ("openrouter", "Claude through OpenRouter (screenshot sent to OpenRouter and Anthropic)"),
+                            ("ui-tars", "UI-TARS on OpenRouter (screenshot sent to OpenRouter)"),
                             ("huggingface", "UI-TARS on Hugging Face (screenshot sent to Hugging Face)"),
                             ("claude", "Claude (screenshot sent to Anthropic)"),
                             ("local", "Local model (screenshot stays on this PC)"), ("off", "Off: page names only")]:

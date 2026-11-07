@@ -40,8 +40,8 @@ class HelpQuestion:
 
 HELP_START = re.compile(r"\s*(?:please\s+)?(?:how\s+(?:do|can|to|would|should)\b|how\b|where\s+(?:is|are|do|can)\b|what\s+(?:is|are|does)\b|help\s+me\b|can\s+(?:you|u)\s+(?:show|tell|explain)\s+(?:me\s+)?(?:how|where|what|why)\b|can\s+(?:you|u)\s+help\b|show\s+me\s+how\b|i\s+(?:can't|cannot|can not|want\s+to|need\s+to)\b|is\s+there\s+a\s+way\b)", re.I)
 
-# "Show me the syllabus of Computer Security", "open my HCI assignments", "take me to Resources": on the LMS Klicky
-# opens the course and its menu links itself (links only, never a button such as Submit), then guides the rest.
+# "Show me the syllabus of Computer Security", "open my HCI assignments", "take me to Resources": asked as a question
+# (Klicky guides the way; it never opens pages itself).
 DO_IT = re.compile(r"\s*(?:please\s+)?(?:(?:can|could|would)\s+(?:you|u)\s+(?:please\s+)?)?(?:open|show\s+me|take\s+me\s+to|"
                    r"bring\s+up|pull\s+up|go\s+to|navigate\s+to|get\s+me\s+to|jump\s+to)\b(?!\s+how\b)", re.I)
 

@@ -204,11 +204,7 @@ def test_a_link_name_ending_in_a_bracket_is_found(monkeypatch):
     assert find(1, "link: Part IV (Part A)")[0] == (288, 748, 443, 772)
 
 
-def test_only_course_tabs_and_menu_links_can_be_opened_by_klicky(monkeypatch):
-    looked = []
-    monkeypatch.setattr(page, "document", lambda hwnd: looked.append(hwnd))
-    for spec in ("control: Submit", "control: Proceed|Submit", "button: Save Draft", "any", "tip"):
-        assert page.press(1, spec) is False
-    assert looked == []                                               # not even looked for
+def test_the_tool_a_tab_shows_and_whether_a_step_opens_it():
+    assert not hasattr(page, "press")                                 # Klicky never opens pages itself
     assert page.tool_of("Sakai : Computer Security (Class No 101765) - Fall 2026 : Assignments - Google Chrome") == "Assignments"
     assert page.opens("link: Assignments", "Assignments") and not page.opens("control: Submit", "Submit")

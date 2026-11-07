@@ -4,9 +4,9 @@ The guide (RAG) always decides what the step is; the vision model only says wher
 of the browser window. Its answer is a position, checked to lie inside the image, and nothing it says is shown,
 spoken or executed. Text in the screenshot is page content, never instructions.
 
-Backends: UI-TARS-1.5-7B hosted by OpenRouter (OPENROUTER_API_KEY) or Hugging Face (HF_TOKEN), Claude
-(ANTHROPIC_API_KEY), all of which receive the screenshot, or a local UI-TARS model served on this PC. Only the
-browser window is captured.
+Backends: Claude through OpenRouter (OPENROUTER_API_KEY) or Anthropic (ANTHROPIC_API_KEY), UI-TARS-1.5-7B hosted
+by OpenRouter or Hugging Face (HF_TOKEN), all of which receive the screenshot, or a local UI-TARS model served on
+this PC. Only the browser window is captured.
 """
 from dataclasses import dataclass
 import base64
@@ -15,12 +15,16 @@ import os
 import re
 from .config import UserError
 
-MAX_EDGE = 1568        # images up to this long edge are not resized by the API, so coordinates stay in our pixels
+MAX_EDGE = 1568
+# Claude counts an image in 28-pixel patches and shrinks one over its visual budget (1568 patches), which would move
+# its answers off our pixels: 1232 wide with sides in multiples of 28 stays inside the budget for any browser window.
+CLAUDE_EDGE, CLAUDE_FACTOR = 1232, 28
 CLAUDE_TIMEOUT_S = 20
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 HOSTED_TIMEOUT_S = 25
 # Hosted UI-TARS: fixed addresses only (never from settings), each with the environment variable holding its key.
 HOSTED = {
-    "openrouter": ("https://openrouter.ai/api/v1/chat/completions", "bytedance/ui-tars-1.5-7b", "OPENROUTER_API_KEY"),
+    "ui-tars": (OPENROUTER_URL, "bytedance/ui-tars-1.5-7b", "OPENROUTER_API_KEY"),
     "huggingface": ("https://router.huggingface.co/v1/chat/completions", "ByteDance-Seed/UI-TARS-1.5-7B:featherless-ai", "HF_TOKEN"),
 }
 TARS_FACTOR, TARS_EDGE = 28, 1288  # UI-TARS-1.5 resizes images to multiples of 28; sending them so keeps its pixels ours
@@ -56,19 +60,43 @@ def describe(spec, chosen=""):
 
 
 def backend(settings):
-    """Which vision backend may be used now, or None. Auto prefers hosted UI-TARS (built for finding things on
-    screens, and cheapest), then Claude, then the local model; a hosted one is used only when its key is set."""
+    """Which vision backend may be used now, or None. Auto prefers Claude (through OpenRouter, then Anthropic), then
+    UI-TARS on Hugging Face, then the local model; a hosted one is used only when its key is set. UI-TARS on
+    OpenRouter is used only when chosen."""
     choice = settings.vision
     if choice == "off":
         return None
-    for name, (_url, _model, key) in HOSTED.items():
-        if choice in ("auto", name) and os.environ.get(key):
-            return name
+    if choice in ("auto", "openrouter") and os.environ.get("OPENROUTER_API_KEY"):
+        return "openrouter"
     if choice in ("auto", "claude") and os.environ.get("ANTHROPIC_API_KEY"):
         return "claude"
+    for name, (_url, _model, key) in HOSTED.items():
+        if (choice == name or (choice == "auto" and name == "huggingface")) and os.environ.get(key):
+            return name
     if choice in ("auto", "local") and settings.model:
         return "local"
     return None
+
+
+def openrouter_model(model):
+    """OpenRouter's name for a Claude model: claude-sonnet-5-5 -> anthropic/claude-sonnet-5.5."""
+    match = re.fullmatch(r"(claude-[a-z]+)-(\d+)(?:-(\d+))?", model)
+    if not match:
+        return model if "/" in model else f"anthropic/{model}"
+    family, major, minor = match.groups()
+    return f"anthropic/{family}-{major}" + (f".{minor}" if minor else "")
+
+
+def position(text):
+    """The JSON position in a reply, even with words around it."""
+    try:
+        return json.loads(text)
+    except (TypeError, ValueError):
+        match = re.search(r"\{.*\}", text or "", re.S)
+        try:
+            return json.loads(match.group(0)) if match else None
+        except ValueError:
+            return None
 
 
 def question(target, step, width, height):
@@ -80,6 +108,8 @@ def question(target, step, width, height):
 
 
 class ClaudeLocator:
+    max_edge, factor = CLAUDE_EDGE, CLAUDE_FACTOR
+
     def __init__(self, model, client=None):
         self.model, self.client = model, client
 
@@ -97,6 +127,30 @@ class ClaudeLocator:
             return None
         text = next((b.text for b in response.content if b.type == "text"), "")
         return json.loads(text)
+
+
+class OpenRouterClaudeLocator:
+    """Claude through OpenRouter's OpenAI-compatible API, asked for the same JSON position as ClaudeLocator."""
+    max_edge, factor = CLAUDE_EDGE, CLAUDE_FACTOR
+
+    def __init__(self, model, post=None):
+        self.model, self.post = openrouter_model(model), post
+
+    def locate(self, png, width, height, target, step):
+        import requests
+        url = "data:image/png;base64," + base64.b64encode(png).decode("ascii")
+        body = {"model": self.model, "max_tokens": 1024, "stream": False, "reasoning": {"effort": "low"},
+                "response_format": {"type": "json_schema", "json_schema": {"name": "position", "strict": True, "schema": SCHEMA}},
+                "messages": [{"role": "system", "content": SYSTEM},
+                             {"role": "user", "content": [{"type": "image_url", "image_url": {"url": url}},
+                                                          {"type": "text", "text": question(target, step, width, height)}]}]}
+        headers = {"Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY', '')}"}
+        response = (self.post or requests.post)(OPENROUTER_URL, json=body, headers=headers, timeout=CLAUDE_TIMEOUT_S, allow_redirects=False)
+        response.raise_for_status()
+        choice = response.json()["choices"][0]
+        if choice.get("finish_reason") in ("length", "content_filter"):
+            return None
+        return position(choice["message"].get("content") or "")
 
 
 def tars_point(text):
@@ -197,7 +251,7 @@ def see(hwnd, spec, chosen, step, settings, locator=None, grab=capture):
         if name is None:
             return None
         locator = (HostedTarsLocator(name) if name in HOSTED else ClaudeLocator(settings.vision_model) if name == "claude"
-                   else LocalLocator(settings))
+                   else OpenRouterClaudeLocator(settings.vision_model) if name == "openrouter" else LocalLocator(settings))
     try:
         png, width, height, bounds = grab(hwnd, getattr(locator, "max_edge", MAX_EDGE), getattr(locator, "factor", 1))
         answer = locator.locate(png, width, height, describe(spec, chosen), re.sub(r"\s+", " ", step)[:300])

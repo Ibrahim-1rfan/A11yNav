@@ -275,7 +275,6 @@ def courses(hwnd, tries=6, wait=.4):
     return []
 
 
-PRESSABLE = ("course", "link")  # what Klicky may open by itself: the course tab and menu links, never a button
 
 
 def find(hwnd, spec, chosen=""):
@@ -286,28 +285,6 @@ def find(hwnd, spec, chosen=""):
     either, e.g. "control: Proceed|Submit"."""
     _info, rect, hidden = locate(hwnd, spec, chosen)
     return rect, hidden
-
-
-def press(hwnd, spec, chosen=""):
-    """Open a course tab or menu link through UI Automation, as a screen reader would; the mouse never moves.
-    Only "course" and "link:" steps, and only a real link, are ever pressed. True when it was pressed."""
-    if spec.partition(":")[0].strip().lower() not in PRESSABLE:
-        return False
-    info, rect, _hidden = locate(hwnd, spec, chosen)
-    if info is None or info.control_type != "Hyperlink":
-        return False
-    from pywinauto.controls.uiawrapper import UIAWrapper
-    control = UIAWrapper(info)
-    try:
-        control.invoke()
-        return True
-    except Exception:
-        pass
-    try:
-        control.iface_legacy_iaccessible.DoDefaultAction()  # links that don't offer Invoke
-        return True
-    except Exception:
-        return False
 
 
 def locate(hwnd, spec, chosen=""):

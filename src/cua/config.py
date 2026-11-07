@@ -52,8 +52,8 @@ class Settings:
     click_ripple: bool = True
     actions: bool = True  # let Klicky do simple browser tasks when asked ("open a new tab for me")
     # When a guided step's control can't be found in the page's accessibility tree, look at a screenshot of the browser:
-    # "auto" uses the first with a key: hosted UI-TARS on OpenRouter (OPENROUTER_API_KEY) or Hugging Face (HF_TOKEN),
-    # Claude (ANTHROPIC_API_KEY), else the local model above. "off" never looks.
+    # "auto" uses the first with a key: Claude through OpenRouter (OPENROUTER_API_KEY) or Anthropic (ANTHROPIC_API_KEY),
+    # UI-TARS on Hugging Face (HF_TOKEN), else the local model above. "off" never looks.
     vision: str = "auto"
     vision_model: str = "claude-haiku-5-5"
     # Summarize an unsubmitted assignment's instructions with the first AI service in keys.env (the instruction text
@@ -83,7 +83,7 @@ class Settings:
         for key, choices in {"adapter": {"ui_tars", "json"}, "browser": {"default", "edge", "chrome", "firefox"}, "engine": {"bing", "google", "duckduckgo"},
                              "profile": {"default", "low_vision", "cognitive", "motor", "deaf"}, "rag_app": {"auto", "edge", "chrome", "firefox"},
                              "input_mode": {"speak", "type"},
-                             "vision": {"auto", "openrouter", "huggingface", "claude", "local", "off"}}.items():
+                             "vision": {"auto", "openrouter", "ui-tars", "huggingface", "claude", "local", "off"}}.items():
             if getattr(self, key) not in choices:
                 raise UserError(f"Unsupported {key} setting.")
         for key, lo, hi, integer in [

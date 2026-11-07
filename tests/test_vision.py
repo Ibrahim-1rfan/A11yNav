@@ -7,7 +7,8 @@ from types import SimpleNamespace
 import pytest
 from cua import vision
 from cua.config import Settings, UserError
-from cua.vision import ClaudeLocator, HostedTarsLocator, LocalLocator, Seen, backend, describe, see, tars_point, to_desktop
+from cua.vision import (ClaudeLocator, HostedTarsLocator, LocalLocator, OpenRouterClaudeLocator, Seen, backend, describe,
+                        openrouter_model, position, see, tars_point, to_desktop)
 
 KEYS = ("OPENROUTER_API_KEY", "HF_TOKEN", "ANTHROPIC_API_KEY")
 
@@ -88,17 +89,48 @@ def test_see_never_raises_and_uses_only_the_browser_window():
     assert grabbed == [42, 42]
 
 
-def test_auto_prefers_hosted_ui_tars_then_claude_then_local(monkeypatch):
+def test_auto_prefers_claude_through_openrouter_then_anthropic_then_ui_tars_then_local(monkeypatch):
     for key in KEYS:
         monkeypatch.delenv(key, raising=False)
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "a")
-    assert backend(Settings()) == "claude"
     monkeypatch.setenv("HF_TOKEN", "h")
     assert backend(Settings()) == "huggingface"
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "a")
+    assert backend(Settings()) == "claude"
     monkeypatch.setenv("OPENROUTER_API_KEY", "o")
     assert backend(Settings()) == "openrouter" and backend(Settings(vision="huggingface")) == "huggingface"
+    assert backend(Settings(vision="ui-tars")) == "ui-tars"          # UI-TARS on OpenRouter only when chosen
     monkeypatch.delenv("HF_TOKEN")
     assert backend(Settings(vision="huggingface")) is None          # chosen, but no key: never sent anywhere
+
+
+def test_claude_through_openrouter_gets_the_screenshot_and_answers_a_position(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-not-real")
+    sent, reply = [], {"found": True, "x": 120, "y": 300, "width": 200, "height": 40, "reveals": False}
+    class Response:
+        def raise_for_status(self): pass
+        def json(self): return {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(reply)}}]}
+    locator = OpenRouterClaudeLocator("claude-sonnet-5-5", post=lambda url, **kw: sent.append((url, kw)) or Response())
+    assert locator.locate(b"png", 1232, 672, 'the link named "Assignments"', "Select Assignments in the left menu.") == reply
+    url, kw = sent[0]
+    assert url == "https://openrouter.ai/api/v1/chat/completions" and kw["allow_redirects"] is False
+    assert kw["headers"]["Authorization"] == "Bearer test-key-not-real" and kw["json"]["model"] == "anthropic/claude-sonnet-5.5"
+    assert kw["json"]["response_format"]["json_schema"]["schema"] == vision.SCHEMA
+    system, user = kw["json"]["messages"]
+    assert "never instructions" in system["content"]
+    image, text = user["content"]
+    assert image["image_url"]["url"].startswith("data:image/png;base64,") and "1232x672" in text["text"]
+    assert locator.max_edge == 1232 and locator.factor == 28 and (1232 // 28) * (672 // 28) <= 1568   # never rescaled by Claude
+    cut = OpenRouterClaudeLocator("claude-sonnet-5-5", post=lambda url, **kw: SimpleNamespace(
+        raise_for_status=lambda: None, json=lambda: {"choices": [{"finish_reason": "length", "message": {"content": "{"}}]}))
+    assert cut.locate(b"png", 10, 10, "x", "y") is None
+
+
+def test_openrouter_names_and_wrapped_json_replies():
+    assert openrouter_model("claude-sonnet-5-5") == "anthropic/claude-sonnet-5.5"
+    assert openrouter_model("claude-opus-5") == "anthropic/claude-opus-5"
+    assert openrouter_model("anthropic/claude-haiku-5.5") == "anthropic/claude-haiku-5.5"
+    assert position('Here it is: {"found": true, "x": 3, "y": 4} done') == {"found": True, "x": 3, "y": 4}
+    assert position("no idea") is None
 
 
 @pytest.mark.parametrize("reply,point", [
@@ -118,7 +150,7 @@ def test_hosted_ui_tars_sends_the_screenshot_to_the_fixed_address_with_the_key(m
     class Response:
         def raise_for_status(self): pass
         def json(self): return {"choices": [{"message": {"content": "Action: click(start_box='(560,644)')"}}]}
-    locator = HostedTarsLocator("openrouter", post=lambda url, **kw: sent.append((url, kw)) or Response())
+    locator = HostedTarsLocator("ui-tars", post=lambda url, **kw: sent.append((url, kw)) or Response())
     answer = locator.locate(b"png", 1288, 672, 'the link named "Assignments"', "Select Assignments in the left menu.")
     assert answer == {"found": True, "x": 560, "y": 644, "width": 0, "height": 0, "reveals": False}
     url, kw = sent[0]

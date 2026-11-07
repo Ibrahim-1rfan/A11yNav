@@ -327,11 +327,9 @@ def test_on_the_lms_its_guide_answers_with_evidence_and_never_points_at_browser_
     s.window.summon()
     assert s.dock.context_platform == "lms"
     assert wait_for(s.app, lambda: s.dock.state == SPEAKING)
-    assert s.dock.answer.apps == ("lms",) and s.dock.walk is None
+    assert s.dock.answer.apps == ("lms",)
     assert "walkthrough video" not in s.dock.card.note.text() and not hasattr(s.dock.card, "evidence")  # the source video is not shown
-    star = next(i for i, step in enumerate(s.dock.card.visible_steps) if "star" in step)  # would match the browser's star
-    s.dock.tts.calls[-1].line(star + 1)
-    assert not [p for p in s.pointed if p]
+    assert not [p for p in s.pointed if p]   # "star" in its steps never lands on the browser's own star
 
 
 def test_a_new_answer_replaces_the_old_steps_immediately():
@@ -368,8 +366,6 @@ def lms_dock(dock_setup, monkeypatch):
     s.seen, s.vision = [], lambda spec: None   # the vision fallback: a fake that, by default, sees nothing
     s.dock.page_seer = lambda hwnd, spec, chosen, step: (s.seen.append(spec), s.vision(spec))[1]
     s.rows, s.opened, s.summaries = [], None, []   # the Assignments list and the opened assignment, as read
-    s.pressed, s.press_ok = [], True                # links Klicky opened itself ("show me the syllabus")
-    s.dock.page_press = lambda hwnd, spec, chosen: (s.pressed.append(spec), s.press_ok)[1]
     s.dock.page_reader = SimpleNamespace(assignments=lambda hwnd: list(s.rows), opened=lambda hwnd: s.opened,
                                          summarize=lambda title, text: (s.summaries.append((title, text)), SUMMARY)[1])
     rect = lambda b: QRect(b[0], b[1], b[2] - b[0], b[3] - b[1])
@@ -506,6 +502,20 @@ def test_a_different_course_named_while_inside_one_wins(lms_dock):
 
 
 
+def test_a_guide_with_nothing_to_choose_is_walked_one_step_at_a_time_on_the_page(lms_dock, monkeypatch):
+    s = lms_dock
+    monkeypatch.setitem(BOXES, "control: Sites|View all sites|All sites|My sites", (1700, 10, 1740, 50))
+    s.title = "Sakai : Home : Overview - Google Chrome"
+    say(s, "show me how to add a course to my top bar")
+    s.window.summon()
+    assert wait_for(s.app, lambda: s.dock.walk is not None)
+    assert type(s.dock.walk).__name__ == "PageWalkthrough" and s.dock.choice is None     # no "Which course?"
+    assert s.dock.card.limit == 1 and "Sites button" in s.dock.card.visible_steps[0]     # Step 1 of 4, on its own
+    s.dock.tts.calls[-1].line(0); s.dock.tts.calls[-1].end()
+    assert wait_for(s.app, lambda: ("page", BOXES["control: Sites|View all sites|All sites|My sites"]) in s.pointed
+                    and s.dock.state == WAITING)
+
+
 def assignment_rows():
     from cua.page import Assignment
     return [Assignment("Week 08 Reading", "In progress", "Nov 4, 2099, 2:15 PM"),
@@ -612,67 +622,17 @@ def test_the_course_outline_step_boxes_the_course_outline_item(lms_dock):
     assert s.dock.pointed_rect is not None                    # the companion flies to it
 
 
-def run_opening(s, count):
-    """Klicky says "Opening ..." and opens that link itself, count times."""
-    for _ in range(count):
-        calls = len(s.dock.tts.calls)
-        line = s.dock.tts.calls[-1]
-        line.line(len(line.lines) - 1)
-        line.end()
-        assert wait_for(s.app, lambda: len(s.dock.tts.calls) > calls)
-
-
-def test_show_me_the_syllabus_opens_the_course_syllabus_and_course_outline_itself(lms_dock, monkeypatch):
-    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
+@pytest.mark.parametrize("question", ["how do I see the syllabus of computer security", "show me the syllabus of computer security",
+                                      "open my computer security assignments"])
+def test_klicky_only_points_even_when_asked_to_go_there(lms_dock, question):
     s = lms_dock
-    BOXES["link: Syllabus"] = (0, 494, 250, 539)
-    say(s, "show me the syllabus of computer security")
+    say(s, question)
     s.window.summon()
     assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
-    assert s.dock.walk.auto and s.dock.tts.calls[-1].lines == ["Okay, Computer Security.", "Opening Computer Security."]
-    run_opening(s, 3)
-    assert s.pressed == ["course", "link: Syllabus", "link: Course Outline"]
-    assert [c.lines[-1] for c in s.dock.tts.calls[-3:-1]] == ["Opening Syllabus.", "Opening Course Outline."]
-    assert ("page", BOXES["link: Course Outline"]) in s.pointed          # each one boxed before it's opened
-    lines = s.dock.tts.calls[-1].lines
-    assert lines[0] == "Here it is." and "Resources" in lines[1] and not s.dock.walk.active
-
-
-def test_opening_assignments_itself_stops_at_choosing_one_and_never_presses_submit(lms_dock, monkeypatch):
-    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
-    s = lms_dock
-    s.rows = assignment_rows()
-    say(s, "open my computer security assignments")
-    s.window.summon()
-    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
-    run_opening(s, 2)
-    assert s.pressed == ["course", "link: Assignments"]
-    assert wait_for(s.app, lambda: s.dock.tts.calls[-1].lines[-1].startswith("Which assignment?"))
-    assert s.dock.walk.index == 2 and s.pressed == ["course", "link: Assignments"]   # the choice is the person's
-
-
-def test_when_klicky_cannot_open_a_link_the_person_clicks_it_and_is_guided(lms_dock, monkeypatch):
-    monkeypatch.setattr("cua.pagewalk.PRESS_MS", 10)
-    s = lms_dock
-    s.press_ok = False
-    say(s, "show me the syllabus of computer security")
-    s.window.summon()
-    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
-    run_opening(s, 1)
-    assert s.dock.tts.calls[-1].lines == ["I couldn't open it myself. Please click it."] and not s.dock.walk.auto
+    assert not any(line.startswith("Opening") for call in s.dock.tts.calls for line in call.lines)
     s.dock.tts.calls[-1].line(0); s.dock.tts.calls[-1].end()
-    assert wait_for(s.app, lambda: s.dock.state == WAITING and s.dock.pointed_rect is not None)
-    click(s, BOXES["course"])
-    assert wait_for(s.app, lambda: s.dock.walk.index == 1)
-    assert s.dock.tts.calls[-1].lines[-1] == "Select Syllabus in the left menu."          # guided from here on
-
-
-def test_how_do_i_questions_are_still_guided_not_done(lms_dock):
-    s = lms_dock
-    say(s, "how do I see the syllabus of computer security")
-    s.window.summon()
-    assert wait_for(s.app, lambda: s.dock.walk is not None and s.dock.state == SPEAKING)
-    assert not s.dock.walk.auto and s.pressed == []
+    assert wait_for(s.app, lambda: s.dock.state == WAITING and s.dock.pointed_rect is not None)   # pointed, waiting for the click
+    assert s.dock.walk.index == 0
 
 
 def test_when_the_tree_cannot_find_a_control_the_vision_model_points_at_it(lms_dock, monkeypatch):

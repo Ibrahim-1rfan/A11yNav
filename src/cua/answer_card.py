@@ -37,6 +37,7 @@ class AnswerCard(QFrame):
         layout.setSpacing(10)
         self.title = QLabel()
         self.title.setObjectName("cardTitle")
+        self.title.setWordWrap(True)  # a long title wraps instead of being cut off at the card's edge
         layout.addWidget(self.title)
         self.steps_box = QVBoxLayout()
         self.steps_box.setSpacing(4)

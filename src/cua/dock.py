@@ -157,7 +157,6 @@ class Dock(QWidget):
         self.choice, self.last_question, self.choice_misses = None, "", 0  # "Which course?" waiting for an answer
         self.page_courses = self.page_find = self.page_seer = None  # tests inject fakes; None means the real page and model
         self.page_reader = None  # likewise for reading assignments and summarizing them
-        self.page_press = None   # and for opening a link (None: through UI Automation)
         self.page_worker = None
         self.action_factory = None  # tests inject a fake action runner
         self.actor = None
@@ -251,6 +250,8 @@ class Dock(QWidget):
         text = (text if whole else last_two_lines(text, self.caption.font(), self.caption_width())) if text else ""
         self.caption.setText(text)
         self.caption.setVisible(bool(text))
+        if self.state != CLOSED and self.panel.isVisible():
+            self.reposition()  # a longer caption needs a taller panel, or the card's steps get squeezed and cut off
         if text:
             announce(self, text)
 
@@ -700,8 +701,11 @@ class Dock(QWidget):
             return
         self.answered = True
         self.answer = answer
-        if answer.ask and answer.grounded and self.return_hwnd and self.context_platform in answer.apps:
-            self.start_choice(answer)  # on the LMS page itself: ask which course, then guide inside the page
+        if answer.points and answer.grounded and self.return_hwnd and self.context_platform in answer.apps:
+            if answer.ask:
+                self.start_choice(answer)  # on the LMS page itself: ask which course, then guide inside the page
+            else:
+                self.begin_guide(answer, "", "")  # nothing to choose (e.g. the top bar): guide inside the page now
             return
         self.card.show_answer(answer, self.colors)
         self.card.show()
@@ -810,21 +814,20 @@ class Dock(QWidget):
         self.card.show_answer(guided, self.colors)
         self.card.show()
         title = self.page_title()
-        here = full in title  # e.g. "Sakai : Computer Security (Class No ...) : Overview"
+        here = bool(full) and full in title  # e.g. "Sakai : Computer Security (Class No ...) : Overview"
         start = 1 if here and answer.points[:1] == ("course",) else 0
         if here and start < len(answer.points) and page.opens(answer.points[start], page.tool_of(title)):
             start += 1  # already on that tool's page too (e.g. Assignments): its link isn't the next step
-        lead = lead or f"Okay, {short}." + (f" You're already in {short}." if start else "")
+        if short:
+            lead = lead or f"Okay, {short}." + (f" You're already in {short}." if start else "")
         if not (self.reading() and self.machine.fire("answer_read")):
             self.machine.fire("answer_quiet")
             announce(self, guided.spoken())
             return
         from .pagewalk import page_reader
-        from .planning import is_do_it
         self.walk = PageWalkthrough(self, steps, answer.points, self.return_hwnd, full, start, lead, finder=self.page_find,
                                     seer=self.page_seer or self.vision_seer(), reader=self.page_reader or page_reader(self.settings),
-                                    question=self.last_question, presser=self.page_press,
-                                    auto=self.settings.actions and is_do_it(self.last_question))
+                                    question=self.last_question)
         self.walk.start()
 
     def vision_seer(self):

@@ -8,8 +8,28 @@ It is built for the **IBA LMS** (Sakai, `lms.iba.edu.pk`) and for everyday tasks
 Every answer comes from a checked guide (a RAG knowledge base), so it doesn't make things up, and each answer
 says where its steps came from.
 
-Klicky never moves your own mouse. It points and you click; ask it to *go* somewhere and it opens the course tab and
-menu links itself, but every button, choice and form stays yours.
+Klicky never moves your own mouse and never clicks for you. It points and you click: every link, button, choice and
+form stays yours.
+
+---
+
+## Start here (group members)
+
+1. **Install:** follow **[SETUP.md](SETUP.md)** step by step (about 20 minutes).
+2. **Keys:** you need two, and they go **only** in `keys.env` on your own PC, never in git or chat:
+   - `OPENROUTER_API_KEY`: your own key, **given to you by the project lead** (it has a spending limit).
+   - `GROQ_API_KEY`: make your own, free, at [console.groq.com/keys](https://console.groq.com/keys).
+3. **Check:** double-click `scripts\check_setup.bat`. Every line should say OK.
+4. **Use:** double-click `scripts\run.bat`, open the LMS in Chrome or Edge, press **Win+Shift+K** and ask.
+5. **Study sessions:** follow **[study/STUDY_DAY.md](study/STUDY_DAY.md)**: the recorder (`study\run_recorder.bat`;
+   **Ctrl+S** starts a task, **Ctrl+E** ends it), what to say, the task order, and how to send your files back.
+
+| Klicky's job | Service | Key |
+| --- | --- | --- |
+| Finding a button on screen when the page doesn't name it, chat replies, assignment summaries | Claude Haiku 5.5 through OpenRouter | `OPENROUTER_API_KEY` |
+| Turning your voice into text | Whisper large v3 turbo on Groq (the model on your PC is the backup) | `GROQ_API_KEY` |
+| Reading answers aloud | Microsoft's natural voice (Andrew) | none, free |
+| Guides and pointing at LMS links | Runs on your PC | none |
 
 ---
 
@@ -125,10 +145,10 @@ Nothing here is downloaded automatically. Klicky only uses what you set up.
 | --- | --- | --- | --- |
 | **Whisper `base.en`** (faster-whisper) | Voice questions | ~145 MB, runs on this PC | `scripts\get_speech_model.bat` (or `tiny.en` / `small.en` as an argument) |
 | **Edge neural voices** | Natural read-aloud | Free, online | Nothing to install. Settings → Voice type: Natural |
-| **UI-TARS-1.5-7B on OpenRouter** (recommended) | Finding a button by looking, when the accessibility tree can't | Pay per use, a few seconds per lookup | Make a key at [openrouter.ai](https://openrouter.ai/keys), put it in `keys.env` |
-| **Claude Haiku 5.5 on OpenRouter** | Summarizing an assignment's instructions | A fraction of a cent each, about 2.5 s | The same OpenRouter key |
+| **Claude Haiku 5.5 on OpenRouter** (recommended) | Finding a button by looking when the accessibility tree can't; chat replies; assignment summaries | About $0.0002 a lookup, 3 s; chat about 1.5 s | Make a key at [openrouter.ai](https://openrouter.ai/keys), put it in `keys.env` |
+| UI-TARS-1.5-7B on OpenRouter | Finding a button by looking, alternative (Settings: UI-TARS on OpenRouter) | Pay per use | The same OpenRouter key |
 | UI-TARS-1.5-7B on Hugging Face | Same, alternative | Hugging Face credits | Token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) in `keys.env` |
-| Claude Haiku (`claude-haiku-5-5`) | Same, alternative | Anthropic API pricing | Key from [console.anthropic.com](https://console.anthropic.com/) in `keys.env` |
+| Claude (`claude-haiku-5-5`) directly from Anthropic | Same, alternative | Anthropic API pricing | Key from [console.anthropic.com](https://console.anthropic.com/) in `keys.env` |
 | **LM Studio** + a local model | The web search agent, or a fully local vision fallback | Multi-GB download | See [Local models (LM Studio)](#local-models-lm-studio) |
 | Local text / embedding model (optional) | Rewriting answers in your profile's style; semantic search | Multi-GB | LM Studio, then Settings → Answer model / Embedding model |
 
@@ -159,11 +179,14 @@ The first time Klicky starts, it creates **`keys.env`** in the project folder (n
 OPENROUTER_API_KEY=
 HF_TOKEN=
 ANTHROPIC_API_KEY=
+GROQ_API_KEY=
 ```
 
-Paste **one** key after its `=` sign and save. No quotes, no restart needed; Klicky reads it at each walkthrough.
+Paste each key after its `=` sign and save. No quotes. Group members fill in `OPENROUTER_API_KEY` (from the
+project lead) and `GROQ_API_KEY` (their own, free) and leave the other two empty; see [SETUP.md](SETUP.md).
 With Settings → Finding buttons by looking set to **Auto**, Klicky uses the first key it finds, in the order
-OpenRouter, Hugging Face, Anthropic. A key set as a Windows environment variable wins over the file.
+OpenRouter (Claude Haiku 5.5), Anthropic, Hugging Face. A key set as a Windows environment variable wins over the
+file. `scripts\check_setup.bat` checks both keys work without showing them.
 
 - `keys.env` is in `.gitignore`, so it is never committed. **Never paste keys into code, issues or chat.**
 - A packaged `Klicky.exe` reads `keys.env` from its own folder.
@@ -213,13 +236,10 @@ replies are used.
 
 On the **Syllabus** page, Klicky boxes the **Course Outline** item and points at it for you to click.
 
-**Or let Klicky go there.** Say it as a request instead of a question: *"show me the syllabus of Computer
-Security"*, *"open my HCI assignments"*, *"take me to Resources"*. Klicky says "Opening Computer Security.", the
-pointer flies to the tab and boxes it, and Klicky opens it, then the Syllabus link, then Course Outline: "Here it is."
-It only ever opens the **course tab and menu links**, through Windows accessibility (your mouse never moves). It
-never presses a button such as Proceed, Submit, Save or Upload, and it never picks an assignment for you: at the first
-step that needs you, it goes back to pointing and waiting for your click. If it can't open a link, it asks you to
-click it. "How do I…" questions are still guided step by step. Turn this off with Settings → Browser tasks.
+**Asking it as a request works too.** *"Show me the syllabus of Computer Security"*, *"open my HCI assignments"* or
+*"take me to Resources"* get the same step-by-step guidance: Klicky points at each link and you click it. (Earlier
+versions opened these pages by themselves; that was removed on 8 Nov 2026 so you always do the clicking, which also
+keeps the usability study fair.)
 
 Esc or clicking the orb stops a walkthrough at any time.
 
@@ -317,7 +337,7 @@ Open from the tray icon → Settings. Saved in `%LOCALAPPDATA%\Klicky\settings.j
 | Voice type | Natural | Natural = Edge neural voices (online); Windows = offline SAPI voice |
 | Natural voice | Ava | Andrew, Emma, Sonia, Neerja, Prabhat… |
 | Reading speed | 1.0 | |
-| Finding buttons by looking | Auto | Auto, UI-TARS on OpenRouter, UI-TARS on Hugging Face, Claude, Local model, Off (page names only) |
+| Finding buttons by looking | Auto | Auto, Claude through OpenRouter, UI-TARS on OpenRouter, UI-TARS on Hugging Face, Claude, Local model, Off (page names only) |
 | Show Klicky companion | On | Follow speed: Gentle, Normal, Snappy. Click ripple on/off |
 | Screen reader | On | "Let my screen reader read answers instead, when one is running" |
 | Browser tasks | On | "Let Klicky do simple browser tasks when I ask" |
@@ -333,9 +353,9 @@ Windows "Show animations" off means no pulsing, ripples or overshoot; state is s
 
 ## Privacy and safety
 
-- **Klicky never moves your mouse pointer.** When you ask it to go somewhere on the LMS ("show me the syllabus"),
-  it opens only course tabs and menu links. Every button, choice and form is yours: it never logs in, fills forms,
-  presses Proceed or Submit, submits assignments, sends messages or buys anything.
+- **Klicky never moves your mouse pointer and never clicks on the LMS for you.** It only points. Every link, button,
+  choice and form is yours: it never logs in, fills forms, presses Proceed or Submit, submits assignments, sends
+  messages or buys anything.
 - **Microphone audio** stays in memory and is never saved. With a `GROQ_API_KEY` in `keys.env` and Settings →
   Speech to text on Groq (the default when the key is there), the finished question's clip is sent to Groq's hosted
   Whisper large for a more accurate transcript; live captions stay on this PC, and if Groq can't be reached the
@@ -376,7 +396,7 @@ A11yNav/
 │   ├── page.py, pagewalk.py   LMS: reading course tabs, controls and assignments from the accessibility tree; guided steps
 │   ├── summary.py             a short summary of an assignment's instructions
 │   ├── walkthrough.py         guided steps for the browser's own menus
-│   ├── vision.py              vision fallback: OpenRouter / Hugging Face UI-TARS, Claude, LM Studio
+│   ├── vision.py              vision fallback: Claude (OpenRouter or Anthropic), UI-TARS, LM Studio
 │   ├── keys.py                reads keys.env
 │   ├── voice.py, speech.py    listening (Whisper)
 │   ├── neural_tts.py, tts.py  speaking (Edge neural voices, Windows voice)

@@ -1,8 +1,9 @@
-# Klicky: session handoff (as of 4 November 2026, ~3 AM)
+# Klicky: session handoff (as of 8 November 2026)
 
 Read this first if you are a new agent picking up the work. It says what Klicky is, where everything is, what is
 done, what is **not committed yet**, how to run and test it, the decisions the owner has made, the rules to keep, and
-what to do next. `tracker.md` has the dated history in more detail; `README.md` is the user-facing manual.
+what to do next. `tracker.md` has the older dated history; `README.md` is the user-facing manual;
+`study/README.md` is the study plan.
 
 ---
 
@@ -10,18 +11,17 @@ what to do next. `tracker.md` has the dated history in more detail; `README.md` 
 
 **Klicky** is an accessible "AI teacher" for Windows, built for an HCI course project (7th semester, IBA Karachi).
 It sits next to the browser; you press a hotkey and ask ("how do I submit my assignment?"). It answers from checked
-guides (RAG, no made-up answers, evidence kept in the guides), and **points at the real link/button on the page**, waiting for
-your click, one step at a time.
+guides (RAG, no made-up steps), and **points at the real link/button on the page**, waiting for your click, one step
+at a time. It also chats back to small talk ("hey Klicky, how are you?").
 
 Target: the **IBA LMS** (Sakai, `lms.iba.edu.pk`) plus everyday **Edge / Chrome / Firefox** tasks.
 
-Three user groups (the inclusivity story, in the owner's words):
-1. **Motor disabilities**: can just ask Klicky (voice); it can also *go there itself* ("show me the syllabus").
-2. **Low vision / blind**: voice in, voice out, large text, pointer + box on the target.
-3. **Deaf / hard of hearing**: **Type** mode: type questions, answers come as text/captions, no sound needed.
+Design story (for the paper): three layers (baseline agent that sees and points, knowledge layer of checked guides,
+accessibility layer) and two accessibility agents: **Speak** (motor disabilities, low vision: voice in, voice out,
+pointer) and **Type** (Deaf / hard of hearing: typed in, text captions out).
 
-Owner: Azhab Babar (works on the `azhab-dev` branch of Ibrahim-1rfan's repo). Prefers short, plain answers; tests
-things live and reports visually (screenshots). Calls the companion "the duplicate cursor"/"Clicky cursor".
+Owner: Azhab Babar (works on the `azhab-dev` branch of Ibrahim-1rfan's repo). Prefers short, plain answers ("simpler
+mate"); tests things live and reports with screenshots. Calls the companion "the duplicate cursor"/"Clicky cursor".
 
 ---
 
@@ -34,22 +34,25 @@ things live and reports visually (screenshots). Calls the companion "the duplica
 | Working branch | `azhab-dev` (the owner sometimes says "Azure branch": it means `azhab-dev`) |
 | Python venv | `.venv` (Python 3.13.5) |
 | User settings | `%LOCALAPPDATA%\Klicky\settings.json` |
-| API keys | `keys.env` in the project root (git-ignored). **Never read, print or commit it.** |
-| Speech model | `%LOCALAPPDATA%\Klicky\models\faster-whisper-base.en` (installed) |
+| API keys | `keys.env` in the project root (git-ignored): OPENROUTER_API_KEY and GROQ_API_KEY are set. **Never read, print or commit it.** |
+| Speech models | `%LOCALAPPDATA%\Klicky\models\faster-whisper-base.en` (used) and `-small.en` (installed, unused: too slow) |
 | Voice cache / log | `%LOCALAPPDATA%\Klicky\voice-cache\`, `%LOCALAPPDATA%\Klicky\klicky.log` (walk steps, no page text) |
-| Scratch/temp output | `tmp\` in the project (git-ignored), e.g. `tmp\companion_sizes.png` |
+| Research paper (Claude Doc) | https://claude.ai/artifact/C4huXCjvy8mykFxKbt3Xc5 ("Klicky: A Layered, Context-Aware Agent for Accessible LMS Navigation") |
+| Study app | `study\` (Klicky Mart shop + results server); see 4.13 |
+| Scratch/temp output | `tmp\` in the project (git-ignored), e.g. `tmp\mart_shop.png` |
+| Preview launch config | `D:\Classess\Projects\Klickyy\.claude\launch.json` ("klicky-mart" on port 8765), outside the repo |
 | Reference video | `D:\Classess\7th Sem\HCi\Project\Clickyy.mp4` (the "Clicky" demo the owner likes) |
-| Blender (abandoned) | Installed at `C:\Classess\7th Sem\HCi\Project`; not part of the project any more |
 
 ### Git state
 
-- `main` and `azhab-dev` are the same on GitHub and contain all of the work below. On 4 Nov the history was rewritten
-  (at the owner's request) to drop a "Co-Authored-By: Claude" line from every commit, so commit IDs changed (e.g. the
-  big 4 Nov commit is now e896c68, the README commit c26a63f). Code was verified identical before the force-push.
-- A local-only branch `backup/before-rewrite` keeps the old history; delete it once the owner is happy.
-- Commit messages must NOT include a Co-Authored-By: Claude line (the owner does not want Claude listed on GitHub).
-- `git stash list` → `stash@{0}: Blender experiment (removed from the project, 3 Nov 2026)`. Kept only as a backup.
-  The owner said to remove everything Blender and stick to the LMS.
+- Last pushed commit: **282173d** (Groq voice, listen until a pause, typed small talk) on both `azhab-dev` and `main`.
+  Before it: 520d99b (chat back, hide the video line).
+- **Not committed yet** (all tests pass): 4.9d (LMS walks without a course choice + card resize fix), 4.13 (Klicky
+  Mart study app + `knowledge/mart/` + `tests/test_study.py`), 4.14 (everything on Claude Haiku 5.5 through OpenRouter), this file.
+- Commit messages must NOT include a Co-Authored-By: Claude line (history was rewritten on 4 Nov to remove them).
+- Every push to `azhab-dev` also fast-forwards and pushes `main` (owner, 4 Nov): `git push origin azhab-dev:main`.
+- Local-only branch `backup/before-rewrite` keeps the pre-rewrite history; delete when the owner is happy.
+- `git stash list` → `stash@{0}: Blender experiment (removed 3 Nov)`. Backup only; the owner dropped Blender.
 
 ---
 
@@ -57,170 +60,220 @@ things live and reports visually (screenshots). Calls the companion "the duplica
 
 ```powershell
 cd D:\Classess\Projects\Klickyy\A11yNav
-.\.venv\Scripts\python.exe -m pytest -q          # 431 tests, about 1 minute; all passing at handoff
+.\.venv\Scripts\python.exe -m pytest -q          # 458 tests, about 1.5-3 minutes; all passing on 8 Nov
 .\.venv\Scripts\pythonw.exe launch.pyw           # start Klicky (tray icon "K"); hotkey Win+Shift+K
+.\.venv\Scripts\python.exe study\server.py       # Klicky Mart at http://127.0.0.1:8765 (or study\run_klicky_mart.bat)
 ```
 
-- **Restarting Klicky** after code changes: stop every `pythonw.exe` running `launch.pyw`, then start it again
-  (from an agent: PowerShell `Get-CimInstance Win32_Process -Filter "Name like 'python%'" | Where-Object
-  { $_.CommandLine -like '*launch.pyw*' } | Stop-Process`, then run `launch.pyw` in the background; two python
-  processes for one Klicky is normal with a venv). Shell commands that touch the user's apps or network needed the
-  sandbox disabled in this environment.
-- `git push` needs `GIT_TERMINAL_PROMPT=0` (it otherwise hangs on a credential prompt) and works unsandboxed.
-- Tests must never touch the real settings file: `tests/conftest.py` redirects `cua.config.settings_path` to a temp
-  folder (autouse). Keep it that way. (Earlier the tests overwrote the owner's settings; it was restored.)
-- Rendering widgets offscreen for screenshots: `QT_QPA_PLATFORM=offscreen` and `QT_QPA_FONTDIR=C:/Windows/Fonts`.
+- **Restarting Klicky**: kill every `pythonw.exe` running `launch.pyw` (PowerShell: `Get-CimInstance Win32_Process
+  -Filter "Name like 'python%'" | Where-Object { $_.CommandLine -like '*launch.pyw*' } | ForEach-Object { taskkill /F
+  /T /PID $_.ProcessId }`), then start it again. Two python processes for one Klicky is normal (venv). Make sure the
+  old one is gone first, or the new one can't take the hotkey. Commands touching the user's apps/network need the
+  sandbox disabled.
+- `git push` needs `GIT_TERMINAL_PROMPT=0` and works unsandboxed.
+- Tests never touch the real settings file or real AI keys: `tests/conftest.py` redirects `settings_path` to a temp
+  folder and removes OPENROUTER/ANTHROPIC/HF/GROQ keys from the environment (autouse). Keep it that way.
+- Offscreen widget screenshots: `QT_QPA_PLATFORM=offscreen` + `QT_QPA_FONTDIR=C:/Windows/Fonts`
+  (`tmp/render_card.py` renders the dock card). Full-page web screenshots: headless Edge
+  (`msedge --headless=new --screenshot=... --window-size=1366,900 URL`).
 
 ---
 
-## 4. What Klicky does now (all features)
+## 4. What Klicky does now
 
-### 4.1 Intelligence layer (RAG): committed
-- `knowledge/browsers/*.md` (17 guides, Edge/Chrome/Firefox, each cites official help) and `knowledge/lms/*.md`
-  (9 guides: course outline, calendar, announcements, resources, submit assignment, tests and quizzes, drop box,
-  favourite sites, notifications), steps taken from the IBA student walkthrough video (evidence kept in the guide, no longer shown on the card: owner asked, 4 Nov).
-- `src/cua/rag.py`: BM25 (+ optional LM Studio embeddings with RRF), platform detection (LMS from the tab title),
-  platform boost ×1.5, `names:` front-matter boost (e.g. "drop box" beats "assignment").
-- `src/cua/assistant.py`: grounded answers; guided guides (`ask`/`point`) are always shown as written.
-- Guide front matter: `title, keywords, names, ask: course, point: [...], evidence/sources`. Point specs:
-  `course`, `link: <name>`, `button: <name>`, `control: A|B`, `any`, `tip`, `assignment` (see 4.5).
+### 4.1 Knowledge layer (RAG): committed
+- `knowledge/browsers/*.md` (17 guides, cite official help), `knowledge/lms/*.md` (9 guides from the IBA student
+  walkthrough video), `knowledge/mart/*.md` (7 study-shop guides, uncommitted). Evidence stays in the guides but is
+  **not shown on the card** (owner, 4 Nov).
+- `rag.py`: BM25 (+ optional embeddings), platform detection from the tab title (`lms`, `mart`), platform boost ×1.5,
+  `names:` boost. Guide front matter: `title, task, keywords, names, ask: course, point: [...], evidence/sources`.
+  Point specs: `course`, `link: <name>`, `button: <name>`, `control: A|B`, `any`, `tip`, `assignment`.
+- `assistant.py`: guided guides (`ask` or `point`) are kept as written; small talk and no-guide questions go to chat.
 
-### 4.2 Accessibility tree pointing on the LMS: committed
-- `src/cua/page.py`: reads the Chrome/Edge page through Windows UI Automation (pywinauto): course tabs (between the
-  Home link and the left menu), links/buttons by name, link URLs. Retries while Chrome builds its tree lazily.
-- "Which course?" is asked only when not already inside a course (tab title `Sakai : <course> : <tool>`).
-- `src/cua/pagewalk.py` (`PageWalkthrough`): say step → box + companion flies to the control → wait for the click →
-  next step. Vision fallback (`src/cua/vision.py`) when the tree can't find a control: hosted UI-TARS-1.5-7B via
-  OpenRouter (`OPENROUTER_API_KEY` in keys.env; the owner added one) → Hugging Face → Claude Haiku → local.
+### 4.2 Pointing inside the page: committed (+ 4.9d uncommitted)
+- `page.py` reads Chrome/Edge through Windows UI Automation (course tabs, links/buttons by name, assignment tables).
+  The first lookup can come back empty while Chrome builds its tree; walkthroughs retry.
+- `pagewalk.py` (`PageWalkthrough`): say step → box + companion on the control → wait for the click → next step.
+- Vision fallback `vision.py` when the tree can't find a control: **Claude Haiku 5.5 through OpenRouter** by default
+  (4.14), then Claude via Anthropic, UI-TARS on Hugging Face, local model.
 
 ### 4.3 Voice: committed
-- Voice in: Groq hosted Whisper large when GROQ_API_KEY is set (4.9c), else local faster-whisper `base.en`. Voice out: Edge neural voices (the owner chose **Andrew**,
-  `en-US-AndrewNeural`), cached, Windows SAPI fallback.
+- Voice in: Groq `whisper-large-v3-turbo` (~0.8 s) when GROQ_API_KEY is set, local `base.en` for live captions and as
+  fallback. Listening lasts until 1.2 s of quiet (2-minute safety cap). Voice out: Edge neural voice **Andrew**
+  (free), Windows voice fallback. Claude has no speech-to-text or text-to-speech.
 
-### 4.4 Assignments in detail: committed 4 Nov
-- Recorded the live LMS read-only (with permission): the Assignments list is a table (Assignment Title / Status /
-  Open Date / Due Date); an opened assignment has a StatusBar ("In progress"/"Submitted"), label/value rows
-  (Title, Due, Status, Submitted Date) and an "Instructions" section ending at "Additional resources for assignment".
-- `page.py`: `assignment_rows`, `assignment_page`, `assignments(hwnd)`, `opened_assignment(hwnd)`, `spoken_time`,
-  `tool_of(title)`, `opens(spec, tool)`.
-- The submit-assignment guide's step 3 is `assignment`: Klicky reads the list, says which aren't submitted and
-  their due dates, boxes the first, listens (or reads typed text) for a name ("week eight" → "Week 08 Reading");
-  any click on an assignment also counts. Then it reads the opened page: **submitted** → "already submitted, on …,
-  you don't have to worry about this one" (ends); **not submitted** → due date (or "has passed") + a 1–2 sentence
-  summary of the instructions, then the remaining steps (write/attach, Proceed, Submit).
-- `src/cua/summary.py`: summary via OpenRouter `anthropic/claude-haiku-5.5` → Anthropic `claude-haiku-5-5` → local
-  answer model → first sentences. Only title + instruction text are sent. Setting `summaries` (on).
-  Live check: 2.5 s, correct summary.
-- If the tab already shows the tool (e.g. "… : Assignments"), the link step is skipped; if an assignment is already
-  open, it is read straight away. Course Outline step now boxes the "Course Outline" link (it was "any").
+### 4.4 Assignments: committed 4 Nov
+- Reads the Assignments list (status, due dates), asks which one, reads the opened page: submitted → "you don't have
+  to worry about this one"; not submitted → due date + 1-2 sentence summary (`summary.py`, Claude Haiku 5.5).
 
-### 4.5 "Show me the syllabus": Klicky goes there itself: committed 4 Nov
-- `planning.is_do_it`: "show me / open / take me to / go to / bring up / can you open …" (not "how do I"). With
-  Settings → Browser tasks on, `course` and `link:` steps are **opened by Klicky** through UI Automation Invoke
-  (LegacyIAccessible DoDefaultAction fallback) after the companion boxes them; the mouse never moves.
-- **Never** presses buttons (`control:`/`button:` such as Proceed, Submit, Upload) and never picks an assignment.
-  If pressing fails → "I couldn't open it myself. Please click it." and guides the rest.
-- Not yet tried on the live LMS.
+### 4.5 "Show me the syllabus": go-there mode REMOVED (8 Nov, not committed)
+- Was: `is_do_it` phrases made Klicky open course tabs and menu links itself (UI Automation Invoke). The owner's test
+  run showed 0 clicks on a with-Klicky task, so it was removed: `page.press`, `PRESSABLE`, the pagewalk auto/presser
+  code and the dock's `page_press` are gone. `is_do_it` stays only so "show me ..." still routes as a question; it is
+  now guided like "how do I ...". Browser actions ("open a new tab for me") are a separate feature and still exist
+  (Settings → Browser tasks).
 
-### 4.6 Speak / Type (Deaf and hard-of-hearing): committed 4 Nov
-- Under the orb: one segmented control **Speak | Type** (`src/cua/inputmode.py`, 190×46, group "Input mode",
-  buttons "Voice"/"Typing"), then a typing box row that is always reserved (no layout shift).
-- Typed question → **answer in text only** (`SilentReader` in dock.py shows each line as a caption for its reading
-  time with the same callbacks), so LMS walkthroughs, "Which course?" and "Which assignment?" work without sound.
-  Spoken question → read aloud.
-- Hotkey opens in the saved mode (`input_mode` setting; remembered when switched). A printable key or Tab in Speak
-  mode switches to Type. New profile **"Deaf and hard of hearing"** (opens in Type). Settings → "Klicky opens in".
-- The owner supplied a detailed spec (84 px container, halo 0.88–1.0, mic-off orb). It was built, the owner
-  disliked the look ("animations/visuals fucked up"), so **the original orb was restored unchanged** and only the
-  Speak/Type boxes + typing box were kept.
+### 4.6 Speak / Type: committed 4 Nov
+- Speak | Type control under the orb; typed questions are answered in text only. "Deaf and hard of hearing" profile
+  opens in Type. The owner rejected a redesigned orb; **the original orb stays**.
 
-### 4.7 Orb and companion look: committed 4 Nov (owner-approved)
-- Orb (`src/cua/orb.py`) = the original: teal `#1D9E75` circle, white mic, voice-following rings, breathing while
-  thinking, pulse while speaking, 56 px (72 low vision). Change: the focus ring shows **only for Tab focus**
-  (opening Klicky no longer draws a dark ring). The owner's reference: plain teal circle + white mic.
-- Companion pointer (`src/cua/companion_asset.py`): **18 px, plain teal, no outline** (owner chose 18 px from a
-  comparison picture; white outline → dark green outline → no outline, at the owner's request). Offset (16, 14)
-  down-right of the real cursor.
+### 4.7 Look: committed 4 Nov (owner-approved)
+- Orb: teal `#1D9E75` circle + white mic. Companion pointer: 18 px plain teal, no outline. Focus ring only on Tab.
 
-### 4.8 Card behaviour: committed 4 Nov
-- Walkthroughs show **one step at a time** ("Step 2 of 6"), the next appears once the step is done; closing tips
-  together at the end (pagewalk + browser walkthrough).
-- The card/orb **moves clear of the boxed target** (dock.`move_out_of_the_way`: tries several spots using the card's
-  real size, picks the least-covering one). In Type mode, a step on the card isn't repeated as a caption.
+### 4.8 Card: committed 4 Nov
+- One step at a time ("Step 2 of 6"); the card moves clear of the boxed target.
 
-### 4.9 Other: committed 4 Nov
-- Local step log `%LOCALAPPDATA%\Klicky\klicky.log` (`main.walk_log`, logger `klicky.walk`; numbers/counts only).
-- "how do I submit my week 8 reading" now goes to the assignment guide (was Calendar): reading keywords added.
+### 4.9 Conversation (chat back): committed 4 Nov
+- `chat.py`: small talk is caught before retrieval (fixed phrase list, `is_small_talk`); it and no-guide questions
+  get a short reply (Claude Haiku 5.5, effort low) with the last 6 messages, forgotten after 10 min. Never
+  invents browser/LMS steps. Built-in lines when no service. Setting `chat`. Typed small talk also routes here.
 
-### 4.9b Conversation: committed 4 Nov
-- The owner wanted Klicky to be conversational ("hey Klicky, how are you?" said "no guide"; "what's up" even matched
-  the "Open your profile" guide). `src/cua/chat.py`: small talk is caught before retrieval (`is_small_talk`); it and
-  questions with no guide hits get a short reply from OpenRouter Claude Haiku 5.5 → Anthropic → local → built-in
-  lines, with the last 6 messages (forgotten after 10 min). Never step-by-step browser/LMS instructions.
-  `Answer.chat`, card title "Klicky", setting `chat` (Settings → Conversation). Live check OK. Tests: 431 pass;
-  conftest now also removes AI keys from the environment for every test.
-
-### 4.9c Groq speech-to-text: committed 4 Nov
-- Owner added `GROQ_API_KEY` to keys.env (keys.py now reads that name). `voice.HostedTranscriber`: the finished
-  question goes to Groq `whisper-large-v3-turbo` (WAV in memory, 8 s timeout); live captions and any failure use
-  local base.en. Setting `speech_service` "auto" (Groq when the key exists) / "local". Measured: Groq ~0.8 s vs
-  base.en ~1.9 s vs small.en ~6 s on this i3; all correct on three test questions. small.en is installed but unused.
-- Listening now lasts until 1.2 s of quiet (owner asked); the old 15 s limit is now a 2-minute safety net.
-  Typed small talk ("thanks") is no longer rejected by planning.route (it skipped the chat).
-
-### 4.10 Docs: committed 4 Nov
-- README describes everything above (Speak/Type, assignments, go-there mode, summaries, privacy), tracker has
-  dated entries through 4 Nov. README still says the companion is "teal"; its size isn't documented (fine).
+### 4.9d LMS guides without a course choice walk too: NOT committed
+- Any LMS guide with `point:` now starts a page walkthrough (no "Which course?" without `ask`). favourite-sites:
+  `control: Sites|View all sites|All sites|My sites`, any, any, `control: Reload`; notifications:
+  `control: Notifications|Bell|Alerts` (names are guesses, never recorded live; vision covers misses).
+- Card fix: `set_caption` re-measures the panel (a long caption squeezed the steps); the card title wraps.
 
 ---
+
+## 4.11 Research paper (Claude Doc, 4 Nov)
+- https://claude.ai/artifact/C4huXCjvy8mykFxKbt3Xc5: abstract, introduction, related work (9 papers, each opened
+  and checked: AskEase CHI 2026, Kodandaram et al. EMNLP 2026, Hu et al. ICML 2026, NeXUI, RAG (Lewis 2020),
+  DeVries et al. CHI 2026, Tran et al. CHI 2024, Pulikottil et al. 2026, Insight 2026), three-layer architecture
+  diagram, two agents, implementation table, evaluation plan, limitations, references.
+- **Out of date**: Section 6 (evaluation) still describes disability groups, questionnaires (SUS, NASA-TLX) and
+  5 tasks. It needs rewriting for the current study (4.12).
+
+## 4.12 Study plan: how it evolved (decided by the owner and the instructor)
+1. 4 Nov: instructor liked the idea; suggested a simple 2-3 step app (Klicky Mart) for Deaf vs low-vision/motor
+   users, with and without Klicky. Built (4.13).
+2. Later: instructor agreed to use ordinary **freshman students on the real LMS** instead of disability groups.
+3. Owner: **no forms or ratings**. Cognitive load from behaviour: screen recording + mouse tracking (time on task,
+   hesitation before first click, pauses > 1 s, path straightness, direction changes, wrong clicks, pages revisited).
+   Klicky's speaking time is to be subtracted from pauses (from klicky.log). One continuous recording per student;
+   the researcher presses **F8** to start/pause both the screen recording (OBS hotkey) and the mouse recorder, and
+   ticks success on paper.
+4. 8 Nov (current): **10 students, one LMS task**, with and without Klicky. Suggested task: "Open the Assignments of
+   [course] and find which assignment is due next, and its due date", a different course in each round, order
+   alternated (5 start without Klicky). Cost estimate: about $2 of AI including testing.
+- **Not built yet**: the mouse recorder (F8 start/pause, one CSV per student) and the analysis script (metrics,
+  Wilcoxon signed-rank, mouse-path figures). The owner was walked through it but hasn't said "build".
+
+## 4.13 Klicky Mart study app: NOT committed (4 Nov)
+- `study/klicky-mart/` (index.html, styles.css, app.js): grocery shop, 4 numbered aisles, cart drawer, researcher
+  set-up, 3 timed tasks, Paas effort, NASA-TLX, SUS; every click logged. `study/server.py` (127.0.0.1:8765) saves
+  `study/results/` (git-ignored). Klicky side: platform `mart`, 7 guides pointing at the shop's aria-labels; checked
+  with UI Automation in Edge. Design: Atkinson Hyperlegible, 56 px targets, plum/mango, no teal.
+- Now superseded by the LMS study (4.12); keep as a demo/backup. Its questionnaires don't fit the "no forms" plan.
+
+## 4.14 All AI on Claude through OpenRouter (now Haiku 5.5): NOT committed (8 Nov)
+- Owner has **$30 OpenRouter credit** and wanted Claude instead of UI-TARS. Vision: `vision.OpenRouterClaudeLocator`
+  (setting vision `openrouter`; UI-TARS on OpenRouter is `ui-tars`, only when chosen). Screenshots for Claude are
+  1232 px max, sides multiples of 28, so Claude never rescales them. Chat and summaries:
+  `anthropic/claude-sonnet-5.5`, reasoning effort low. The owner's settings.json vision_model was set to
+  `claude-sonnet-5-5`.
+- Measured live on the shop page: Sonnet 5.5 found 4/4 buttons within ~1 px, 5-7 s each; Haiku 5.5 same accuracy,
+  3-5 s. Chat: Sonnet ~3 s, Haiku ~2 s. OpenRouter prices equal Anthropic's (Sonnet 5.5 $2/$10, Haiku 5.5
+  $0.10/$0.50 per million tokens).
+- 8 Nov model comparison (real calls on the shop screenshot, 7 buttons; costs as charged by OpenRouter):
+  Sonnet 5.5 7/7, 4.4 s, $0.0040/lookup; **Haiku 5.5 7/7, 3.0 s, $0.0002**; GPT-6 Luna 7/7, 5.2 s, $0.0002;
+  Gemini 3.1 Flash-Lite 7/7 but on a 0-1000 scale (needs conversion), $0.0004; Gemini 2.5 Flash-Lite 6/7 (0-1000),
+  $0.00005; Qwen3-VL-30B 5/7; Qwen 3.8 Omni 3/7; GPT-5 mini 2/7. Voice-to-text: Gemini Flash-Lite and Qwen Omni were
+  correct but 4-5 s vs Groq 0.8 s, so Groq stays. Study cost (10 students): Sonnet $0.28, Haiku $0.02.
+- **Owner chose Haiku 5.5 (8 Nov)**: vision, chat and summaries now `anthropic/claude-haiku-5.5` /
+  `claude-haiku-5-5`; the owner's settings.json vision_model is `claude-haiku-5-5`. Not yet tried on a real LMS
+  screenshot (the test page is simpler than the LMS).
+
+---
+
+## 4.15 Setup docs for group members: NOT committed (8 Nov)
+- Plan: the owner's two group members (Member A, Member B) clone the repo, install Klicky on their own PCs and run
+  the study with friends in their flats. The owner buys OpenRouter credit, makes one OpenRouter key per member
+  with a spending limit and sends it privately; each member makes their own free Groq key.
+- `SETUP.md` (new): requirements, clone, setup.bat, speech model, keys.env (which line is which, where each key
+  comes from, safety rules), check, first run, settings, mic test, updates, troubleshooting. `README.md` has a new
+  "Start here (group members)" section at the top and an updated keys section (GROQ line, OpenRouter first).
+- `scripts/check_setup.py` + `.bat` (new): checks Windows, Python, packages, speech model, both keys (OpenRouter
+  `/api/v1/key` shows the limit left; Groq `/models`), and that keys.env isn't tracked. Never prints a key.
+- `scripts/mic_test.py` + `.bat` (new): records 8 s, shows voice/room levels, where listening would stop, and what
+  Groq turbo / large-v3 (with and without the word list) and base.en heard. Nothing saved. Each voice question
+  now also logs length, loudness and engine to klicky.log (`voice.log_heard`). The owner hasn't run the mic test yet
+  (Whisper mishears the owner; Groq itself transcribes clean audio perfectly).
+
+## 4.16 Study recorder, analysis and study-day sheet: NOT committed (8 Nov)
+- Plan: Member A and Member B (group members, on GitHub) install Klicky on their own PCs and run sessions with
+  flatmates, each student on their own LMS account. Codes: lead P01-P09, A P11-P19, B P21-P29.
+- `study/recorder.py` (+ `run_recorder.bat`): small always-on-top window; type code, Start. **Ctrl+S starts a task,
+  Ctrl+E ends it** (owner's choice; registered with RegisterHotKey while the recorder is open, so the browser never
+  gets Save-page / address-bar; F8 still toggles as a backup, polled). Then "Yes, they did it" / "No / gave up".
+  Logs at 50 Hz only between start and end: moves (only when the pointer moved), left/right clicks, page changes
+  (foreground window title). Never keys, pixels or sound. Saves `study/recordings/<code>.csv` + `.json` after each
+  task (git-ignored). `plan(code)`: tasks "assignment" (find which is due next + date) and "outline" (open Course
+  Outline); even codes with Klicky first, odd without; the second round uses a different course.
+- `study/analyze.py`: per task seconds, time to first click, pauses >1 s, pointer distance, straightness, turns
+  >90 degrees, clicks, page changes, revisits; per-student means with vs without, medians, exact two-sided Wilcoxon
+  signed-rank (no scipy); writes `study/results/summary.md`, `tasks.csv`, `paths_<code>.png` (PIL). `main(folder, out)`.
+- `study/STUDY_DAY.md`: OBS set-up, codes, consent script, 30-second Klicky intro, per-task steps, fairness rules,
+  sending files. README "Start here" step 5 and SETUP section 10 link to it.
+- tests/test_recorder.py (6 tests). Checked with 6 fake students into tmp/fake_results. Not yet used on a person.
+- 8 Nov fixes after the owner's second test (P01): every dock state change is now logged ("dock a -> b", with ms) by
+  `dockstate.DockState.fire`; at each task end the recorder reads klicky.log and stores `klicky_busy` spans (states
+  idle/listening/typing/thinking/speaking/acting; "waiting" is the student's turn) plus `started_at` in the JSON.
+  analyze.py ignores clicks/pages on the recorder window and empty titles (taskbar), treats the "Klicky" window as
+  Klicky's turn (fallback when no log), reports `klicky_s`, `klicky_uses`, `own_s` (time minus Klicky's turns), and
+  leaves Klicky's turns out of pauses and of time to first click. P01 test: own time 26.5 s with vs 30.5 s without;
+  first click 3.7 vs 7.0 s; ~15 s per task with Klicky. Recorder must run on the same PC as Klicky.
+- `study/report.py` (8 Nov): analyze.py also writes `study/results/report.html`, all graphs as inline SVG (no
+  libraries), grouped by HCI idea: Effectiveness (tasks done, bars), Efficiency (time split into own work and time
+  with Klicky, stacked bars), Cognitive load (time to first click, pauses, time paused), Cognitive offloading
+  (pointer distance, straightness, direction changes), Navigation (clicks, page changes, revisits): slope charts,
+  grey line per student, median teal/red/grey, Wilcoxon p; then the mouse-path pictures. Demo with 10 fake students
+  in tmp/report_fake10. Not added yet (proposed): retention task (learning), final spoken preference.
+- More measures (8 Nov, owner asked for more HCI angles; sources checked by web search): decide_s (pointer still
+  before each click), idle_share, bursts (stop-and-go movements, gap > 0.15 s), speed while moving (Grimes &
+  Valacich ICIS 2015; Thorpe et al. 2022; MacKenzie et al. CHI 2001 direction-change idea), lostness (Smith 1996,
+  sqrt((N/S-1)^2+(R/N-1)^2), R = 3 pages per task), nav_efficiency (needed/made clicks; 2 for assignment, 3 for
+  outline), klm_ratio (own time / clicks needed x 2.65 s: KLM M 1.35 + P 1.1 + B 0.2), rage_clicks (3+ in 1 s within
+  40 px). Report: 17 slope charts in 4 sections + tasks-done bars + time split + "where the time went" (moving /
+  still / Klicky's turn) = 20 charts, plus path pictures. ROUTE values are assumptions about the LMS route.
 
 ## 5. Live LMS facts (from the read-only recording, ComSec)
 - Tab title: `Sakai : Computer Security (Class No 101765) - Fall 2026 : <Tool> - Google Chrome`.
-- Left menu links include Overview, Syllabus, Assignments, Resources, Announcements, Calendar, Tests & Quizzes, Drop Box.
-- Syllabus page: "Expand All" button, "Print View" link, TabItem "Course Outline" containing link "Course Outline".
-- Assignment page buttons: Proceed, Preview, Save Draft, Cancel; "Select a file from computer". Submitted page has
-  "Back to list". 20 ComSec assignments were read correctly. A **Not Started** assignment page was never recorded.
+- Left menu: Overview, Syllabus, Assignments, Resources, Announcements, Calendar, Tests & Quizzes, Drop Box.
+- Syllabus page: "Expand All" button, "Print View" link, TabItem "Course Outline" with link "Course Outline".
+- Assignment page buttons: Proceed, Preview, Save Draft, Cancel; "Select a file from computer"; submitted page has
+  "Back to list". A **Not Started** assignment page was never recorded.
 
 ---
 
 ## 6. Rules and constraints to keep
 
-- **Never read, print or paste `keys.env` or any API key.** Keys only in `keys.env` (git-ignored) or env vars.
-  The owner once pasted a key in chat: it was not used and they were told to revoke it.
-- Ask before reading the owner's browser/LMS tabs (each read-only check needs a yes). Recordings stay local.
-- Klicky never moves the real mouse; it opens only course tabs/menu links itself; every button, form and choice is
-  the person's. Never submit anything on the LMS.
-- Tests must not touch real user files (conftest guard). Don't download models/files without asking.
-- Don't commit or push without the owner's yes. Push target is `azhab-dev` (main only when asked).
-- Prefer the owner's visual direction: they react strongly to looks. Show options as rendered pictures (as with
-  the pointer sizes) before changing visuals.
+- **Never read, print or paste `keys.env` or any API key.** Check a key only by name/prefix.
+- Ask before reading the owner's browser/LMS tabs. Recordings stay local.
+- Klicky never moves the real mouse and never clicks on the LMS itself (go-there removed 8 Nov); never submits anything.
+- Tests must not touch real user files or real keys (conftest guard). Don't download models/files without asking.
+- Don't commit or push without the owner's yes; a yes covers `azhab-dev` and `main`. No Claude co-author line.
+- Visual changes: show rendered options first; the original orb stays.
 
 ---
 
 ## 7. Open items / next steps
 
-1. Done: today's work is committed and pushed to `azhab-dev`. Merge to `main` only if the owner asks.
-2. Live checks not done yet: go-there mode pressing links on the real LMS; one-step card + move-aside on the real
-   screen; Speak/Type end to end; a **Not Started** assignment page; Drop Box names.
-3. Optional (proposed, not started): Clicky-style motion from the reference video: the companion morphs into a tiny
-   waveform while listening, a spinner while thinking, flies to the target facing its direction with a small
-   "found it!" label, and flies back after the click. (Video analysis: triangle down-right of cursor; hotkey → flat
-   line → 5-bar waveform; ~34 s spinner ring; ~0.6–0.7 s curved flight; pill label; label fades ~1.5 s after the
-   click and it returns.)
-4. UMS (IBA's other portal) is not covered; needs a video/screenshots from the owner.
-5. Usability-test materials (tasks, SUS, results template) were suggested for the HCI report; not started.
-6. Rarely flaky test: `test_a_control_folded_into_a_menu_points_at_the_menu_first` (timing; wait raised to 8 s).
+1. Commit and push 4.9d, 4.13, 4.14 and this file (needs the owner's yes).
+2. Study: recorder, analysis and STUDY_DAY.md are built (4.16); members need the push, their OpenRouter keys and a
+   practice session (P00). Rewrite the paper's Section 6 for the LMS study with behavioural measures.
+3. Try the study task end to end with Klicky on the real LMS (Haiku vision, walkthrough, due-date reading); check Haiku on a real LMS screenshot.
+4. Live checks never done: a Not Started assignment page; Sites/bell/Reload names.
+5. Optional, not started: Clicky-style companion motion from the reference video; UMS portal guides.
+6. Rarely flaky tests: `test_a_control_folded_into_a_menu_points_at_the_menu_first`,
+   `test_first_appearance_snaps_then_fades_in_and_follows_lazily`, a neural-TTS ordering test (all timing).
 
 ---
 
-## 8. Short timeline of this session
-- Cloned A11yNav as Azhism, branch `azhab-dev`; built RAG layer, profiles, voice orb, companion, walkthroughs,
-  browser actions (committed earlier).
-- 3 Nov: LMS guides from the student video; course-aware walkthroughs; accessibility-tree pointing with hosted
-  UI-TARS fallback (OpenRouter); natural voice (Andrew); committed 6268481.
-- Blender add-on + guides built, then **removed** (stashed) at the owner's request; detailed README + full
-  requirements; committed a513e43, pushed, main fast-forwarded.
-- Assignment detail (list, status, summaries), Course Outline pointing, "already on the page" fixes, step log.
-- "Show me the syllabus" go-there mode.
-- 4 Nov: Clicky video analysed; Speak/Type + Deaf profile + text-only answers; orb redesign reverted to the original;
-  focus ring only on Tab; one step at a time; card moves off the target; companion pointer 18 px, no outline.
+## 8. Timeline
+- 3 Nov: RAG layer, LMS guides from the student video, accessibility-tree pointing, UI-TARS fallback, Andrew voice.
+- 4 Nov: assignments detail, go-there mode, Speak/Type, card and pointer look; history rewritten (no co-author);
+  chat back (520d99b); hide video line; Groq Whisper + listen until pause + typed small talk (282173d); research
+  paper doc; LMS walks without course choice; Klicky Mart study app.
+- After 4 Nov: study pivot to freshmen on the LMS with behavioural measures (no forms); cost estimates.
+- 8 Nov: everything on Claude through OpenRouter (Sonnet 5.5, then Haiku 5.5 after a 9-model comparison); this handoff rewritten.

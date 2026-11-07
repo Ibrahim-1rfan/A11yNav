@@ -187,6 +187,7 @@ class HostedTranscriber:
 
     def __init__(self, local, post=None):
         self.local, self.post = local, post
+        self.used = ""  # which engine heard the last question, for the step log
 
     def partial(self, audio):
         return self.local.partial(audio) if model_installed(self.local.name) else ""
@@ -206,7 +207,9 @@ class HostedTranscriber:
             raise Cancelled()
         try:
             text = self.ask_groq(audio)
-        except Exception:
+            self.used = "groq"
+        except Exception as exc:
+            self.used = f"local (groq failed: {type(exc).__name__})"
             if not model_installed(self.local.name):
                 raise UserError("I couldn't reach the speech service. Check the internet, or type your question.")
             return self.local.transcribe(audio, stop)
@@ -282,7 +285,9 @@ class VoiceWorker(QThread):
             audio = self.microphone.record(self.stop_event, self.level.emit, on_chunk=buffer.append, endpointer=endpointer)
             recorded.set()
             self.stage.emit("transcribing")
-            self.heard.emit(self.transcriber.transcribe(audio, self.stop_event))
+            text = self.transcriber.transcribe(audio, self.stop_event)
+            log_heard(audio, endpointer, getattr(self.transcriber, "used", "") or "local")
+            self.heard.emit(text)
         except Cancelled:
             self.stage.emit("stopped")
         except UserError as exc:
@@ -291,6 +296,20 @@ class VoiceWorker(QThread):
             self.failed.emit("Voice input stopped unexpectedly. You can type your question instead.")
         finally:
             recorded.set()
+
+
+def log_heard(audio, endpointer, engine):
+    """One line per voice question in klicky.log: length, loudness and engine. Never the audio or the words."""
+    import logging
+    try:
+        import numpy as np
+        levels = sorted(endpointer.levels) or [0.0]
+        voice_level = levels[int(len(levels) * .9)] if len(levels) > 1 else levels[0]
+        logging.getLogger("klicky.walk").info(
+            "voice question: %.1f s, room %.4f, voice %.4f, peak %.2f, heard by %s",
+            len(audio) / RATE, endpointer.threshold / 3, voice_level, float(np.max(np.abs(audio))) if len(audio) else 0.0, engine)
+    except Exception:
+        pass
 
 
 class BargeInMonitor(QThread):

@@ -12,9 +12,7 @@ due, points at the first, and listens for another name. Once one is opened, its 
 the walkthrough ("you don't have to worry about this one"); otherwise its due date and a short summary of its
 instructions are read before the next step.
 
-When the person asked Klicky to go there itself ("show me the syllabus of Computer Security"), course and menu-link
-steps are done by Klicky: the companion flies to the link and Klicky opens it through UI Automation (never a button
-such as Proceed or Submit, and never with the mouse). The first step that needs the person is guided as usual.
+"Show me the syllabus" is guided the same way: Klicky only points, and every click is the person's.
 """
 import logging
 import time
@@ -32,9 +30,6 @@ LOOK_LIMIT = 2        # vision lookups per step: each one is a screenshot and a 
 PAGE_SETTLE_MS = 1200  # after the click, let the next page load before reading the next step
 CLICK_MENU_MS = 500    # after opening a collapsed menu, let it unfold before looking inside
 NAMED_AT_MOST = 3      # unsubmitted assignments read out by name; the rest are counted
-AUTO_WAIT_MS = 300     # doing it for the person: look for the link again this often while the page loads
-AUTO_TRIES = 12        # about 4 s; then the person is asked to click it instead
-PRESS_MS = 700         # the companion rests on the link a moment, so the person sees what is opened
 LOG = logging.getLogger("klicky.walk")  # step numbers and counts only, never what the page says
 
 
@@ -75,7 +70,7 @@ def status_lines(found, title, summary, now=None):
 
 class PageWalkthrough(QObject):
     def __init__(self, dock, steps, points, hwnd, chosen="", start=0, lead="", finder=None, worker_factory=None, seer=None,
-                 reader=None, question="", auto=False, presser=None):
+                 reader=None, question=""):
         super().__init__()
         self.dock, self.steps, self.hwnd, self.chosen = dock, list(steps), hwnd, chosen
         self.points = list(points) + ["any"] * (len(self.steps) - len(points))
@@ -86,7 +81,6 @@ class PageWalkthrough(QObject):
         self.seer = seer  # (hwnd, spec, chosen, step) -> vision.Seen or None; None means no vision fallback
         self.reader = reader  # assignments(hwnd), opened(hwnd), summarize(title, text); None: "assignment" acts as "any"
         self.question = question  # the person's question: it may name the assignment already
-        self.auto, self.presser, self.pressed_last = auto, presser or page.press, False  # Klicky opens links itself
         self.looks, self.revealing, self.by_eye = 0, False, False
         self.index, self.active, self.advancing = start, True, False
         self.worker, self.tasks = None, []
@@ -135,58 +129,12 @@ class PageWalkthrough(QObject):
             self.dock.set_caption("Looking at your assignments...")
             self.run(self.reader.assignments, self.hwnd, done=lambda rows, index=index: self.on_list(index, rows or [], lines))
             return
-        if self.auto_step(index):
-            self.speak_step(index, lines + [self.opening(index)], on_end=lambda: self.press_when_found(index))
-            return
         self.speak_step(index, lines + [spoken(self.steps[index])])
 
     def speak_step(self, index, lines, on_end=None):
         last = len(lines) - 1
         self.dock.speak(lines, on_line_start=lambda line: self.show_step(index) if line == last else None,
                         on_end=on_end or (lambda: self.await_step(index)))
-
-    # ---- doing it for the person: open the course and its menu links ---------------------------------------
-    def auto_step(self, index):
-        return self.auto and self.points[index].partition(":")[0].strip() in page.PRESSABLE
-
-    def opening(self, index):
-        kind, _, name = self.points[index].partition(":")
-        return f"Opening {page.short_name(self.chosen) if kind.strip() == 'course' else name.split('|')[0].strip()}."
-
-    def press_when_found(self, index, tries=0):
-        """Once the link is boxed on screen, open it; while the page still loads, look again."""
-        if not self.active or index != self.index:
-            return
-        if self.dock.pointed_rect is None or self.by_eye:
-            if tries >= AUTO_TRIES or self.by_eye:  # only seen in a screenshot: it can't be pressed, so the person clicks
-                self.hand_over(index)
-                return
-            if tries % 3 == 2:
-                self.point(index)
-            QTimer.singleShot(AUTO_WAIT_MS, lambda: self.press_when_found(index, tries + 1))
-            return
-        QTimer.singleShot(PRESS_MS, lambda: self.active and self.index == index and self.press_now(index))
-
-    def press_now(self, index):
-        companion = getattr(getattr(self.dock, "owner", None), "companion", None)
-        if companion is not None:
-            companion.press()  # the companion squishes as if it clicked
-        self.run(self.presser, self.hwnd, self.points[index], self.chosen, done=lambda ok, index=index: self.on_pressed(index, ok))
-
-    def on_pressed(self, index, ok):
-        if not self.active or index != self.index:
-            return
-        LOG.info("opened step %d myself: %s", index, bool(ok))
-        if not ok:
-            self.hand_over(index)
-            return
-        self.pressed_last = True
-        self.advance()
-
-    def hand_over(self, index):
-        """Klicky couldn't open it: the person clicks this one, and the rest are guided."""
-        self.auto = False
-        self.speak_step(index, ["I couldn't open it myself. Please click it."])
 
     def on_list(self, index, rows, lines):
         if not self.active or index != self.index:
@@ -333,7 +281,6 @@ class PageWalkthrough(QObject):
                 self.dock.highlighter.clear()
                 QTimer.singleShot(CLICK_MENU_MS, lambda index=self.index: self.active and self.index == index and self.point(index))
                 return
-        self.pressed_last = False
         self.advance()
 
     def advance(self):
@@ -414,8 +361,7 @@ class PageWalkthrough(QObject):
         if tips:
             self.dock.card.show_from(self.walked, len(tips))
             self.dock.reposition()
-        done = "Here it is." if self.pressed_last else "That's it, well done."
-        self.dock.speak([done] + [spoken(tip) for tip in tips],
+        self.dock.speak(["That's it, well done."] + [spoken(tip) for tip in tips],
                         on_line_start=lambda line: self.dock.card.set_active(line - 1) if line else None,
                         on_end=self.dock.on_read_end)
 

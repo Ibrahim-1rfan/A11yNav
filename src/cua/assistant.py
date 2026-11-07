@@ -80,7 +80,7 @@ def fill(steps, ask, value):
 def extractive(hits, profile, note=""):
     chunk = hits[0].chunk
     steps = fill(chunk.steps, chunk.ask, f"your {chunk.ask}")
-    if chunk.ask:  # a guided walkthrough needs every step, not a shortened list
+    if chunk.ask or chunk.points:  # a guided walkthrough needs every step, not a shortened list
         return Answer(chunk.title, (chunk.app,), steps, (chunk.source,) if chunk.source else (), True, False, note,
                       chunk.task, chunk.walk, chunk.evidence, chunk.ask, chunk.points, chunk.steps)
     if len(steps) > profile.max_steps:
@@ -117,7 +117,7 @@ class Assistant:
                 raise Cancelled()
             return answer or Answer("No guide found", (), (), (), False, False, NO_GUIDE)
         profile = profiles.get(self.settings.profile)
-        if not (self.text and self.settings.text_model) or hits[0].chunk.ask:  # guided steps are kept as written
+        if not (self.text and self.settings.text_model) or hits[0].chunk.ask or hits[0].chunk.points:  # guided steps are kept as written
             return extractive(hits, profile)
         try:
             reply = self.text.complete(system_prompt(profile, len(hits)), user_prompt(question, hits), stop)

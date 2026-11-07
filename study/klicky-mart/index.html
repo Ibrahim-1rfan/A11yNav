@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klicky Mart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#shelf">Skip to the shelves</a>
+
+  <header class="topbar">
+    <p class="brand"><span class="brand-mark" aria-hidden="true"></span>Klicky Mart</p>
+    <button id="cartButton" class="cart-button" type="button" aria-label="Cart, 0 items">
+      <span aria-hidden="true">Cart</span>
+      <span id="cartCount" class="cart-count" aria-hidden="true">0</span>
+    </button>
+  </header>
+
+  <section id="taskBand" class="task-band" hidden aria-labelledby="taskText">
+    <p id="taskStep" class="task-step"></p>
+    <p id="taskText" class="task-text"></p>
+    <div class="task-actions">
+      <button id="doneButton" class="btn btn-primary" type="button">I'm done</button>
+      <button id="skipButton" class="btn btn-quiet" type="button">Skip this task</button>
+    </div>
+  </section>
+
+  <div id="store" class="store">
+    <nav class="aisles" aria-label="Aisles">
+      <ul>
+        <li><a href="#fruit" data-aisle="fruit" style="--aisle: var(--fruit)"><span class="aisle-no" aria-hidden="true">1</span><span class="aisle-name">Fruit</span></a></li>
+        <li><a href="#dairy" data-aisle="dairy" style="--aisle: var(--dairy)"><span class="aisle-no" aria-hidden="true">2</span><span class="aisle-name">Dairy</span></a></li>
+        <li><a href="#bakery" data-aisle="bakery" style="--aisle: var(--bakery)"><span class="aisle-no" aria-hidden="true">3</span><span class="aisle-name">Bakery</span></a></li>
+        <li><a href="#vegetables" data-aisle="vegetables" style="--aisle: var(--vegetables)"><span class="aisle-no" aria-hidden="true">4</span><span class="aisle-name">Vegetables</span></a></li>
+      </ul>
+    </nav>
+    <main id="shelf" class="shelf" tabindex="-1">
+      <h1 id="aisleTitle" class="aisle-title"></h1>
+      <ul id="items" class="items"></ul>
+    </main>
+  </div>
+
+  <div id="cartBackdrop" class="backdrop" hidden></div>
+  <aside id="cartPanel" class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
+    <div class="cart-head">
+      <h2 id="cartTitle">Your cart</h2>
+      <button id="closeCart" class="btn btn-quiet" type="button">Close cart</button>
+    </div>
+    <div id="cartBody" class="cart-body"></div>
+  </aside>
+
+  <p id="toast" class="toast" aria-hidden="true"></p>
+  <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+
+  <!-- Study screens: shown over the shop between tasks. -->
+  <section id="screen" class="screen" hidden>
+    <div id="screenCard" class="screen-card" role="dialog" aria-modal="true" aria-labelledby="screenTitle"></div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

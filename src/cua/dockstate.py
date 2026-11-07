@@ -3,6 +3,9 @@
 idle -> listening -> thinking -> speaking -> done, with error and typing as side states. Events that are not
 valid in the current state are ignored, so a late microphone or model result can never jump the dock around.
 """
+import logging
+
+LOG = logging.getLogger("klicky.walk")  # every state change, with its time: the study measures time spent with Klicky
 IDLE, LISTENING, TYPING, THINKING, SPEAKING, WAITING, ACTING, DONE, ERROR, CLOSED = (
     "idle", "listening", "typing", "thinking", "speaking", "waiting", "acting", "done", "error", "closed")
 
@@ -61,5 +64,6 @@ class DockState:
         if new is None:
             return None
         old, self.state = self.state, new
+        LOG.info("dock %s -> %s", old, new)
         self.on_change(old, new, event)
         return new

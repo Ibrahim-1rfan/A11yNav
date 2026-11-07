@@ -2,6 +2,11 @@
 title: Show or hide a course in the LMS top bar (favourite sites)
 task: add a course to your top bar
 keywords: star, favourite, favorite, favourites, favorites, top bar, header, course missing, course not showing, new course, add course, hide course, sites, all sites, organize favorites
+point:
+- control: Sites|View all sites|All sites|My sites
+- any
+- any
+- control: Reload
 evidence:
 - IBA LMS student walkthrough video, 5:39 to 5:59
 ---

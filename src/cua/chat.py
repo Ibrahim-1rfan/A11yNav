@@ -106,7 +106,7 @@ HISTORY = History()
 
 def ask_openrouter(messages, post=None):
     import requests
-    body = {"model": OPENROUTER_MODEL, "temperature": 0.7, "max_tokens": 160, "stream": False,
+    body = {"model": OPENROUTER_MODEL, "max_tokens": 400, "stream": False, "reasoning": {"effort": "low"},
             "messages": [{"role": "system", "content": SYSTEM}] + messages}
     headers = {"Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY', '')}"}
     response = (post or requests.post)(OPENROUTER_URL, json=body, headers=headers, timeout=TIMEOUT_S, allow_redirects=False)
