@@ -8,6 +8,8 @@ from pathlib import Path
 import importlib
 import platform
 import sys
+
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 PACKAGES = ["PySide6", "pywinauto", "faster_whisper", "sounddevice", "edge_tts", "requests", "numpy", "PIL"]
@@ -43,10 +45,16 @@ def main():
     loaded = set(load_keys())
     import os
     import requests
+    from dotenv import load_dotenv
+
+    load_dotenv("keys.env", override=True)
+
     if os.environ.get("OPENROUTER_API_KEY"):
         try:
+            # print(f"Key starts with: {str(os.environ.get('OPENROUTER_API_KEY'))[:15]}")
             r = requests.get("https://openrouter.ai/api/v1/key", timeout=20,
                              headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
+            # print(r.status_code, r.text)
             data = r.json().get("data", {}) if r.ok else {}
             left = data.get("limit_remaining")
             report(r.ok, "OPENROUTER_API_KEY works" + (f" (${left:.2f} of its limit left)" if isinstance(left, (int, float)) else ""),

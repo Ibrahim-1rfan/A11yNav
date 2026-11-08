@@ -1,0 +1,100 @@
+{
+  "code": "P20",
+  "saved": "2026-11-08 13:09:25",
+  "tasks": [
+    {
+      "step": 1,
+      "round": 1,
+      "klicky": "with",
+      "task": "assignment",
+      "text": "In one of your courses (say which), find which assignment is due next, and its due date.",
+      "seconds": 51.98,
+      "klicky_busy": [
+        [
+          2.03,
+          2.16
+        ],
+        [
+          2.16,
+          9.52
+        ],
+        [
+          9.52,
+          13.02
+        ],
+        [
+          13.02,
+          20.5
+        ],
+        [
+          27.61,
+          30.41
+        ],
+        [
+          31.88,
+          51.98
+        ]
+      ],
+      "started_at": "2026-11-08T13:02:48.697",
+      "success": true
+    },
+    {
+      "step": 2,
+      "round": 1,
+      "klicky": "with",
+      "task": "outline",
+      "text": "Open the Course Outline of one of your courses (say which).",
+      "seconds": 46.35,
+      "klicky_busy": [
+        [
+          1.97,
+          2.0
+        ],
+        [
+          2.0,
+          8.96
+        ],
+        [
+          8.96,
+          10.38
+        ],
+        [
+          10.38,
+          16.57
+        ],
+        [
+          21.59,
+          24.35
+        ],
+        [
+          29.78,
+          36.49
+        ]
+      ],
+      "started_at": "2026-11-08T13:05:13.715",
+      "success": true
+    },
+    {
+      "step": 3,
+      "round": 2,
+      "klicky": "without",
+      "task": "assignment",
+      "text": "In a different course, find which assignment is due next, and its due date.",
+      "seconds": 58.11,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:06:23.090",
+      "success": true
+    },
+    {
+      "step": 4,
+      "round": 2,
+      "klicky": "without",
+      "task": "outline",
+      "text": "Open the Course Outline of a different course.",
+      "seconds": 42.42,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:08:37.818",
+      "success": true
+    }
+  ]
+}

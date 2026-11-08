@@ -1,0 +1,8813 @@
+{
+ "code": "P33",
+ "synthetic": true,
+ "generator": "L2_generative (replicate.py MotorModel)",
+ "pace_factor": 0.808,
+ "device_profile_from": "P24",
+ "trials": [
+  {
+   "step": 1,
+   "round": 1,
+   "klicky": "without",
+   "task": "outline",
+   "duration_s": 26.35,
+   "events": [
+    {
+     "t": 0.0,
+     "type": "start",
+     "x": 1308,
+     "y": 557,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 1.143,
+     "type": "move",
+     "x": 1313,
+     "y": 551,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.159,
+     "type": "move",
+     "x": 1320,
+     "y": 542,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.19,
+     "type": "move",
+     "x": 1334,
+     "y": 527,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.206,
+     "type": "move",
+     "x": 1342,
+     "y": 521,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.222,
+     "type": "move",
+     "x": 1352,
+     "y": 514,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.236,
+     "type": "move",
+     "x": 1356,
+     "y": 513,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.282,
+     "type": "move",
+     "x": 1367,
+     "y": 505,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.299,
+     "type": "move",
+     "x": 1369,
+     "y": 504,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.316,
+     "type": "move",
+     "x": 1370,
+     "y": 504,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.29,
+     "type": "move",
+     "x": 1380,
+     "y": 494,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.306,
+     "type": "move",
+     "x": 1388,
+     "y": 489,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.322,
+     "type": "move",
+     "x": 1399,
+     "y": 483,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.336,
+     "type": "move",
+     "x": 1407,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.351,
+     "type": "move",
+     "x": 1415,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.367,
+     "type": "move",
+     "x": 1421,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.401,
+     "type": "move",
+     "x": 1429,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.417,
+     "type": "move",
+     "x": 1431,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.467,
+     "type": "move",
+     "x": 1434,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.753,
+     "type": "move",
+     "x": 1455,
+     "y": 472,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.77,
+     "type": "move",
+     "x": 1478,
+     "y": 463,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.784,
+     "type": "move",
+     "x": 1512,
+     "y": 449,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.799,
+     "type": "move",
+     "x": 1554,
+     "y": 431,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.817,
+     "type": "move",
+     "x": 1599,
+     "y": 410,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.833,
+     "type": "move",
+     "x": 1634,
+     "y": 390,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.848,
+     "type": "move",
+     "x": 1661,
+     "y": 375,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.864,
+     "type": "move",
+     "x": 1687,
+     "y": 358,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.88,
+     "type": "move",
+     "x": 1713,
+     "y": 341,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.896,
+     "type": "move",
+     "x": 1742,
+     "y": 320,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.912,
+     "type": "move",
+     "x": 1763,
+     "y": 303,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.926,
+     "type": "move",
+     "x": 1786,
+     "y": 285,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.958,
+     "type": "move",
+     "x": 1823,
+     "y": 251,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.987,
+     "type": "move",
+     "x": 1852,
+     "y": 224,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.003,
+     "type": "move",
+     "x": 1865,
+     "y": 212,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.018,
+     "type": "move",
+     "x": 1877,
+     "y": 199,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.038,
+     "type": "move",
+     "x": 1889,
+     "y": 188,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.053,
+     "type": "move",
+     "x": 1896,
+     "y": 181,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.068,
+     "type": "move",
+     "x": 1901,
+     "y": 176,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.084,
+     "type": "move",
+     "x": 1905,
+     "y": 171,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.099,
+     "type": "move",
+     "x": 1909,
+     "y": 167,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.114,
+     "type": "move",
+     "x": 1913,
+     "y": 164,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.147,
+     "type": "move",
+     "x": 1917,
+     "y": 159,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.163,
+     "type": "move",
+     "x": 1918,
+     "y": 158,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.176,
+     "type": "move",
+     "x": 1919,
+     "y": 158,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.191,
+     "type": "move",
+     "x": 1919,
+     "y": 157,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.826,
+     "type": "move",
+     "x": 1918,
+     "y": 157,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.862,
+     "type": "move",
+     "x": 1917,
+     "y": 157,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.882,
+     "type": "move",
+     "x": 1916,
+     "y": 158,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.916,
+     "type": "move",
+     "x": 1913,
+     "y": 158,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.932,
+     "type": "move",
+     "x": 1911,
+     "y": 159,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.964,
+     "type": "move",
+     "x": 1905,
+     "y": 160,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.979,
+     "type": "move",
+     "x": 1901,
+     "y": 161,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.995,
+     "type": "move",
+     "x": 1897,
+     "y": 160,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.028,
+     "type": "move",
+     "x": 1885,
+     "y": 161,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.044,
+     "type": "move",
+     "x": 1877,
+     "y": 162,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.076,
+     "type": "move",
+     "x": 1867,
+     "y": 161,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.14,
+     "type": "move",
+     "x": 1861,
+     "y": 159,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.481,
+     "type": "move",
+     "x": 1863,
+     "y": 174,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.496,
+     "type": "move",
+     "x": 1863,
+     "y": 188,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.512,
+     "type": "move",
+     "x": 1863,
+     "y": 195,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.527,
+     "type": "move",
+     "x": 1862,
+     "y": 202,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.543,
+     "type": "move",
+     "x": 1862,
+     "y": 207,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.558,
+     "type": "move",
+     "x": 1862,
+     "y": 208,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.573,
+     "type": "move",
+     "x": 1862,
+     "y": 209,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.795,
+     "type": "move",
+     "x": 1845,
+     "y": 221,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.813,
+     "type": "move",
+     "x": 1828,
+     "y": 237,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.844,
+     "type": "move",
+     "x": 1828,
+     "y": 259,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.859,
+     "type": "move",
+     "x": 1834,
+     "y": 266,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.875,
+     "type": "move",
+     "x": 1844,
+     "y": 272,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.89,
+     "type": "move",
+     "x": 1848,
+     "y": 275,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.905,
+     "type": "move",
+     "x": 1854,
+     "y": 278,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.92,
+     "type": "move",
+     "x": 1858,
+     "y": 280,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.938,
+     "type": "move",
+     "x": 1861,
+     "y": 282,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.986,
+     "type": "move",
+     "x": 1864,
+     "y": 284,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.126,
+     "type": "move",
+     "x": 1840,
+     "y": 259,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.143,
+     "type": "move",
+     "x": 1821,
+     "y": 239,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.16,
+     "type": "move",
+     "x": 1809,
+     "y": 222,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.189,
+     "type": "move",
+     "x": 1794,
+     "y": 203,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.204,
+     "type": "move",
+     "x": 1787,
+     "y": 192,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.22,
+     "type": "move",
+     "x": 1785,
+     "y": 188,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.235,
+     "type": "move",
+     "x": 1783,
+     "y": 186,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.247,
+     "type": "move",
+     "x": 1782,
+     "y": 185,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.263,
+     "type": "move",
+     "x": 1782,
+     "y": 184,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.61,
+     "type": "move",
+     "x": 1795,
+     "y": 188,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.629,
+     "type": "move",
+     "x": 1802,
+     "y": 192,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.647,
+     "type": "move",
+     "x": 1806,
+     "y": 195,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.663,
+     "type": "move",
+     "x": 1809,
+     "y": 198,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.679,
+     "type": "move",
+     "x": 1812,
+     "y": 200,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.695,
+     "type": "move",
+     "x": 1813,
+     "y": 202,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.711,
+     "type": "move",
+     "x": 1815,
+     "y": 204,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.727,
+     "type": "move",
+     "x": 1815,
+     "y": 205,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.76,
+     "type": "move",
+     "x": 1816,
+     "y": 207,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.165,
+     "type": "click",
+     "x": 1816,
+     "y": 207,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 11.472,
+     "type": "move",
+     "x": 1812,
+     "y": 213,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.488,
+     "type": "move",
+     "x": 1805,
+     "y": 224,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.504,
+     "type": "move",
+     "x": 1795,
+     "y": 238,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.536,
+     "type": "move",
+     "x": 1747,
+     "y": 307,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.569,
+     "type": "move",
+     "x": 1630,
+     "y": 445,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.584,
+     "type": "move",
+     "x": 1558,
+     "y": 501,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.617,
+     "type": "move",
+     "x": 1400,
+     "y": 551,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.641,
+     "type": "move",
+     "x": 1241,
+     "y": 531,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.657,
+     "type": "move",
+     "x": 1147,
+     "y": 498,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.672,
+     "type": "move",
+     "x": 1078,
+     "y": 470,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.703,
+     "type": "move",
+     "x": 1008,
+     "y": 438,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.719,
+     "type": "move",
+     "x": 1003,
+     "y": 436,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.221,
+     "type": "click",
+     "x": 1003,
+     "y": 436,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 12.83,
+     "type": "move",
+     "x": 976,
+     "y": 510,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.845,
+     "type": "move",
+     "x": 928,
+     "y": 589,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.862,
+     "type": "move",
+     "x": 904,
+     "y": 615,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.875,
+     "type": "move",
+     "x": 887,
+     "y": 631,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.891,
+     "type": "move",
+     "x": 870,
+     "y": 646,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.909,
+     "type": "move",
+     "x": 859,
+     "y": 655,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.925,
+     "type": "move",
+     "x": 854,
+     "y": 659,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.941,
+     "type": "move",
+     "x": 851,
+     "y": 661,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.956,
+     "type": "move",
+     "x": 850,
+     "y": 662,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.989,
+     "type": "click",
+     "x": 850,
+     "y": 662,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 13.548,
+     "type": "page",
+     "x": 850,
+     "y": 662,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 13.727,
+     "type": "move",
+     "x": 824,
+     "y": 678,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.743,
+     "type": "move",
+     "x": 779,
+     "y": 703,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.759,
+     "type": "move",
+     "x": 717,
+     "y": 736,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.775,
+     "type": "move",
+     "x": 649,
+     "y": 762,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.785,
+     "type": "move",
+     "x": 639,
+     "y": 764,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.803,
+     "type": "move",
+     "x": 573,
+     "y": 763,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.818,
+     "type": "move",
+     "x": 543,
+     "y": 746,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.832,
+     "type": "move",
+     "x": 521,
+     "y": 721,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.863,
+     "type": "move",
+     "x": 495,
+     "y": 662,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.878,
+     "type": "move",
+     "x": 483,
+     "y": 611,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.898,
+     "type": "move",
+     "x": 476,
+     "y": 568,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.913,
+     "type": "move",
+     "x": 472,
+     "y": 542,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.944,
+     "type": "move",
+     "x": 467,
+     "y": 500,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.975,
+     "type": "move",
+     "x": 464,
+     "y": 475,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.992,
+     "type": "move",
+     "x": 464,
+     "y": 468,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.008,
+     "type": "move",
+     "x": 463,
+     "y": 465,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.039,
+     "type": "move",
+     "x": 463,
+     "y": 464,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.069,
+     "type": "move",
+     "x": 465,
+     "y": 461,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.085,
+     "type": "move",
+     "x": 477,
+     "y": 448,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.102,
+     "type": "move",
+     "x": 494,
+     "y": 429,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.117,
+     "type": "move",
+     "x": 517,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.132,
+     "type": "move",
+     "x": 538,
+     "y": 378,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.147,
+     "type": "move",
+     "x": 562,
+     "y": 353,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.178,
+     "type": "move",
+     "x": 628,
+     "y": 290,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.209,
+     "type": "move",
+     "x": 705,
+     "y": 229,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.224,
+     "type": "move",
+     "x": 749,
+     "y": 201,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.24,
+     "type": "move",
+     "x": 797,
+     "y": 173,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.256,
+     "type": "move",
+     "x": 827,
+     "y": 157,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.271,
+     "type": "move",
+     "x": 857,
+     "y": 142,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.286,
+     "type": "move",
+     "x": 882,
+     "y": 131,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.3,
+     "type": "move",
+     "x": 909,
+     "y": 118,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.316,
+     "type": "move",
+     "x": 940,
+     "y": 105,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.331,
+     "type": "move",
+     "x": 954,
+     "y": 99,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.362,
+     "type": "move",
+     "x": 978,
+     "y": 89,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.378,
+     "type": "move",
+     "x": 986,
+     "y": 86,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.394,
+     "type": "move",
+     "x": 990,
+     "y": 84,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.411,
+     "type": "move",
+     "x": 992,
+     "y": 83,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.471,
+     "type": "move",
+     "x": 933,
+     "y": 80,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.531,
+     "type": "move",
+     "x": 761,
+     "y": 59,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.547,
+     "type": "move",
+     "x": 725,
+     "y": 52,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.561,
+     "type": "move",
+     "x": 706,
+     "y": 48,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.582,
+     "type": "move",
+     "x": 660,
+     "y": 36,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.598,
+     "type": "move",
+     "x": 638,
+     "y": 29,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.629,
+     "type": "move",
+     "x": 597,
+     "y": 16,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.645,
+     "type": "move",
+     "x": 584,
+     "y": 11,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.676,
+     "type": "move",
+     "x": 567,
+     "y": 6,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.692,
+     "type": "move",
+     "x": 559,
+     "y": 4,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.706,
+     "type": "move",
+     "x": 554,
+     "y": 2,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.737,
+     "type": "move",
+     "x": 549,
+     "y": 0,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.753,
+     "type": "move",
+     "x": 548,
+     "y": 0,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.028,
+     "type": "move",
+     "x": 543,
+     "y": 2,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.044,
+     "type": "move",
+     "x": 537,
+     "y": 5,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.059,
+     "type": "move",
+     "x": 532,
+     "y": 7,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.105,
+     "type": "move",
+     "x": 517,
+     "y": 13,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.133,
+     "type": "move",
+     "x": 511,
+     "y": 15,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.163,
+     "type": "move",
+     "x": 506,
+     "y": 17,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.179,
+     "type": "move",
+     "x": 505,
+     "y": 18,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.196,
+     "type": "move",
+     "x": 504,
+     "y": 18,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.21,
+     "type": "move",
+     "x": 503,
+     "y": 19,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.226,
+     "type": "move",
+     "x": 502,
+     "y": 19,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.242,
+     "type": "move",
+     "x": 501,
+     "y": 19,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.812,
+     "type": "move",
+     "x": 460,
+     "y": 120,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.826,
+     "type": "move",
+     "x": 421,
+     "y": 199,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.842,
+     "type": "move",
+     "x": 390,
+     "y": 254,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.862,
+     "type": "move",
+     "x": 340,
+     "y": 325,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.883,
+     "type": "move",
+     "x": 301,
+     "y": 370,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.898,
+     "type": "move",
+     "x": 269,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.924,
+     "type": "move",
+     "x": 223,
+     "y": 444,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.939,
+     "type": "move",
+     "x": 199,
+     "y": 464,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.955,
+     "type": "move",
+     "x": 176,
+     "y": 483,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.971,
+     "type": "move",
+     "x": 166,
+     "y": 491,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.986,
+     "type": "move",
+     "x": 156,
+     "y": 499,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.003,
+     "type": "move",
+     "x": 146,
+     "y": 507,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.081,
+     "type": "move",
+     "x": 132,
+     "y": 518,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.455,
+     "type": "click",
+     "x": 132,
+     "y": 518,
+     "button": "left",
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 17.261,
+     "type": "page",
+     "x": 132,
+     "y": 518,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    },
+    {
+     "t": 17.863,
+     "type": "move",
+     "x": 248,
+     "y": 566,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.88,
+     "type": "move",
+     "x": 306,
+     "y": 575,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.896,
+     "type": "move",
+     "x": 341,
+     "y": 578,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.914,
+     "type": "move",
+     "x": 352,
+     "y": 578,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.93,
+     "type": "move",
+     "x": 360,
+     "y": 578,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.946,
+     "type": "move",
+     "x": 363,
+     "y": 579,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.978,
+     "type": "click",
+     "x": 363,
+     "y": 579,
+     "button": "left",
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    },
+    {
+     "t": 18.082,
+     "type": "move",
+     "x": 306,
+     "y": 518,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.141,
+     "type": "move",
+     "x": 208,
+     "y": 513,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.156,
+     "type": "move",
+     "x": 194,
+     "y": 522,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.176,
+     "type": "move",
+     "x": 175,
+     "y": 540,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.193,
+     "type": "move",
+     "x": 165,
+     "y": 551,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.224,
+     "type": "move",
+     "x": 153,
+     "y": 563,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.239,
+     "type": "move",
+     "x": 150,
+     "y": 566,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.255,
+     "type": "move",
+     "x": 147,
+     "y": 569,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.286,
+     "type": "move",
+     "x": 144,
+     "y": 572,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.302,
+     "type": "move",
+     "x": 144,
+     "y": 573,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.622,
+     "type": "move",
+     "x": 141,
+     "y": 582,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.654,
+     "type": "move",
+     "x": 141,
+     "y": 585,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.67,
+     "type": "move",
+     "x": 141,
+     "y": 586,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.92,
+     "type": "move",
+     "x": 163,
+     "y": 566,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.936,
+     "type": "move",
+     "x": 175,
+     "y": 558,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.952,
+     "type": "move",
+     "x": 182,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.978,
+     "type": "move",
+     "x": 192,
+     "y": 550,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.996,
+     "type": "move",
+     "x": 196,
+     "y": 548,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.012,
+     "type": "move",
+     "x": 198,
+     "y": 546,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.03,
+     "type": "move",
+     "x": 200,
+     "y": 545,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.062,
+     "type": "move",
+     "x": 201,
+     "y": 545,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.214,
+     "type": "move",
+     "x": 201,
+     "y": 548,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.237,
+     "type": "move",
+     "x": 202,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.268,
+     "type": "move",
+     "x": 202,
+     "y": 580,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.283,
+     "type": "move",
+     "x": 203,
+     "y": 593,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.295,
+     "type": "move",
+     "x": 203,
+     "y": 608,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.31,
+     "type": "move",
+     "x": 203,
+     "y": 633,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.341,
+     "type": "move",
+     "x": 199,
+     "y": 677,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.357,
+     "type": "move",
+     "x": 194,
+     "y": 704,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.377,
+     "type": "move",
+     "x": 191,
+     "y": 721,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.392,
+     "type": "move",
+     "x": 189,
+     "y": 734,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.406,
+     "type": "move",
+     "x": 187,
+     "y": 743,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.421,
+     "type": "move",
+     "x": 187,
+     "y": 745,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.437,
+     "type": "move",
+     "x": 187,
+     "y": 746,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.454,
+     "type": "move",
+     "x": 174,
+     "y": 755,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.485,
+     "type": "move",
+     "x": 130,
+     "y": 795,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.501,
+     "type": "move",
+     "x": 120,
+     "y": 808,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.514,
+     "type": "move",
+     "x": 114,
+     "y": 832,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.528,
+     "type": "move",
+     "x": 117,
+     "y": 845,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.543,
+     "type": "move",
+     "x": 124,
+     "y": 856,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.555,
+     "type": "move",
+     "x": 137,
+     "y": 868,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.575,
+     "type": "move",
+     "x": 155,
+     "y": 881,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.608,
+     "type": "move",
+     "x": 180,
+     "y": 895,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.64,
+     "type": "move",
+     "x": 194,
+     "y": 903,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.657,
+     "type": "move",
+     "x": 197,
+     "y": 904,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.677,
+     "type": "move",
+     "x": 198,
+     "y": 905,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.723,
+     "type": "move",
+     "x": 199,
+     "y": 907,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.739,
+     "type": "move",
+     "x": 200,
+     "y": 910,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.785,
+     "type": "move",
+     "x": 214,
+     "y": 943,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.805,
+     "type": "move",
+     "x": 219,
+     "y": 964,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.838,
+     "type": "move",
+     "x": 224,
+     "y": 1001,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.854,
+     "type": "move",
+     "x": 222,
+     "y": 1021,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.87,
+     "type": "move",
+     "x": 219,
+     "y": 1040,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.886,
+     "type": "move",
+     "x": 217,
+     "y": 1049,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.901,
+     "type": "move",
+     "x": 216,
+     "y": 1058,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.917,
+     "type": "move",
+     "x": 215,
+     "y": 1061,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.93,
+     "type": "move",
+     "x": 215,
+     "y": 1062,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 20.905,
+     "type": "move",
+     "x": 220,
+     "y": 1072,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 20.921,
+     "type": "move",
+     "x": 227,
+     "y": 1079,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 20.937,
+     "type": "move",
+     "x": 231,
+     "y": 1079,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 20.968,
+     "type": "move",
+     "x": 241,
+     "y": 1079,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.014,
+     "type": "move",
+     "x": 246,
+     "y": 1079,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.03,
+     "type": "move",
+     "x": 249,
+     "y": 1078,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.046,
+     "type": "move",
+     "x": 250,
+     "y": 1077,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.061,
+     "type": "move",
+     "x": 252,
+     "y": 1075,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.075,
+     "type": "move",
+     "x": 254,
+     "y": 1073,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.107,
+     "type": "move",
+     "x": 256,
+     "y": 1071,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.138,
+     "type": "move",
+     "x": 258,
+     "y": 1069,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.169,
+     "type": "move",
+     "x": 259,
+     "y": 1068,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.185,
+     "type": "move",
+     "x": 259,
+     "y": 1067,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.236,
+     "type": "move",
+     "x": 260,
+     "y": 1067,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.434,
+     "type": "move",
+     "x": 284,
+     "y": 1048,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.465,
+     "type": "move",
+     "x": 325,
+     "y": 1006,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.48,
+     "type": "move",
+     "x": 336,
+     "y": 994,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.496,
+     "type": "move",
+     "x": 345,
+     "y": 983,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.525,
+     "type": "move",
+     "x": 356,
+     "y": 969,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.541,
+     "type": "move",
+     "x": 360,
+     "y": 964,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.556,
+     "type": "move",
+     "x": 363,
+     "y": 960,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.571,
+     "type": "move",
+     "x": 364,
+     "y": 958,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.587,
+     "type": "move",
+     "x": 365,
+     "y": 956,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.603,
+     "type": "move",
+     "x": 366,
+     "y": 955,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.07,
+     "type": "move",
+     "x": 413,
+     "y": 897,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.102,
+     "type": "move",
+     "x": 497,
+     "y": 818,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.119,
+     "type": "move",
+     "x": 516,
+     "y": 804,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.15,
+     "type": "move",
+     "x": 532,
+     "y": 791,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.166,
+     "type": "move",
+     "x": 535,
+     "y": 788,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.182,
+     "type": "move",
+     "x": 537,
+     "y": 787,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.213,
+     "type": "move",
+     "x": 538,
+     "y": 786,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.35,
+     "type": "end",
+     "x": 538,
+     "y": 786,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "round": 1,
+   "klicky": "without",
+   "task": "assignment",
+   "duration_s": 39.923,
+   "events": [
+    {
+     "t": 0.0,
+     "type": "start",
+     "x": 526,
+     "y": 591,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 2.338,
+     "type": "move",
+     "x": 465,
+     "y": 490,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.368,
+     "type": "move",
+     "x": 459,
+     "y": 467,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.384,
+     "type": "move",
+     "x": 458,
+     "y": 461,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.414,
+     "type": "move",
+     "x": 456,
+     "y": 444,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.433,
+     "type": "move",
+     "x": 456,
+     "y": 438,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.449,
+     "type": "move",
+     "x": 456,
+     "y": 431,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.464,
+     "type": "move",
+     "x": 455,
+     "y": 428,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.495,
+     "type": "move",
+     "x": 455,
+     "y": 419,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.525,
+     "type": "move",
+     "x": 455,
+     "y": 413,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.541,
+     "type": "move",
+     "x": 455,
+     "y": 411,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.557,
+     "type": "move",
+     "x": 455,
+     "y": 410,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.573,
+     "type": "move",
+     "x": 455,
+     "y": 408,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.589,
+     "type": "move",
+     "x": 455,
+     "y": 407,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.608,
+     "type": "move",
+     "x": 455,
+     "y": 406,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.623,
+     "type": "move",
+     "x": 455,
+     "y": 405,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.654,
+     "type": "move",
+     "x": 455,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.25,
+     "type": "move",
+     "x": 456,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.266,
+     "type": "move",
+     "x": 457,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.291,
+     "type": "move",
+     "x": 467,
+     "y": 396,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.307,
+     "type": "move",
+     "x": 490,
+     "y": 379,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.321,
+     "type": "move",
+     "x": 514,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.337,
+     "type": "move",
+     "x": 536,
+     "y": 305,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 3.431,
+     "type": "move",
+     "x": 539,
+     "y": 248,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.422,
+     "type": "move",
+     "x": 540,
+     "y": 245,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.437,
+     "type": "move",
+     "x": 544,
+     "y": 233,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.453,
+     "type": "move",
+     "x": 548,
+     "y": 221,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.471,
+     "type": "move",
+     "x": 553,
+     "y": 207,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.499,
+     "type": "move",
+     "x": 558,
+     "y": 185,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.531,
+     "type": "move",
+     "x": 566,
+     "y": 155,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.548,
+     "type": "move",
+     "x": 568,
+     "y": 141,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.594,
+     "type": "move",
+     "x": 573,
+     "y": 110,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.625,
+     "type": "move",
+     "x": 574,
+     "y": 92,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.656,
+     "type": "move",
+     "x": 575,
+     "y": 81,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.687,
+     "type": "move",
+     "x": 575,
+     "y": 70,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.7,
+     "type": "move",
+     "x": 575,
+     "y": 68,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.716,
+     "type": "move",
+     "x": 575,
+     "y": 65,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.735,
+     "type": "move",
+     "x": 575,
+     "y": 63,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.766,
+     "type": "move",
+     "x": 575,
+     "y": 60,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.78,
+     "type": "move",
+     "x": 576,
+     "y": 60,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 7.795,
+     "type": "move",
+     "x": 576,
+     "y": 59,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.247,
+     "type": "move",
+     "x": 576,
+     "y": 62,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.277,
+     "type": "move",
+     "x": 577,
+     "y": 71,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.294,
+     "type": "move",
+     "x": 577,
+     "y": 84,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.328,
+     "type": "move",
+     "x": 579,
+     "y": 112,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.343,
+     "type": "move",
+     "x": 580,
+     "y": 133,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.359,
+     "type": "move",
+     "x": 581,
+     "y": 150,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.375,
+     "type": "move",
+     "x": 583,
+     "y": 173,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.407,
+     "type": "move",
+     "x": 586,
+     "y": 213,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.438,
+     "type": "move",
+     "x": 590,
+     "y": 261,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.453,
+     "type": "move",
+     "x": 592,
+     "y": 276,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.485,
+     "type": "move",
+     "x": 600,
+     "y": 326,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.502,
+     "type": "move",
+     "x": 605,
+     "y": 352,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.517,
+     "type": "move",
+     "x": 609,
+     "y": 369,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.549,
+     "type": "move",
+     "x": 622,
+     "y": 415,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.566,
+     "type": "move",
+     "x": 627,
+     "y": 429,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.581,
+     "type": "move",
+     "x": 634,
+     "y": 447,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.612,
+     "type": "move",
+     "x": 655,
+     "y": 487,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.643,
+     "type": "move",
+     "x": 671,
+     "y": 509,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.674,
+     "type": "move",
+     "x": 695,
+     "y": 530,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.689,
+     "type": "move",
+     "x": 710,
+     "y": 540,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.72,
+     "type": "move",
+     "x": 738,
+     "y": 552,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.737,
+     "type": "move",
+     "x": 750,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.752,
+     "type": "move",
+     "x": 766,
+     "y": 559,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.783,
+     "type": "move",
+     "x": 797,
+     "y": 561,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.814,
+     "type": "move",
+     "x": 830,
+     "y": 558,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.829,
+     "type": "move",
+     "x": 845,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.845,
+     "type": "move",
+     "x": 867,
+     "y": 552,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.86,
+     "type": "move",
+     "x": 882,
+     "y": 548,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.877,
+     "type": "move",
+     "x": 901,
+     "y": 543,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.892,
+     "type": "move",
+     "x": 916,
+     "y": 538,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.906,
+     "type": "move",
+     "x": 925,
+     "y": 534,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.952,
+     "type": "move",
+     "x": 968,
+     "y": 517,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.998,
+     "type": "move",
+     "x": 1015,
+     "y": 496,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.014,
+     "type": "move",
+     "x": 1031,
+     "y": 489,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.03,
+     "type": "move",
+     "x": 1043,
+     "y": 484,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.046,
+     "type": "move",
+     "x": 1052,
+     "y": 479,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.062,
+     "type": "move",
+     "x": 1068,
+     "y": 471,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.096,
+     "type": "move",
+     "x": 1089,
+     "y": 461,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.112,
+     "type": "move",
+     "x": 1102,
+     "y": 454,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.143,
+     "type": "move",
+     "x": 1119,
+     "y": 445,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.175,
+     "type": "move",
+     "x": 1138,
+     "y": 435,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.188,
+     "type": "move",
+     "x": 1141,
+     "y": 434,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.235,
+     "type": "move",
+     "x": 1161,
+     "y": 423,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.266,
+     "type": "move",
+     "x": 1172,
+     "y": 417,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.281,
+     "type": "move",
+     "x": 1175,
+     "y": 416,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.3,
+     "type": "move",
+     "x": 1181,
+     "y": 413,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.315,
+     "type": "move",
+     "x": 1184,
+     "y": 411,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.331,
+     "type": "move",
+     "x": 1187,
+     "y": 410,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.347,
+     "type": "move",
+     "x": 1190,
+     "y": 408,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.364,
+     "type": "move",
+     "x": 1191,
+     "y": 407,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.396,
+     "type": "move",
+     "x": 1195,
+     "y": 405,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.411,
+     "type": "move",
+     "x": 1196,
+     "y": 405,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.426,
+     "type": "move",
+     "x": 1197,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.456,
+     "type": "move",
+     "x": 1199,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.471,
+     "type": "move",
+     "x": 1199,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.921,
+     "type": "move",
+     "x": 1201,
+     "y": 386,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.95,
+     "type": "move",
+     "x": 1202,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.966,
+     "type": "move",
+     "x": 1202,
+     "y": 367,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.995,
+     "type": "move",
+     "x": 1203,
+     "y": 350,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.024,
+     "type": "move",
+     "x": 1202,
+     "y": 334,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.04,
+     "type": "move",
+     "x": 1201,
+     "y": 327,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.069,
+     "type": "move",
+     "x": 1199,
+     "y": 314,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.084,
+     "type": "move",
+     "x": 1195,
+     "y": 307,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.13,
+     "type": "move",
+     "x": 1184,
+     "y": 286,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.146,
+     "type": "move",
+     "x": 1179,
+     "y": 278,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.177,
+     "type": "move",
+     "x": 1171,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.208,
+     "type": "move",
+     "x": 1162,
+     "y": 261,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.239,
+     "type": "move",
+     "x": 1156,
+     "y": 254,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.254,
+     "type": "move",
+     "x": 1153,
+     "y": 252,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.27,
+     "type": "move",
+     "x": 1149,
+     "y": 248,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.286,
+     "type": "move",
+     "x": 1145,
+     "y": 245,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.301,
+     "type": "move",
+     "x": 1143,
+     "y": 243,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.316,
+     "type": "move",
+     "x": 1141,
+     "y": 242,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.331,
+     "type": "move",
+     "x": 1139,
+     "y": 240,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.377,
+     "type": "move",
+     "x": 1134,
+     "y": 236,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.407,
+     "type": "move",
+     "x": 1133,
+     "y": 235,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.422,
+     "type": "move",
+     "x": 1132,
+     "y": 235,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.45,
+     "type": "move",
+     "x": 1132,
+     "y": 234,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.832,
+     "type": "move",
+     "x": 1143,
+     "y": 238,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.86,
+     "type": "move",
+     "x": 1159,
+     "y": 244,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.876,
+     "type": "move",
+     "x": 1171,
+     "y": 248,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.906,
+     "type": "move",
+     "x": 1188,
+     "y": 256,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.922,
+     "type": "move",
+     "x": 1194,
+     "y": 259,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.937,
+     "type": "move",
+     "x": 1204,
+     "y": 263,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.953,
+     "type": "move",
+     "x": 1209,
+     "y": 266,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.0,
+     "type": "move",
+     "x": 1227,
+     "y": 277,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.015,
+     "type": "move",
+     "x": 1233,
+     "y": 280,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.032,
+     "type": "move",
+     "x": 1237,
+     "y": 282,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.061,
+     "type": "move",
+     "x": 1246,
+     "y": 287,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.108,
+     "type": "move",
+     "x": 1258,
+     "y": 295,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.124,
+     "type": "move",
+     "x": 1261,
+     "y": 297,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.155,
+     "type": "move",
+     "x": 1265,
+     "y": 300,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.17,
+     "type": "move",
+     "x": 1268,
+     "y": 301,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.183,
+     "type": "move",
+     "x": 1269,
+     "y": 302,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.213,
+     "type": "move",
+     "x": 1272,
+     "y": 304,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.228,
+     "type": "move",
+     "x": 1273,
+     "y": 305,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.244,
+     "type": "move",
+     "x": 1274,
+     "y": 306,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.259,
+     "type": "move",
+     "x": 1275,
+     "y": 306,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.274,
+     "type": "move",
+     "x": 1276,
+     "y": 307,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.305,
+     "type": "move",
+     "x": 1277,
+     "y": 307,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.32,
+     "type": "move",
+     "x": 1277,
+     "y": 308,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.336,
+     "type": "move",
+     "x": 1278,
+     "y": 308,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.711,
+     "type": "move",
+     "x": 1223,
+     "y": 331,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.727,
+     "type": "move",
+     "x": 1196,
+     "y": 343,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.743,
+     "type": "move",
+     "x": 1162,
+     "y": 360,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.758,
+     "type": "move",
+     "x": 1146,
+     "y": 370,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.789,
+     "type": "move",
+     "x": 1108,
+     "y": 393,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.819,
+     "type": "move",
+     "x": 1086,
+     "y": 408,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.835,
+     "type": "move",
+     "x": 1078,
+     "y": 414,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.851,
+     "type": "move",
+     "x": 1071,
+     "y": 419,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.881,
+     "type": "move",
+     "x": 1061,
+     "y": 426,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.896,
+     "type": "move",
+     "x": 1059,
+     "y": 427,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.927,
+     "type": "move",
+     "x": 1053,
+     "y": 431,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.942,
+     "type": "move",
+     "x": 1052,
+     "y": 432,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.958,
+     "type": "move",
+     "x": 1050,
+     "y": 433,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.99,
+     "type": "move",
+     "x": 1049,
+     "y": 434,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.015,
+     "type": "move",
+     "x": 1048,
+     "y": 435,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.516,
+     "type": "move",
+     "x": 1032,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.535,
+     "type": "move",
+     "x": 1011,
+     "y": 382,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.562,
+     "type": "move",
+     "x": 980,
+     "y": 373,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.608,
+     "type": "move",
+     "x": 955,
+     "y": 374,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.624,
+     "type": "move",
+     "x": 951,
+     "y": 375,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.639,
+     "type": "move",
+     "x": 947,
+     "y": 376,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.653,
+     "type": "move",
+     "x": 944,
+     "y": 376,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.668,
+     "type": "move",
+     "x": 942,
+     "y": 376,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.684,
+     "type": "move",
+     "x": 941,
+     "y": 377,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.73,
+     "type": "move",
+     "x": 940,
+     "y": 377,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.052,
+     "type": "move",
+     "x": 961,
+     "y": 387,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.069,
+     "type": "move",
+     "x": 975,
+     "y": 393,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.101,
+     "type": "move",
+     "x": 993,
+     "y": 399,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.117,
+     "type": "move",
+     "x": 1007,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.13,
+     "type": "move",
+     "x": 1013,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.161,
+     "type": "move",
+     "x": 1032,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.177,
+     "type": "move",
+     "x": 1037,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.191,
+     "type": "move",
+     "x": 1043,
+     "y": 404,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.208,
+     "type": "move",
+     "x": 1049,
+     "y": 403,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.224,
+     "type": "move",
+     "x": 1056,
+     "y": 401,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.254,
+     "type": "move",
+     "x": 1068,
+     "y": 397,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.285,
+     "type": "move",
+     "x": 1076,
+     "y": 392,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.363,
+     "type": "move",
+     "x": 1098,
+     "y": 380,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.379,
+     "type": "move",
+     "x": 1101,
+     "y": 379,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.41,
+     "type": "move",
+     "x": 1106,
+     "y": 375,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.425,
+     "type": "move",
+     "x": 1109,
+     "y": 374,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.44,
+     "type": "move",
+     "x": 1111,
+     "y": 373,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.455,
+     "type": "move",
+     "x": 1113,
+     "y": 371,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.486,
+     "type": "move",
+     "x": 1118,
+     "y": 368,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.503,
+     "type": "move",
+     "x": 1119,
+     "y": 367,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.521,
+     "type": "move",
+     "x": 1121,
+     "y": 366,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.537,
+     "type": "move",
+     "x": 1122,
+     "y": 365,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.554,
+     "type": "move",
+     "x": 1124,
+     "y": 364,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.57,
+     "type": "move",
+     "x": 1124,
+     "y": 363,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.586,
+     "type": "move",
+     "x": 1126,
+     "y": 362,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.603,
+     "type": "move",
+     "x": 1127,
+     "y": 361,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.65,
+     "type": "move",
+     "x": 1129,
+     "y": 360,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.713,
+     "type": "move",
+     "x": 1130,
+     "y": 359,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.744,
+     "type": "move",
+     "x": 1131,
+     "y": 359,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.79,
+     "type": "move",
+     "x": 1131,
+     "y": 358,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.033,
+     "type": "move",
+     "x": 1094,
+     "y": 364,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.063,
+     "type": "move",
+     "x": 1073,
+     "y": 367,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.096,
+     "type": "move",
+     "x": 1059,
+     "y": 370,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.112,
+     "type": "move",
+     "x": 1053,
+     "y": 371,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.128,
+     "type": "move",
+     "x": 1049,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.144,
+     "type": "move",
+     "x": 1048,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.159,
+     "type": "move",
+     "x": 1047,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.19,
+     "type": "move",
+     "x": 1046,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.337,
+     "type": "move",
+     "x": 1049,
+     "y": 370,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.367,
+     "type": "move",
+     "x": 1050,
+     "y": 368,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.007,
+     "type": "move",
+     "x": 1074,
+     "y": 350,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.024,
+     "type": "move",
+     "x": 1078,
+     "y": 342,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.102,
+     "type": "move",
+     "x": 1079,
+     "y": 341,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.366,
+     "type": "click",
+     "x": 1079,
+     "y": 341,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 16.051,
+     "type": "move",
+     "x": 1077,
+     "y": 338,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.066,
+     "type": "move",
+     "x": 1075,
+     "y": 337,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.098,
+     "type": "move",
+     "x": 1072,
+     "y": 336,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 16.129,
+     "type": "move",
+     "x": 1071,
+     "y": 335,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.143,
+     "type": "move",
+     "x": 1054,
+     "y": 380,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.158,
+     "type": "move",
+     "x": 1035,
+     "y": 439,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.174,
+     "type": "move",
+     "x": 1027,
+     "y": 472,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.19,
+     "type": "move",
+     "x": 1021,
+     "y": 497,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.206,
+     "type": "move",
+     "x": 1018,
+     "y": 515,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.222,
+     "type": "move",
+     "x": 1016,
+     "y": 534,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.237,
+     "type": "move",
+     "x": 1014,
+     "y": 550,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.253,
+     "type": "move",
+     "x": 1013,
+     "y": 562,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.299,
+     "type": "move",
+     "x": 1010,
+     "y": 587,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.33,
+     "type": "move",
+     "x": 1009,
+     "y": 595,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.346,
+     "type": "move",
+     "x": 1009,
+     "y": 598,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.359,
+     "type": "move",
+     "x": 1009,
+     "y": 599,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.376,
+     "type": "move",
+     "x": 1009,
+     "y": 600,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.393,
+     "type": "move",
+     "x": 1009,
+     "y": 601,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.484,
+     "type": "move",
+     "x": 982,
+     "y": 711,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.499,
+     "type": "move",
+     "x": 967,
+     "y": 727,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.513,
+     "type": "move",
+     "x": 952,
+     "y": 738,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.538,
+     "type": "move",
+     "x": 934,
+     "y": 749,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.556,
+     "type": "move",
+     "x": 921,
+     "y": 756,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.57,
+     "type": "move",
+     "x": 914,
+     "y": 759,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.588,
+     "type": "move",
+     "x": 904,
+     "y": 764,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.602,
+     "type": "move",
+     "x": 901,
+     "y": 765,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.618,
+     "type": "move",
+     "x": 897,
+     "y": 767,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.634,
+     "type": "move",
+     "x": 894,
+     "y": 769,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.65,
+     "type": "move",
+     "x": 893,
+     "y": 769,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.666,
+     "type": "move",
+     "x": 892,
+     "y": 770,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.698,
+     "type": "move",
+     "x": 891,
+     "y": 770,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.022,
+     "type": "move",
+     "x": 885,
+     "y": 743,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.053,
+     "type": "move",
+     "x": 876,
+     "y": 695,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.069,
+     "type": "move",
+     "x": 873,
+     "y": 681,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.101,
+     "type": "move",
+     "x": 864,
+     "y": 635,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.133,
+     "type": "move",
+     "x": 859,
+     "y": 606,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.148,
+     "type": "move",
+     "x": 858,
+     "y": 589,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.164,
+     "type": "move",
+     "x": 856,
+     "y": 574,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.195,
+     "type": "move",
+     "x": 853,
+     "y": 551,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.211,
+     "type": "move",
+     "x": 852,
+     "y": 535,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.227,
+     "type": "move",
+     "x": 851,
+     "y": 525,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.243,
+     "type": "move",
+     "x": 852,
+     "y": 511,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.267,
+     "type": "move",
+     "x": 851,
+     "y": 498,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.282,
+     "type": "move",
+     "x": 850,
+     "y": 491,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.298,
+     "type": "move",
+     "x": 849,
+     "y": 482,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.328,
+     "type": "move",
+     "x": 850,
+     "y": 464,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.343,
+     "type": "move",
+     "x": 849,
+     "y": 457,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.374,
+     "type": "move",
+     "x": 849,
+     "y": 444,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.405,
+     "type": "move",
+     "x": 849,
+     "y": 431,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.436,
+     "type": "move",
+     "x": 849,
+     "y": 420,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.452,
+     "type": "move",
+     "x": 849,
+     "y": 416,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.482,
+     "type": "move",
+     "x": 850,
+     "y": 406,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.501,
+     "type": "move",
+     "x": 850,
+     "y": 400,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.518,
+     "type": "move",
+     "x": 850,
+     "y": 395,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.532,
+     "type": "move",
+     "x": 850,
+     "y": 392,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.579,
+     "type": "move",
+     "x": 851,
+     "y": 381,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.595,
+     "type": "move",
+     "x": 851,
+     "y": 378,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.611,
+     "type": "move",
+     "x": 851,
+     "y": 375,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.643,
+     "type": "move",
+     "x": 851,
+     "y": 371,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.659,
+     "type": "move",
+     "x": 852,
+     "y": 368,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.675,
+     "type": "move",
+     "x": 852,
+     "y": 366,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.691,
+     "type": "move",
+     "x": 852,
+     "y": 363,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.722,
+     "type": "move",
+     "x": 852,
+     "y": 360,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.74,
+     "type": "move",
+     "x": 852,
+     "y": 358,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.756,
+     "type": "move",
+     "x": 852,
+     "y": 357,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.771,
+     "type": "move",
+     "x": 852,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.802,
+     "type": "move",
+     "x": 852,
+     "y": 354,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.818,
+     "type": "move",
+     "x": 852,
+     "y": 352,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.865,
+     "type": "move",
+     "x": 853,
+     "y": 350,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.882,
+     "type": "move",
+     "x": 853,
+     "y": 349,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.913,
+     "type": "move",
+     "x": 853,
+     "y": 348,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.945,
+     "type": "move",
+     "x": 853,
+     "y": 347,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.992,
+     "type": "move",
+     "x": 853,
+     "y": 346,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 19.079,
+     "type": "move",
+     "x": 853,
+     "y": 345,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.137,
+     "type": "move",
+     "x": 852,
+     "y": 345,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.152,
+     "type": "move",
+     "x": 850,
+     "y": 345,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.169,
+     "type": "move",
+     "x": 844,
+     "y": 346,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.185,
+     "type": "move",
+     "x": 838,
+     "y": 347,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.216,
+     "type": "move",
+     "x": 802,
+     "y": 351,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.253,
+     "type": "move",
+     "x": 730,
+     "y": 358,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.268,
+     "type": "move",
+     "x": 695,
+     "y": 359,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.283,
+     "type": "move",
+     "x": 637,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.299,
+     "type": "move",
+     "x": 576,
+     "y": 345,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.315,
+     "type": "move",
+     "x": 535,
+     "y": 335,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.33,
+     "type": "move",
+     "x": 488,
+     "y": 320,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.345,
+     "type": "move",
+     "x": 460,
+     "y": 309,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.359,
+     "type": "move",
+     "x": 437,
+     "y": 300,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.375,
+     "type": "move",
+     "x": 417,
+     "y": 292,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.392,
+     "type": "move",
+     "x": 412,
+     "y": 290,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 24.876,
+     "type": "move",
+     "x": 440,
+     "y": 271,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 24.907,
+     "type": "move",
+     "x": 461,
+     "y": 255,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 24.921,
+     "type": "move",
+     "x": 466,
+     "y": 254,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 24.952,
+     "type": "move",
+     "x": 478,
+     "y": 246,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 24.982,
+     "type": "move",
+     "x": 485,
+     "y": 242,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.029,
+     "type": "move",
+     "x": 492,
+     "y": 238,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.056,
+     "type": "move",
+     "x": 494,
+     "y": 237,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.087,
+     "type": "move",
+     "x": 496,
+     "y": 236,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.103,
+     "type": "move",
+     "x": 497,
+     "y": 236,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.428,
+     "type": "move",
+     "x": 505,
+     "y": 285,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.443,
+     "type": "move",
+     "x": 514,
+     "y": 338,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.474,
+     "type": "move",
+     "x": 540,
+     "y": 437,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.489,
+     "type": "move",
+     "x": 550,
+     "y": 467,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.505,
+     "type": "move",
+     "x": 559,
+     "y": 492,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.52,
+     "type": "move",
+     "x": 569,
+     "y": 517,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.535,
+     "type": "move",
+     "x": 580,
+     "y": 543,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.551,
+     "type": "move",
+     "x": 584,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.583,
+     "type": "move",
+     "x": 595,
+     "y": 577,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.599,
+     "type": "move",
+     "x": 597,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.615,
+     "type": "move",
+     "x": 600,
+     "y": 589,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.662,
+     "type": "move",
+     "x": 602,
+     "y": 594,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 27.884,
+     "type": "click",
+     "x": 602,
+     "y": 594,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 29.333,
+     "type": "move",
+     "x": 603,
+     "y": 591,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.349,
+     "type": "move",
+     "x": 606,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.381,
+     "type": "move",
+     "x": 613,
+     "y": 563,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.398,
+     "type": "move",
+     "x": 617,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.414,
+     "type": "move",
+     "x": 621,
+     "y": 541,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.431,
+     "type": "move",
+     "x": 625,
+     "y": 529,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.447,
+     "type": "move",
+     "x": 632,
+     "y": 512,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.479,
+     "type": "move",
+     "x": 642,
+     "y": 488,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.496,
+     "type": "move",
+     "x": 646,
+     "y": 478,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.521,
+     "type": "move",
+     "x": 656,
+     "y": 457,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.537,
+     "type": "move",
+     "x": 662,
+     "y": 442,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.556,
+     "type": "move",
+     "x": 669,
+     "y": 429,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.587,
+     "type": "move",
+     "x": 679,
+     "y": 410,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.602,
+     "type": "move",
+     "x": 686,
+     "y": 398,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.617,
+     "type": "move",
+     "x": 690,
+     "y": 392,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.632,
+     "type": "move",
+     "x": 697,
+     "y": 383,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.662,
+     "type": "move",
+     "x": 710,
+     "y": 364,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.677,
+     "type": "move",
+     "x": 717,
+     "y": 354,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.692,
+     "type": "move",
+     "x": 722,
+     "y": 347,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.707,
+     "type": "move",
+     "x": 726,
+     "y": 341,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.723,
+     "type": "move",
+     "x": 733,
+     "y": 331,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.769,
+     "type": "move",
+     "x": 746,
+     "y": 314,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.786,
+     "type": "move",
+     "x": 752,
+     "y": 306,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.803,
+     "type": "move",
+     "x": 755,
+     "y": 301,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.834,
+     "type": "move",
+     "x": 765,
+     "y": 289,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.865,
+     "type": "move",
+     "x": 772,
+     "y": 280,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.894,
+     "type": "move",
+     "x": 777,
+     "y": 274,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.925,
+     "type": "move",
+     "x": 783,
+     "y": 266,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.943,
+     "type": "move",
+     "x": 785,
+     "y": 263,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.98,
+     "type": "move",
+     "x": 790,
+     "y": 257,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 29.996,
+     "type": "move",
+     "x": 792,
+     "y": 254,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.011,
+     "type": "move",
+     "x": 793,
+     "y": 253,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.026,
+     "type": "move",
+     "x": 795,
+     "y": 251,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.041,
+     "type": "move",
+     "x": 796,
+     "y": 250,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.073,
+     "type": "move",
+     "x": 797,
+     "y": 248,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.089,
+     "type": "move",
+     "x": 798,
+     "y": 247,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.119,
+     "type": "move",
+     "x": 800,
+     "y": 245,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.15,
+     "type": "move",
+     "x": 800,
+     "y": 244,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.185,
+     "type": "move",
+     "x": 801,
+     "y": 244,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.229,
+     "type": "move",
+     "x": 801,
+     "y": 243,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.428,
+     "type": "move",
+     "x": 844,
+     "y": 276,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.443,
+     "type": "move",
+     "x": 856,
+     "y": 288,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.458,
+     "type": "move",
+     "x": 866,
+     "y": 298,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.489,
+     "type": "move",
+     "x": 871,
+     "y": 304,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.506,
+     "type": "move",
+     "x": 871,
+     "y": 305,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.522,
+     "type": "move",
+     "x": 862,
+     "y": 363,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.537,
+     "type": "move",
+     "x": 863,
+     "y": 391,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.553,
+     "type": "move",
+     "x": 865,
+     "y": 405,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.584,
+     "type": "move",
+     "x": 866,
+     "y": 414,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 30.662,
+     "type": "move",
+     "x": 866,
+     "y": 415,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 31.635,
+     "type": "page",
+     "x": 866,
+     "y": 415,
+     "button": null,
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    },
+    {
+     "t": 32.279,
+     "type": "move",
+     "x": 824,
+     "y": 400,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.293,
+     "type": "move",
+     "x": 782,
+     "y": 385,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.31,
+     "type": "move",
+     "x": 752,
+     "y": 373,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.327,
+     "type": "move",
+     "x": 723,
+     "y": 363,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.343,
+     "type": "move",
+     "x": 712,
+     "y": 358,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.375,
+     "type": "move",
+     "x": 679,
+     "y": 347,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.391,
+     "type": "move",
+     "x": 673,
+     "y": 344,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.407,
+     "type": "move",
+     "x": 666,
+     "y": 342,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.454,
+     "type": "move",
+     "x": 653,
+     "y": 337,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.47,
+     "type": "move",
+     "x": 650,
+     "y": 337,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.502,
+     "type": "move",
+     "x": 648,
+     "y": 336,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.592,
+     "type": "click",
+     "x": 648,
+     "y": 336,
+     "button": "left",
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    },
+    {
+     "t": 32.949,
+     "type": "move",
+     "x": 649,
+     "y": 336,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.965,
+     "type": "move",
+     "x": 653,
+     "y": 339,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.979,
+     "type": "move",
+     "x": 655,
+     "y": 344,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 32.995,
+     "type": "move",
+     "x": 656,
+     "y": 349,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.165,
+     "type": "move",
+     "x": 652,
+     "y": 354,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.184,
+     "type": "move",
+     "x": 642,
+     "y": 365,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.213,
+     "type": "move",
+     "x": 595,
+     "y": 411,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.229,
+     "type": "move",
+     "x": 553,
+     "y": 438,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.244,
+     "type": "move",
+     "x": 525,
+     "y": 448,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.261,
+     "type": "move",
+     "x": 458,
+     "y": 455,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.277,
+     "type": "move",
+     "x": 422,
+     "y": 453,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.308,
+     "type": "move",
+     "x": 384,
+     "y": 449,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.518,
+     "type": "move",
+     "x": 403,
+     "y": 430,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.549,
+     "type": "move",
+     "x": 419,
+     "y": 417,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.58,
+     "type": "move",
+     "x": 435,
+     "y": 413,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.595,
+     "type": "move",
+     "x": 438,
+     "y": 413,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.611,
+     "type": "move",
+     "x": 445,
+     "y": 415,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.627,
+     "type": "move",
+     "x": 449,
+     "y": 418,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.641,
+     "type": "move",
+     "x": 453,
+     "y": 422,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.674,
+     "type": "move",
+     "x": 459,
+     "y": 431,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.721,
+     "type": "move",
+     "x": 467,
+     "y": 442,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.753,
+     "type": "move",
+     "x": 470,
+     "y": 449,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.771,
+     "type": "move",
+     "x": 471,
+     "y": 451,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.804,
+     "type": "move",
+     "x": 473,
+     "y": 455,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.835,
+     "type": "move",
+     "x": 475,
+     "y": 458,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.882,
+     "type": "move",
+     "x": 476,
+     "y": 461,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.897,
+     "type": "move",
+     "x": 476,
+     "y": 462,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.912,
+     "type": "move",
+     "x": 477,
+     "y": 462,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 33.984,
+     "type": "move",
+     "x": 477,
+     "y": 463,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.371,
+     "type": "move",
+     "x": 464,
+     "y": 483,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.403,
+     "type": "move",
+     "x": 424,
+     "y": 545,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.42,
+     "type": "move",
+     "x": 410,
+     "y": 570,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.451,
+     "type": "move",
+     "x": 388,
+     "y": 612,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.465,
+     "type": "move",
+     "x": 379,
+     "y": 628,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.497,
+     "type": "move",
+     "x": 364,
+     "y": 661,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.513,
+     "type": "move",
+     "x": 356,
+     "y": 678,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.545,
+     "type": "move",
+     "x": 341,
+     "y": 710,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.561,
+     "type": "move",
+     "x": 336,
+     "y": 721,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.577,
+     "type": "move",
+     "x": 332,
+     "y": 730,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.606,
+     "type": "move",
+     "x": 324,
+     "y": 751,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.637,
+     "type": "move",
+     "x": 317,
+     "y": 769,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.651,
+     "type": "move",
+     "x": 314,
+     "y": 776,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.666,
+     "type": "move",
+     "x": 312,
+     "y": 781,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.681,
+     "type": "move",
+     "x": 310,
+     "y": 787,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.697,
+     "type": "move",
+     "x": 307,
+     "y": 794,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.712,
+     "type": "move",
+     "x": 306,
+     "y": 797,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.729,
+     "type": "move",
+     "x": 303,
+     "y": 803,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.745,
+     "type": "move",
+     "x": 302,
+     "y": 806,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.762,
+     "type": "move",
+     "x": 301,
+     "y": 810,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.793,
+     "type": "move",
+     "x": 298,
+     "y": 816,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.809,
+     "type": "move",
+     "x": 297,
+     "y": 818,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.856,
+     "type": "move",
+     "x": 295,
+     "y": 823,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.887,
+     "type": "move",
+     "x": 294,
+     "y": 825,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.921,
+     "type": "move",
+     "x": 294,
+     "y": 826,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.937,
+     "type": "move",
+     "x": 293,
+     "y": 826,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 36.97,
+     "type": "move",
+     "x": 293,
+     "y": 827,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.23,
+     "type": "move",
+     "x": 296,
+     "y": 825,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.245,
+     "type": "move",
+     "x": 299,
+     "y": 823,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.26,
+     "type": "move",
+     "x": 302,
+     "y": 821,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.275,
+     "type": "move",
+     "x": 309,
+     "y": 816,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.292,
+     "type": "move",
+     "x": 319,
+     "y": 809,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.324,
+     "type": "move",
+     "x": 343,
+     "y": 795,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.34,
+     "type": "move",
+     "x": 365,
+     "y": 783,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.355,
+     "type": "move",
+     "x": 375,
+     "y": 777,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.369,
+     "type": "move",
+     "x": 389,
+     "y": 771,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.385,
+     "type": "move",
+     "x": 402,
+     "y": 765,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.432,
+     "type": "move",
+     "x": 409,
+     "y": 761,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.628,
+     "type": "move",
+     "x": 390,
+     "y": 756,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.657,
+     "type": "move",
+     "x": 376,
+     "y": 751,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.673,
+     "type": "move",
+     "x": 370,
+     "y": 747,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.7,
+     "type": "move",
+     "x": 365,
+     "y": 744,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.778,
+     "type": "move",
+     "x": 350,
+     "y": 735,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.809,
+     "type": "move",
+     "x": 348,
+     "y": 733,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.84,
+     "type": "move",
+     "x": 346,
+     "y": 732,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.855,
+     "type": "move",
+     "x": 346,
+     "y": 731,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 38.887,
+     "type": "move",
+     "x": 344,
+     "y": 730,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 39.132,
+     "type": "move",
+     "x": 355,
+     "y": 753,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 39.163,
+     "type": "move",
+     "x": 364,
+     "y": 764,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 39.178,
+     "type": "move",
+     "x": 365,
+     "y": 766,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 39.194,
+     "type": "move",
+     "x": 366,
+     "y": 766,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 39.295,
+     "type": "click",
+     "x": 366,
+     "y": 766,
+     "button": "left",
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    },
+    {
+     "t": 39.923,
+     "type": "end",
+     "x": 366,
+     "y": 766,
+     "button": null,
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "round": 2,
+   "klicky": "with",
+   "task": "outline",
+   "duration_s": 28.096,
+   "events": [
+    {
+     "t": 0.0,
+     "type": "start",
+     "x": 896,
+     "y": 764,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 0.392,
+     "type": "move",
+     "x": 904,
+     "y": 766,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.41,
+     "type": "move",
+     "x": 908,
+     "y": 766,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.426,
+     "type": "move",
+     "x": 910,
+     "y": 765,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.441,
+     "type": "move",
+     "x": 911,
+     "y": 765,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.457,
+     "type": "move",
+     "x": 912,
+     "y": 764,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.762,
+     "type": "move",
+     "x": 913,
+     "y": 754,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.795,
+     "type": "move",
+     "x": 911,
+     "y": 750,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.108,
+     "type": "move",
+     "x": 905,
+     "y": 747,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.126,
+     "type": "move",
+     "x": 896,
+     "y": 743,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.141,
+     "type": "move",
+     "x": 886,
+     "y": 738,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.174,
+     "type": "move",
+     "x": 864,
+     "y": 728,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.188,
+     "type": "move",
+     "x": 853,
+     "y": 723,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.203,
+     "type": "move",
+     "x": 840,
+     "y": 717,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.219,
+     "type": "move",
+     "x": 819,
+     "y": 708,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.235,
+     "type": "move",
+     "x": 805,
+     "y": 701,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.265,
+     "type": "move",
+     "x": 779,
+     "y": 689,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.282,
+     "type": "move",
+     "x": 765,
+     "y": 684,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.313,
+     "type": "move",
+     "x": 734,
+     "y": 671,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.329,
+     "type": "move",
+     "x": 718,
+     "y": 664,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.347,
+     "type": "move",
+     "x": 702,
+     "y": 657,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.363,
+     "type": "move",
+     "x": 687,
+     "y": 651,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.379,
+     "type": "move",
+     "x": 666,
+     "y": 642,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.409,
+     "type": "move",
+     "x": 638,
+     "y": 632,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.44,
+     "type": "move",
+     "x": 616,
+     "y": 625,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.454,
+     "type": "move",
+     "x": 598,
+     "y": 619,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.47,
+     "type": "move",
+     "x": 581,
+     "y": 614,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.501,
+     "type": "move",
+     "x": 556,
+     "y": 607,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.519,
+     "type": "move",
+     "x": 542,
+     "y": 603,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.535,
+     "type": "move",
+     "x": 526,
+     "y": 599,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.565,
+     "type": "move",
+     "x": 505,
+     "y": 595,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.581,
+     "type": "move",
+     "x": 489,
+     "y": 591,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.609,
+     "type": "move",
+     "x": 471,
+     "y": 587,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.626,
+     "type": "move",
+     "x": 457,
+     "y": 584,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.642,
+     "type": "move",
+     "x": 446,
+     "y": 582,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.705,
+     "type": "move",
+     "x": 403,
+     "y": 575,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.721,
+     "type": "move",
+     "x": 394,
+     "y": 574,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.737,
+     "type": "move",
+     "x": 380,
+     "y": 572,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.765,
+     "type": "move",
+     "x": 365,
+     "y": 570,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.781,
+     "type": "move",
+     "x": 359,
+     "y": 569,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.797,
+     "type": "move",
+     "x": 347,
+     "y": 568,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.812,
+     "type": "move",
+     "x": 341,
+     "y": 567,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.843,
+     "type": "move",
+     "x": 322,
+     "y": 565,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.86,
+     "type": "move",
+     "x": 315,
+     "y": 565,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.875,
+     "type": "move",
+     "x": 310,
+     "y": 564,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.887,
+     "type": "move",
+     "x": 303,
+     "y": 564,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.903,
+     "type": "move",
+     "x": 296,
+     "y": 563,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.919,
+     "type": "move",
+     "x": 291,
+     "y": 562,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.95,
+     "type": "move",
+     "x": 276,
+     "y": 561,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.969,
+     "type": "move",
+     "x": 272,
+     "y": 560,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 11.985,
+     "type": "move",
+     "x": 265,
+     "y": 559,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.017,
+     "type": "move",
+     "x": 256,
+     "y": 559,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.033,
+     "type": "move",
+     "x": 251,
+     "y": 559,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.047,
+     "type": "move",
+     "x": 247,
+     "y": 558,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.064,
+     "type": "move",
+     "x": 242,
+     "y": 558,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.079,
+     "type": "move",
+     "x": 238,
+     "y": 557,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.095,
+     "type": "move",
+     "x": 235,
+     "y": 557,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.113,
+     "type": "move",
+     "x": 230,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.129,
+     "type": "move",
+     "x": 226,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.145,
+     "type": "move",
+     "x": 223,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.158,
+     "type": "move",
+     "x": 222,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.175,
+     "type": "move",
+     "x": 218,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.205,
+     "type": "move",
+     "x": 214,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.22,
+     "type": "move",
+     "x": 212,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.236,
+     "type": "move",
+     "x": 209,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.25,
+     "type": "move",
+     "x": 207,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.265,
+     "type": "move",
+     "x": 206,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.297,
+     "type": "move",
+     "x": 203,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.329,
+     "type": "move",
+     "x": 200,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.342,
+     "type": "move",
+     "x": 199,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.359,
+     "type": "move",
+     "x": 198,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.373,
+     "type": "move",
+     "x": 197,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.388,
+     "type": "move",
+     "x": 196,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.436,
+     "type": "move",
+     "x": 194,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.5,
+     "type": "move",
+     "x": 193,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.64,
+     "type": "move",
+     "x": 192,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 12.994,
+     "type": "page",
+     "x": 192,
+     "y": 553,
+     "button": null,
+     "title": "Klicky"
+    },
+    {
+     "t": 14.808,
+     "type": "move",
+     "x": 224,
+     "y": 476,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.824,
+     "type": "move",
+     "x": 259,
+     "y": 406,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.839,
+     "type": "move",
+     "x": 281,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.871,
+     "type": "move",
+     "x": 344,
+     "y": 308,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.9,
+     "type": "move",
+     "x": 401,
+     "y": 277,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.916,
+     "type": "move",
+     "x": 433,
+     "y": 267,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.931,
+     "type": "move",
+     "x": 452,
+     "y": 263,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.949,
+     "type": "move",
+     "x": 491,
+     "y": 258,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.963,
+     "type": "move",
+     "x": 505,
+     "y": 257,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 14.993,
+     "type": "move",
+     "x": 544,
+     "y": 257,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.008,
+     "type": "move",
+     "x": 562,
+     "y": 258,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.024,
+     "type": "move",
+     "x": 573,
+     "y": 259,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.04,
+     "type": "move",
+     "x": 587,
+     "y": 260,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.057,
+     "type": "move",
+     "x": 601,
+     "y": 262,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.073,
+     "type": "move",
+     "x": 613,
+     "y": 263,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.089,
+     "type": "move",
+     "x": 625,
+     "y": 264,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.119,
+     "type": "move",
+     "x": 638,
+     "y": 265,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.133,
+     "type": "move",
+     "x": 643,
+     "y": 266,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.143,
+     "type": "move",
+     "x": 648,
+     "y": 266,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.175,
+     "type": "move",
+     "x": 659,
+     "y": 268,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.191,
+     "type": "move",
+     "x": 662,
+     "y": 268,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.221,
+     "type": "move",
+     "x": 667,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.24,
+     "type": "move",
+     "x": 669,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.257,
+     "type": "move",
+     "x": 671,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.288,
+     "type": "move",
+     "x": 673,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.32,
+     "type": "move",
+     "x": 674,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.385,
+     "type": "click",
+     "x": 674,
+     "y": 269,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 16.105,
+     "type": "page",
+     "x": 674,
+     "y": 269,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 18.276,
+     "type": "move",
+     "x": 675,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.308,
+     "type": "move",
+     "x": 678,
+     "y": 269,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.325,
+     "type": "move",
+     "x": 681,
+     "y": 270,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.358,
+     "type": "move",
+     "x": 687,
+     "y": 270,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.374,
+     "type": "move",
+     "x": 690,
+     "y": 270,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.389,
+     "type": "move",
+     "x": 694,
+     "y": 268,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.421,
+     "type": "move",
+     "x": 700,
+     "y": 268,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.437,
+     "type": "move",
+     "x": 702,
+     "y": 267,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.466,
+     "type": "move",
+     "x": 703,
+     "y": 267,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.798,
+     "type": "move",
+     "x": 709,
+     "y": 273,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.814,
+     "type": "move",
+     "x": 721,
+     "y": 286,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.847,
+     "type": "move",
+     "x": 754,
+     "y": 328,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.879,
+     "type": "move",
+     "x": 771,
+     "y": 385,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.894,
+     "type": "move",
+     "x": 767,
+     "y": 414,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.91,
+     "type": "move",
+     "x": 758,
+     "y": 441,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.925,
+     "type": "move",
+     "x": 751,
+     "y": 458,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.941,
+     "type": "move",
+     "x": 745,
+     "y": 470,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.958,
+     "type": "move",
+     "x": 740,
+     "y": 480,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.974,
+     "type": "move",
+     "x": 736,
+     "y": 487,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.992,
+     "type": "move",
+     "x": 736,
+     "y": 488,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 20.328,
+     "type": "page",
+     "x": 736,
+     "y": 488,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 22.46,
+     "type": "move",
+     "x": 605,
+     "y": 308,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.491,
+     "type": "move",
+     "x": 380,
+     "y": 171,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.503,
+     "type": "move",
+     "x": 348,
+     "y": 180,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.519,
+     "type": "move",
+     "x": 288,
+     "y": 215,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.582,
+     "type": "move",
+     "x": 139,
+     "y": 407,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.596,
+     "type": "move",
+     "x": 127,
+     "y": 428,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.627,
+     "type": "move",
+     "x": 100,
+     "y": 473,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.659,
+     "type": "move",
+     "x": 87,
+     "y": 495,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.69,
+     "type": "move",
+     "x": 79,
+     "y": 509,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.706,
+     "type": "move",
+     "x": 77,
+     "y": 512,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.723,
+     "type": "move",
+     "x": 77,
+     "y": 513,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 22.754,
+     "type": "click",
+     "x": 77,
+     "y": 513,
+     "button": "left",
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 23.318,
+     "type": "page",
+     "x": 77,
+     "y": 513,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    },
+    {
+     "t": 25.521,
+     "type": "move",
+     "x": 113,
+     "y": 512,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.537,
+     "type": "move",
+     "x": 119,
+     "y": 509,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.553,
+     "type": "move",
+     "x": 129,
+     "y": 503,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.583,
+     "type": "move",
+     "x": 137,
+     "y": 498,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.599,
+     "type": "move",
+     "x": 141,
+     "y": 494,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.613,
+     "type": "move",
+     "x": 142,
+     "y": 493,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.644,
+     "type": "move",
+     "x": 145,
+     "y": 490,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.66,
+     "type": "move",
+     "x": 146,
+     "y": 489,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.692,
+     "type": "move",
+     "x": 148,
+     "y": 488,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.74,
+     "type": "move",
+     "x": 148,
+     "y": 487,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.899,
+     "type": "move",
+     "x": 148,
+     "y": 488,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.948,
+     "type": "move",
+     "x": 148,
+     "y": 490,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.964,
+     "type": "move",
+     "x": 149,
+     "y": 496,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.98,
+     "type": "move",
+     "x": 150,
+     "y": 507,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 25.997,
+     "type": "move",
+     "x": 149,
+     "y": 523,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.014,
+     "type": "move",
+     "x": 148,
+     "y": 540,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.029,
+     "type": "move",
+     "x": 147,
+     "y": 552,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.06,
+     "type": "move",
+     "x": 146,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.088,
+     "type": "move",
+     "x": 153,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.103,
+     "type": "move",
+     "x": 156,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.118,
+     "type": "move",
+     "x": 164,
+     "y": 561,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.15,
+     "type": "move",
+     "x": 165,
+     "y": 569,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.167,
+     "type": "move",
+     "x": 162,
+     "y": 574,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.183,
+     "type": "move",
+     "x": 159,
+     "y": 579,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.199,
+     "type": "move",
+     "x": 157,
+     "y": 580,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.214,
+     "type": "move",
+     "x": 155,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.23,
+     "type": "move",
+     "x": 154,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.554,
+     "type": "move",
+     "x": 155,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.569,
+     "type": "move",
+     "x": 158,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.582,
+     "type": "move",
+     "x": 166,
+     "y": 582,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.598,
+     "type": "move",
+     "x": 189,
+     "y": 581,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.629,
+     "type": "move",
+     "x": 286,
+     "y": 604,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.661,
+     "type": "move",
+     "x": 345,
+     "y": 651,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 26.676,
+     "type": "move",
+     "x": 346,
+     "y": 652,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 27.288,
+     "type": "click",
+     "x": 346,
+     "y": 652,
+     "button": "left",
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    },
+    {
+     "t": 28.096,
+     "type": "end",
+     "x": 346,
+     "y": 652,
+     "button": null,
+     "title": "Sakai : Computer Security (Class No 101765) - Fall 2026 : Syllabus - Google Chrome"
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "round": 2,
+   "klicky": "with",
+   "task": "assignment",
+   "duration_s": 22.521,
+   "events": [
+    {
+     "t": 0.0,
+     "type": "start",
+     "x": 662,
+     "y": 564,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 0.589,
+     "type": "move",
+     "x": 644,
+     "y": 575,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.605,
+     "type": "move",
+     "x": 638,
+     "y": 579,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.62,
+     "type": "move",
+     "x": 633,
+     "y": 583,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.638,
+     "type": "move",
+     "x": 627,
+     "y": 588,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.668,
+     "type": "move",
+     "x": 618,
+     "y": 597,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.7,
+     "type": "move",
+     "x": 609,
+     "y": 609,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.715,
+     "type": "move",
+     "x": 607,
+     "y": 613,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.733,
+     "type": "move",
+     "x": 605,
+     "y": 618,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.746,
+     "type": "move",
+     "x": 604,
+     "y": 621,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.762,
+     "type": "move",
+     "x": 602,
+     "y": 624,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.777,
+     "type": "move",
+     "x": 601,
+     "y": 627,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.796,
+     "type": "move",
+     "x": 600,
+     "y": 629,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.826,
+     "type": "move",
+     "x": 598,
+     "y": 631,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.841,
+     "type": "move",
+     "x": 598,
+     "y": 632,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.856,
+     "type": "move",
+     "x": 598,
+     "y": 633,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.967,
+     "type": "move",
+     "x": 597,
+     "y": 633,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.984,
+     "type": "move",
+     "x": 595,
+     "y": 633,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 0.998,
+     "type": "move",
+     "x": 594,
+     "y": 633,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.044,
+     "type": "move",
+     "x": 584,
+     "y": 634,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.059,
+     "type": "move",
+     "x": 578,
+     "y": 634,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.074,
+     "type": "move",
+     "x": 571,
+     "y": 634,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.093,
+     "type": "move",
+     "x": 562,
+     "y": 636,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.108,
+     "type": "move",
+     "x": 552,
+     "y": 638,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.155,
+     "type": "move",
+     "x": 525,
+     "y": 643,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.186,
+     "type": "move",
+     "x": 500,
+     "y": 652,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.2,
+     "type": "move",
+     "x": 492,
+     "y": 655,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.233,
+     "type": "move",
+     "x": 472,
+     "y": 664,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.248,
+     "type": "move",
+     "x": 465,
+     "y": 667,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.264,
+     "type": "move",
+     "x": 458,
+     "y": 670,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.28,
+     "type": "move",
+     "x": 452,
+     "y": 673,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.295,
+     "type": "move",
+     "x": 448,
+     "y": 676,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.311,
+     "type": "move",
+     "x": 444,
+     "y": 677,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.327,
+     "type": "move",
+     "x": 443,
+     "y": 678,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.357,
+     "type": "move",
+     "x": 442,
+     "y": 678,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.386,
+     "type": "move",
+     "x": 438,
+     "y": 671,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.399,
+     "type": "move",
+     "x": 435,
+     "y": 666,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.43,
+     "type": "move",
+     "x": 421,
+     "y": 642,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.461,
+     "type": "move",
+     "x": 414,
+     "y": 623,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.478,
+     "type": "move",
+     "x": 413,
+     "y": 616,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.509,
+     "type": "move",
+     "x": 411,
+     "y": 598,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.539,
+     "type": "move",
+     "x": 411,
+     "y": 587,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.554,
+     "type": "move",
+     "x": 411,
+     "y": 580,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.57,
+     "type": "move",
+     "x": 411,
+     "y": 576,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.585,
+     "type": "move",
+     "x": 411,
+     "y": 571,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.593,
+     "type": "move",
+     "x": 411,
+     "y": 570,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.624,
+     "type": "move",
+     "x": 411,
+     "y": 564,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.639,
+     "type": "move",
+     "x": 411,
+     "y": 561,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.656,
+     "type": "move",
+     "x": 411,
+     "y": 558,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.672,
+     "type": "move",
+     "x": 411,
+     "y": 557,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.688,
+     "type": "move",
+     "x": 411,
+     "y": 556,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.705,
+     "type": "move",
+     "x": 411,
+     "y": 555,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.722,
+     "type": "move",
+     "x": 411,
+     "y": 554,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 1.737,
+     "type": "move",
+     "x": 411,
+     "y": 553,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.111,
+     "type": "move",
+     "x": 406,
+     "y": 569,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.142,
+     "type": "move",
+     "x": 397,
+     "y": 604,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.157,
+     "type": "move",
+     "x": 389,
+     "y": 634,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.172,
+     "type": "move",
+     "x": 386,
+     "y": 646,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.203,
+     "type": "move",
+     "x": 377,
+     "y": 687,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.234,
+     "type": "move",
+     "x": 371,
+     "y": 723,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.251,
+     "type": "move",
+     "x": 368,
+     "y": 735,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.265,
+     "type": "move",
+     "x": 367,
+     "y": 744,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.296,
+     "type": "move",
+     "x": 364,
+     "y": 758,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.312,
+     "type": "move",
+     "x": 362,
+     "y": 765,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.328,
+     "type": "move",
+     "x": 362,
+     "y": 768,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.343,
+     "type": "move",
+     "x": 362,
+     "y": 769,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 2.357,
+     "type": "move",
+     "x": 361,
+     "y": 770,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 4.845,
+     "type": "page",
+     "x": 361,
+     "y": 770,
+     "button": null,
+     "title": "Klicky"
+    },
+    {
+     "t": 8.479,
+     "type": "move",
+     "x": 404,
+     "y": 723,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.494,
+     "type": "move",
+     "x": 459,
+     "y": 661,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.515,
+     "type": "move",
+     "x": 492,
+     "y": 623,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.547,
+     "type": "move",
+     "x": 553,
+     "y": 544,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.562,
+     "type": "move",
+     "x": 567,
+     "y": 525,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.578,
+     "type": "move",
+     "x": 587,
+     "y": 494,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.599,
+     "type": "move",
+     "x": 606,
+     "y": 469,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.629,
+     "type": "move",
+     "x": 629,
+     "y": 432,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.661,
+     "type": "move",
+     "x": 647,
+     "y": 405,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.679,
+     "type": "move",
+     "x": 657,
+     "y": 389,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.694,
+     "type": "move",
+     "x": 661,
+     "y": 381,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.71,
+     "type": "move",
+     "x": 667,
+     "y": 372,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.726,
+     "type": "move",
+     "x": 671,
+     "y": 364,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.742,
+     "type": "move",
+     "x": 675,
+     "y": 359,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.774,
+     "type": "move",
+     "x": 680,
+     "y": 350,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.805,
+     "type": "move",
+     "x": 684,
+     "y": 343,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.82,
+     "type": "move",
+     "x": 685,
+     "y": 341,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.835,
+     "type": "move",
+     "x": 686,
+     "y": 339,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.882,
+     "type": "move",
+     "x": 689,
+     "y": 336,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 8.914,
+     "type": "move",
+     "x": 689,
+     "y": 335,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 9.568,
+     "type": "click",
+     "x": 689,
+     "y": 335,
+     "button": "left",
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 10.193,
+     "type": "move",
+     "x": 673,
+     "y": 412,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.209,
+     "type": "move",
+     "x": 672,
+     "y": 413,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.246,
+     "type": "move",
+     "x": 671,
+     "y": 414,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.278,
+     "type": "move",
+     "x": 409,
+     "y": 469,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.294,
+     "type": "move",
+     "x": 406,
+     "y": 473,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.324,
+     "type": "move",
+     "x": 364,
+     "y": 561,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 10.338,
+     "type": "move",
+     "x": 362,
+     "y": 570,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 13.956,
+     "type": "page",
+     "x": 362,
+     "y": 570,
+     "button": null,
+     "title": "Sakai : Home : Overview - Google Chrome"
+    },
+    {
+     "t": 14.967,
+     "type": "page",
+     "x": 362,
+     "y": 570,
+     "button": null,
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 15.372,
+     "type": "move",
+     "x": 356,
+     "y": 573,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.418,
+     "type": "move",
+     "x": 307,
+     "y": 597,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.434,
+     "type": "move",
+     "x": 288,
+     "y": 606,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.449,
+     "type": "move",
+     "x": 273,
+     "y": 614,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.526,
+     "type": "move",
+     "x": 181,
+     "y": 660,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.539,
+     "type": "move",
+     "x": 163,
+     "y": 669,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.555,
+     "type": "move",
+     "x": 148,
+     "y": 676,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.573,
+     "type": "move",
+     "x": 138,
+     "y": 681,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.588,
+     "type": "move",
+     "x": 128,
+     "y": 687,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.604,
+     "type": "move",
+     "x": 115,
+     "y": 693,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.619,
+     "type": "move",
+     "x": 108,
+     "y": 696,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.634,
+     "type": "move",
+     "x": 100,
+     "y": 700,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.65,
+     "type": "move",
+     "x": 96,
+     "y": 702,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.667,
+     "type": "move",
+     "x": 90,
+     "y": 705,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.697,
+     "type": "move",
+     "x": 85,
+     "y": 707,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.712,
+     "type": "move",
+     "x": 83,
+     "y": 708,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.728,
+     "type": "move",
+     "x": 81,
+     "y": 709,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.743,
+     "type": "move",
+     "x": 80,
+     "y": 710,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 15.788,
+     "type": "click",
+     "x": 80,
+     "y": 710,
+     "button": "left",
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Overview - Google Chrome"
+    },
+    {
+     "t": 17.163,
+     "type": "move",
+     "x": 122,
+     "y": 692,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.177,
+     "type": "move",
+     "x": 179,
+     "y": 668,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.193,
+     "type": "move",
+     "x": 258,
+     "y": 635,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.21,
+     "type": "move",
+     "x": 370,
+     "y": 584,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.242,
+     "type": "move",
+     "x": 482,
+     "y": 530,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.258,
+     "type": "move",
+     "x": 551,
+     "y": 493,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.289,
+     "type": "move",
+     "x": 637,
+     "y": 448,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.318,
+     "type": "move",
+     "x": 701,
+     "y": 411,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.332,
+     "type": "move",
+     "x": 722,
+     "y": 400,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.349,
+     "type": "move",
+     "x": 742,
+     "y": 388,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.365,
+     "type": "move",
+     "x": 763,
+     "y": 376,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.381,
+     "type": "move",
+     "x": 777,
+     "y": 368,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.397,
+     "type": "move",
+     "x": 784,
+     "y": 364,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.428,
+     "type": "move",
+     "x": 796,
+     "y": 357,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.442,
+     "type": "move",
+     "x": 797,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.458,
+     "type": "move",
+     "x": 798,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 17.475,
+     "type": "move",
+     "x": 799,
+     "y": 356,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 18.221,
+     "type": "page",
+     "x": 799,
+     "y": 356,
+     "button": null,
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    },
+    {
+     "t": 21.125,
+     "type": "move",
+     "x": 752,
+     "y": 357,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.154,
+     "type": "move",
+     "x": 680,
+     "y": 367,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.231,
+     "type": "move",
+     "x": 592,
+     "y": 439,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.263,
+     "type": "move",
+     "x": 578,
+     "y": 461,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.279,
+     "type": "move",
+     "x": 574,
+     "y": 469,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.356,
+     "type": "move",
+     "x": 559,
+     "y": 498,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.372,
+     "type": "move",
+     "x": 557,
+     "y": 501,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.404,
+     "type": "move",
+     "x": 555,
+     "y": 505,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.435,
+     "type": "move",
+     "x": 554,
+     "y": 507,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.451,
+     "type": "move",
+     "x": 554,
+     "y": 508,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.523,
+     "type": "move",
+     "x": 533,
+     "y": 539,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.539,
+     "type": "move",
+     "x": 518,
+     "y": 562,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.57,
+     "type": "move",
+     "x": 479,
+     "y": 616,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.6,
+     "type": "move",
+     "x": 447,
+     "y": 655,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.615,
+     "type": "move",
+     "x": 439,
+     "y": 665,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.63,
+     "type": "move",
+     "x": 424,
+     "y": 682,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.66,
+     "type": "move",
+     "x": 405,
+     "y": 702,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.677,
+     "type": "move",
+     "x": 394,
+     "y": 714,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.693,
+     "type": "move",
+     "x": 389,
+     "y": 719,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.71,
+     "type": "move",
+     "x": 379,
+     "y": 730,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.787,
+     "type": "move",
+     "x": 361,
+     "y": 747,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.801,
+     "type": "move",
+     "x": 359,
+     "y": 749,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.817,
+     "type": "move",
+     "x": 357,
+     "y": 752,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.833,
+     "type": "move",
+     "x": 356,
+     "y": 752,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.848,
+     "type": "move",
+     "x": 355,
+     "y": 753,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.881,
+     "type": "move",
+     "x": 355,
+     "y": 754,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.913,
+     "type": "move",
+     "x": 354,
+     "y": 754,
+     "button": null,
+     "title": null
+    },
+    {
+     "t": 21.928,
+     "type": "click",
+     "x": 354,
+     "y": 754,
+     "button": "left",
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    },
+    {
+     "t": 22.521,
+     "type": "end",
+     "x": 354,
+     "y": 754,
+     "button": null,
+     "title": "Sakai : HUMAN COMPUTER INTERACTION (Class No 101624) - Fall 2026 : Assignments - Google Chrome"
+    }
+   ]
+  }
+ ]
+}

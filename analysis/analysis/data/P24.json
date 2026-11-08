@@ -1,0 +1,112 @@
+{
+  "code": "P24",
+  "saved": "2026-11-08 13:43:56",
+  "tasks": [
+    {
+      "step": 1,
+      "round": 1,
+      "klicky": "without",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 68.49,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:40:10.688",
+      "success": true
+    },
+    {
+      "step": 2,
+      "round": 1,
+      "klicky": "without",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 23.41,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:41:39.000",
+      "success": true
+    },
+    {
+      "step": 3,
+      "round": 2,
+      "klicky": "with",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 34.05,
+      "klicky_busy": [
+        [
+          1.12,
+          1.15
+        ],
+        [
+          1.15,
+          7.94
+        ],
+        [
+          7.94,
+          9.86
+        ],
+        [
+          9.86,
+          15.98
+        ],
+        [
+          18.23,
+          21.1
+        ],
+        [
+          23.98,
+          30.74
+        ],
+        [
+          31.44,
+          34.05
+        ]
+      ],
+      "started_at": "2026-11-08T13:42:21.270",
+      "success": true
+    },
+    {
+      "step": 4,
+      "round": 2,
+      "klicky": "with",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 41.67,
+      "klicky_busy": [
+        [
+          1.24,
+          1.27
+        ],
+        [
+          1.27,
+          8.09
+        ],
+        [
+          8.09,
+          9.51
+        ],
+        [
+          9.51,
+          16.67
+        ],
+        [
+          18.96,
+          21.74
+        ],
+        [
+          24.65,
+          36.11
+        ],
+        [
+          36.12,
+          37.12
+        ],
+        [
+          41.22,
+          41.67
+        ]
+      ],
+      "started_at": "2026-11-08T13:43:11.310",
+      "success": true
+    }
+  ]
+}

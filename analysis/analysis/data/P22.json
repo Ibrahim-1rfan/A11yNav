@@ -1,0 +1,104 @@
+{
+  "code": "P22",
+  "saved": "2026-11-08 13:33:40",
+  "tasks": [
+    {
+      "step": 1,
+      "round": 1,
+      "klicky": "without",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 51.54,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:29:54.964",
+      "success": true
+    },
+    {
+      "step": 2,
+      "round": 1,
+      "klicky": "without",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 37.37,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T13:31:03.327",
+      "success": true
+    },
+    {
+      "step": 3,
+      "round": 2,
+      "klicky": "with",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 34.21,
+      "klicky_busy": [
+        [
+          1.61,
+          1.65
+        ],
+        [
+          1.65,
+          7.62
+        ],
+        [
+          7.62,
+          9.18
+        ],
+        [
+          9.18,
+          15.32
+        ],
+        [
+          17.41,
+          20.32
+        ],
+        [
+          22.91,
+          29.62
+        ],
+        [
+          30.44,
+          34.21
+        ]
+      ],
+      "started_at": "2026-11-08T13:31:59.301",
+      "success": true
+    },
+    {
+      "step": 4,
+      "round": 2,
+      "klicky": "with",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 40.08,
+      "klicky_busy": [
+        [
+          1.51,
+          1.53
+        ],
+        [
+          1.53,
+          8.36
+        ],
+        [
+          8.36,
+          9.6
+        ],
+        [
+          9.6,
+          16.79
+        ],
+        [
+          18.81,
+          21.83
+        ],
+        [
+          24.74,
+          40.08
+        ]
+      ],
+      "started_at": "2026-11-08T13:32:55.643",
+      "success": true
+    }
+  ]
+}

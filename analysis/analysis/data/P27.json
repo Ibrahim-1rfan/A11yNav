@@ -1,0 +1,100 @@
+{
+  "code": "P27",
+  "saved": "2026-11-08 15:10:57",
+  "tasks": [
+    {
+      "step": 1,
+      "round": 1,
+      "klicky": "without",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 69.03,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T15:02:15.587",
+      "success": false
+    },
+    {
+      "step": 2,
+      "round": 1,
+      "klicky": "without",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 56.33,
+      "klicky_busy": [],
+      "started_at": "2026-11-08T15:03:58.783",
+      "success": true
+    },
+    {
+      "step": 3,
+      "round": 2,
+      "klicky": "with",
+      "task": "outline",
+      "text": "Open the Course Outline of Computer Security.",
+      "seconds": 33.51,
+      "klicky_busy": [
+        [
+          1.92,
+          1.95
+        ],
+        [
+          1.95,
+          8.44
+        ],
+        [
+          8.44,
+          9.86
+        ],
+        [
+          9.86,
+          15.96
+        ],
+        [
+          18.48,
+          21.37
+        ],
+        [
+          24.06,
+          30.82
+        ]
+      ],
+      "started_at": "2026-11-08T15:05:25.980",
+      "success": true
+    },
+    {
+      "step": 4,
+      "round": 2,
+      "klicky": "with",
+      "task": "assignment",
+      "text": "In Human Computer Interaction, find which assignment is due next, and its due date.",
+      "seconds": 41.76,
+      "klicky_busy": [
+        [
+          1.66,
+          1.68
+        ],
+        [
+          1.68,
+          9.18
+        ],
+        [
+          9.18,
+          10.86
+        ],
+        [
+          10.86,
+          18.08
+        ],
+        [
+          20.45,
+          23.23
+        ],
+        [
+          26.14,
+          41.76
+        ]
+      ],
+      "started_at": "2026-11-08T15:10:07.530",
+      "success": true
+    }
+  ]
+}
