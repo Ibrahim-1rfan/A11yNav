@@ -28,8 +28,8 @@ So that codes never clash between members:
 | Member A | P11 to P19 |
 | Member B | P21 to P29 |
 
-**Even** numbers do the round **with Klicky first**, **odd** numbers **without Klicky first**. The recorder handles
-this for you and tells you which round is which.
+Every student does the **same 4 tasks in the same order**: both without Klicky first, then both with Klicky. The
+recorder shows each one.
 
 ---
 
@@ -50,7 +50,8 @@ this for you and tells you which round is which.
 
 If they say yes:
 
-1. They **log in to the LMS with their own account**. (If Chrome offers to save the password, click **Never**.)
+1. The LMS must be logged in to an account that has **both Computer Security and Human Computer Interaction**,
+   because every task uses those two courses. (If Chrome offers to save a password, click **Never**.)
 2. Click **Start Recording** in OBS. It records the whole session; leave it running.
 
 ### Before the WITH-Klicky round (the same words for everyone, about 30 seconds)
@@ -71,13 +72,16 @@ Show them once where the keys are. Don't do a full demo.
 | 5 | When they say they're done, or give up, press **Ctrl+E** (task ends) | |
 | 6 | Click **Yes, they did it** or **No / gave up** in the recorder | |
 
-The tasks (the recorder shows them in the right order for each student):
+The 4 tasks, the same for every student and always in this order:
 
-1. *"In one of your courses, find which assignment is due next, and its due date."* (Ask them to say which course
-   before you press Ctrl+S.)
-2. *"Open the Course Outline of that course."*
+| # | Klicky | Task to read aloud |
+| --- | --- | --- |
+| 1 | Without | *"Open the Course Outline of Computer Security."* |
+| 2 | Without | *"In Human Computer Interaction, find which assignment is due next, and its due date."* |
+| 3 | **With** | *"Open the Course Outline of Computer Security."* |
+| 4 | **With** | *"In Human Computer Interaction, find which assignment is due next, and its due date."* |
 
-In the second round, the same two tasks in **a different course**.
+Read the Klicky introduction (above) just before task 3.
 
 A task counts as done only if they found the right thing: the actual next assignment and its date, or the Course
 Outline page is open.

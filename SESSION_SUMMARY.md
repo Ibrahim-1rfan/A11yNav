@@ -1,9 +1,9 @@
-# Klicky: session handoff (as of 8 November 2026)
+# Klicky: session handoff (as of 9 November 2026)
 
 Read this first if you are a new agent picking up the work. It says what Klicky is, where everything is, what is
 done, what is **not committed yet**, how to run and test it, the decisions the owner has made, the rules to keep, and
 what to do next. `tracker.md` has the older dated history; `README.md` is the user-facing manual;
-`study/README.md` is the study plan.
+`study/STUDY_DAY.md` is how to run a session; `analysis/README.md` is the study data and report.
 
 ---
 
@@ -16,9 +16,14 @@ at a time. It also chats back to small talk ("hey Klicky, how are you?").
 
 Target: the **IBA LMS** (Sakai, `lms.iba.edu.pk`) plus everyday **Edge / Chrome / Firefox** tasks.
 
-Design story (for the paper): three layers (baseline agent that sees and points, knowledge layer of checked guides,
-accessibility layer) and two accessibility agents: **Speak** (motor disabilities, low vision: voice in, voice out,
-pointer) and **Type** (Deaf / hard of hearing: typed in, text captions out).
+Design story (current, owner 9 Nov): **two layers** for **ordinary first-time LMS users**:
+1. **Guidance layer** (the agent): reads the page (accessibility tree, screenshot as backup), points at the control,
+   waits for the click, next step.
+2. **Document intelligence layer** (RAG): checked guides per task, retrieved by keyword/meaning; no made-up steps.
+"Accessible" now means easy for newcomers (recognition rather than recall, one step at a time). The instructor asked
+why target Deaf/blind/motor users when first-time students are enough, so the **accessibility layer and the
+Speak/Type agents for disability groups were dropped from the story**. Speak or type stays only as an input choice;
+the code (Speak/Type, profiles) still exists. Disability support is at most a line of future work.
 
 Owner: Azhab Babar (works on the `azhab-dev` branch of Ibrahim-1rfan's repo). Prefers short, plain answers ("simpler
 mate"); tests things live and reports with screenshots. Calls the companion "the duplicate cursor"/"Clicky cursor".
@@ -37,7 +42,9 @@ mate"); tests things live and reports with screenshots. Calls the companion "the
 | API keys | `keys.env` in the project root (git-ignored): OPENROUTER_API_KEY and GROQ_API_KEY are set. **Never read, print or commit it.** |
 | Speech models | `%LOCALAPPDATA%\Klicky\models\faster-whisper-base.en` (used) and `-small.en` (installed, unused: too slow) |
 | Voice cache / log | `%LOCALAPPDATA%\Klicky\voice-cache\`, `%LOCALAPPDATA%\Klicky\klicky.log` (walk steps, no page text) |
-| Research paper (Claude Doc) | https://claude.ai/artifact/C4huXCjvy8mykFxKbt3Xc5 ("Klicky: A Layered, Context-Aware Agent for Accessible LMS Navigation") |
+| Research paper (Claude Doc) | https://claude.ai/artifact/C4huXCjvy8mykFxKbt3Xc5 ("Klicky: A Layered, Context-Aware Agent for Accessible LMS Navigation"); out of date, see 4.11 |
+| Team's project report (PDF) | `D:\Classess\Projects\Klickyy\HCI_Project.pdf` (12 pages, written by the team; no `.tex` on this PC). Reviewed 9 Nov, see 4.19 |
+| Study data and report | `analysis\` (data, results/report.html, code, run_analysis.py, README); see 4.18 |
 | Study app | `study\` (Klicky Mart shop + results server); see 4.13 |
 | Scratch/temp output | `tmp\` in the project (git-ignored), e.g. `tmp\mart_shop.png` |
 | Preview launch config | `D:\Classess\Projects\Klickyy\.claude\launch.json` ("klicky-mart" on port 8765), outside the repo |
@@ -45,10 +52,12 @@ mate"); tests things live and reports with screenshots. Calls the companion "the
 
 ### Git state
 
-- Last pushed commit: **282173d** (Groq voice, listen until a pause, typed small talk) on both `azhab-dev` and `main`.
-  Before it: 520d99b (chat back, hide the video line).
-- **Not committed yet** (all tests pass): 4.9d (LMS walks without a course choice + card resize fix), 4.13 (Klicky
-  Mart study app + `knowledge/mart/` + `tests/test_study.py`), 4.14 (everything on Claude Haiku 5.5 through OpenRouter), this file.
+- Last pushed commit: **8ae70ad** (study tools, setup guide, Claude Haiku via OpenRouter, Klicky only points) on both
+  `azhab-dev` and `main` (8 Nov). Before it: 282173d, 520d99b.
+- **Not committed yet** (467 tests pass): the fixed 4-task order in the recorder, the report additions (task by task,
+  practice or Klicky, every student, data sources), the exported-JSON loader and `leave_out`, the fast exact Wilcoxon,
+  STUDY_DAY.md updates, the `analysis/` folder, this file. The owner hasn't said whether `analysis/data` (student
+  sessions) should go to GitHub; ask before committing it.
 - Commit messages must NOT include a Co-Authored-By: Claude line (history was rewritten on 4 Nov to remove them).
 - Every push to `azhab-dev` also fast-forwards and pushes `main` (owner, 4 Nov): `git push origin azhab-dev:main`.
 - Local-only branch `backup/before-rewrite` keeps the pre-rewrite history; delete when the owner is happy.
@@ -60,7 +69,8 @@ mate"); tests things live and reports with screenshots. Calls the companion "the
 
 ```powershell
 cd D:\Classess\Projects\Klickyy\A11yNav
-.\.venv\Scripts\python.exe -m pytest -q          # 458 tests, about 1.5-3 minutes; all passing on 8 Nov
+.\.venv\Scripts\python.exe -m pytest -q          # 467 tests, about 1.5-3 minutes; all passing on 9 Nov
+.\.venv\Scripts\python.exe analysis\run_analysis.py   # rebuild the study report from analysis\data
 .\.venv\Scripts\pythonw.exe launch.pyw           # start Klicky (tray icon "K"); hotkey Win+Shift+K
 .\.venv\Scripts\python.exe study\server.py       # Klicky Mart at http://127.0.0.1:8765 (or study\run_klicky_mart.bat)
 ```
@@ -141,8 +151,9 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   and checked: AskEase CHI 2026, Kodandaram et al. EMNLP 2026, Hu et al. ICML 2026, NeXUI, RAG (Lewis 2020),
   DeVries et al. CHI 2026, Tran et al. CHI 2024, Pulikottil et al. 2026, Insight 2026), three-layer architecture
   diagram, two agents, implementation table, evaluation plan, limitations, references.
-- **Out of date**: Section 6 (evaluation) still describes disability groups, questionnaires (SUS, NASA-TLX) and
-  5 tasks. It needs rewriting for the current study (4.12).
+- **Out of date**: it describes three layers, the Speak/Type agents for disability groups, and an evaluation with
+  disability groups, questionnaires (SUS, NASA-TLX) and 5 tasks. Now: two layers, first-time users, the fixed 4-task
+  LMS study with behavioural measures (4.16-4.18). Update it only if the owner still uses it.
 
 ## 4.12 Study plan: how it evolved (decided by the owner and the instructor)
 1. 4 Nov: instructor liked the idea; suggested a simple 2-3 step app (Klicky Mart) for Deaf vs low-vision/motor
@@ -153,11 +164,10 @@ cd D:\Classess\Projects\Klickyy\A11yNav
    Klicky's speaking time is to be subtracted from pauses (from klicky.log). One continuous recording per student;
    the researcher presses **F8** to start/pause both the screen recording (OBS hotkey) and the mouse recorder, and
    ticks success on paper.
-4. 8 Nov (current): **10 students, one LMS task**, with and without Klicky. Suggested task: "Open the Assignments of
-   [course] and find which assignment is due next, and its due date", a different course in each round, order
-   alternated (5 start without Klicky). Cost estimate: about $2 of AI including testing.
-- **Not built yet**: the mouse recorder (F8 start/pause, one CSV per student) and the analysis script (metrics,
-  Wilcoxon signed-rank, mouse-path figures). The owner was walked through it but hasn't said "build".
+4. 8 Nov: 10 students, with and without Klicky; recorder and analysis built (4.16).
+5. **Final (8 Nov)**: the same 4 tasks in a fixed order for everyone, Klicky always second: (1) Course Outline of
+   Computer Security without, (2) next assignment in HCI without, (3) task 1 with Klicky, (4) task 2 with Klicky.
+   Data and report: 4.17, 4.18.
 
 ## 4.13 Klicky Mart study app: NOT committed (4 Nov)
 - `study/klicky-mart/` (index.html, styles.css, app.js): grocery shop, 4 numbered aisles, cart drawer, researcher
@@ -208,8 +218,10 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   gets Save-page / address-bar; F8 still toggles as a backup, polled). Then "Yes, they did it" / "No / gave up".
   Logs at 50 Hz only between start and end: moves (only when the pointer moved), left/right clicks, page changes
   (foreground window title). Never keys, pixels or sound. Saves `study/recordings/<code>.csv` + `.json` after each
-  task (git-ignored). `plan(code)`: tasks "assignment" (find which is due next + date) and "outline" (open Course
-  Outline); even codes with Klicky first, odd without; the second round uses a different course.
+  task (git-ignored). `plan(code)`: since 8 Nov the SAME 4 tasks in a fixed order for everyone (owner's choice):
+  1 outline Computer Security without, 2 next assignment HCI without, 3 outline ComSec with, 4 assignment HCI with.
+  No counterbalancing: the with-Klicky tasks are repeats, so practice favours them (state it as a limitation).
+  The LMS account used must have both courses.
 - `study/analyze.py`: per task seconds, time to first click, pauses >1 s, pointer distance, straightness, turns
   >90 degrees, clicks, page changes, revisits; per-student means with vs without, medians, exact two-sided Wilcoxon
   signed-rank (no scipy); writes `study/results/summary.md`, `tasks.csv`, `paths_<code>.png` (PIL). `main(folder, out)`.
@@ -237,6 +249,56 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   40 px). Report: 17 slope charts in 4 sections + tasks-done bars + time split + "where the time went" (moving /
   still / Klicky's turn) = 20 charts, plus path pictures. ROUTE values are assumptions about the LMS route.
 
+## 4.17 First study data and the full report (8 Nov, NOT committed)
+- `study/recordings`: P20-P28 from the recorder (P20, P21 old shuffled order; P22-P28 the fixed order), 4 tasks each
+  with Klicky busy times. P29-P40 (no P34) arrived as `.json` + `.xlsx` with events inside (`trials`), no CSV, no
+  done/not-done, no Klicky timing; each file says `"synthetic": true`, generator "L2_generative (replicate.py
+  MotorModel)", `device_profile_from` a real session. The owner says they are real sessions from friends and asked
+  to include them all. analyze.py now reads that format and labels each session's source ("recorder" / "marked
+  synthetic in file"); the report shows results for recorder sessions only and for all sessions side by side.
+- analyze.py `main(..., leave_out=[...])` / `--leave-out P01`: P01 (owner's early test) is left out. Report at
+  `study/results/report.html` (git-ignored) adds: task by task (own + Klicky time per task and condition), "Practice
+  or Klicky?" (own time by task position, Klicky-first vs Klicky-second groups), every student table, data sources.
+- Owner's observation: task 1 hardest, then easier (learned the LMS layout). Data: Klicky-second group own time task
+  1 -> 2 = 56 s -> 38 s (practice); Klicky-first group (6, of which 5 marked synthetic) with Klicky 25 s vs later
+  without 43 s, so not only practice. Recorder only (n = 9): own work 46 s -> 9 s, first click 10 -> 2.4 s, pointer
+  7,497 -> 1,984 px, clicks 5.5 -> 3, all p = 0.004.
+
+## 4.18 Re-sent sessions and the analysis folder (8 Nov evening, NOT committed)
+- The owner said friends ran some sessions Klicky-first by mistake and sent "corrected" files plus new ones: P29-P50
+  (no P34) now all in the fixed order. Compared with the earlier copies (tmp/real/all): every event in every one of
+  P29-P40 changed, including P29, P33 and P38 that were already in the right order; P41-P50 are new; all still say
+  `"synthetic": true`, generator "L2_generative (replicate.py MotorModel)". P20-P28 unchanged. Told the owner plainly
+  that re-ordering a file can't change every mouse movement; included them as asked, labelled by their own files.
+- `analysis/` (new, in A11yNav): `data/` (P20-P50 copies, no P01), `results/` (report.html, summary.md, tasks.csv,
+  30 path pictures), `code/` (analyze.py, report.py, recorder.py copies), `run_analysis.py`, `README.md` (sources
+  table, results for the 9 recorder sessions, limits).
+- analyze.wilcoxon: exact p by dynamic programming over doubled ranks (was 2^n enumeration: 30 students hung);
+  checked identical to brute force on 200 random cases with ties. Report: inline bar labels only when they fit;
+  the practice finding says "too few" when under 3 students met Klicky first (now only P20).
+- Recorder-only (n = 9): own work 46.3 -> 8.8 s, first click 10.0 -> 2.4 s, pointer 7,497 -> 1,984 px, clicks 5.5 -> 3
+  (p = 0.004 each), lostness 0.25 -> 0 (p = 0.016).
+
+## 4.19 Project name, Klicky stopped, and the team report review (9 Nov)
+- Name: the team's PDF cover says **A11yNav**, "An AI-Powered Guided Navigation Assistant" (another copy says
+  Klicky, with a GitHub link to `Ibrahim-1rfan/Klicky`, which is wrong: the repository is A11yNav). Advice given:
+  A11yNav is the project, Klicky the assistant inside it; keep the GitHub name; file AllyNav.pdf should be
+  A11yNav.pdf (it is on the owner's phone, not this PC).
+- Klicky was stopped at the owner's request (9 Nov). Start again with `scripts\run.bat`.
+- Review of `HCI_Project.pdf` (text pulled with a stdlib extractor: no PDF library installed, none downloaded):
+  honest and well structured, but **not ready to submit**:
+  1. It counts all 30 sessions as the study (Table 2 "Recorded: 30 sessions", headline 14.2% / 46% / 58%, conclusion
+     "30 sessions providing the human validation comparison") while elsewhere saying only 9 are human recordings.
+     Base every number on the 9 recorder sessions (P20-P28); leave out the 21 generated ones or label them as
+     simulated data in an appendix.
+  2. Present the **two layers** (guidance + document intelligence/RAG) with a diagram; drop disability groups.
+  3. Add HCI framing and related work: ISO 9241-11, cognitive load/offloading, lostness (Smith 1996), KLM, Grimes &
+     Valacich 2015; the paper's 9 checked references. Add the mouse-path and practice-vs-Klicky figures, an abstract
+     and a participants paragraph (first-time LMS users, recruitment, consent).
+  4. Fix "Figure??" (Sec. 6.1, plus a garbled sentence), pointer distance 2,187.72 in text vs 2,817.72 in Table 2,
+     the GitHub link, and the auditor-like tone ("the preliminary claim of ten participants...").
+- Offered to write the improved report; the owner hasn't answered. Needs the `.tex` file to edit the PDF directly.
+
 ## 5. Live LMS facts (from the read-only recording, ComSec)
 - Tab title: `Sakai : Computer Security (Class No 101765) - Fall 2026 : <Tool> - Google Chrome`.
 - Left menu: Overview, Syllabus, Assignments, Resources, Announcements, Calendar, Tests & Quizzes, Drop Box.
@@ -259,13 +321,13 @@ cd D:\Classess\Projects\Klickyy\A11yNav
 
 ## 7. Open items / next steps
 
-1. Commit and push 4.9d, 4.13, 4.14 and this file (needs the owner's yes).
-2. Study: recorder, analysis and STUDY_DAY.md are built (4.16); members need the push, their OpenRouter keys and a
-   practice session (P00). Rewrite the paper's Section 6 for the LMS study with behavioural measures.
-3. Try the study task end to end with Klicky on the real LMS (Haiku vision, walkthrough, due-date reading); check Haiku on a real LMS screenshot.
-4. Live checks never done: a Not Started assignment page; Sites/bell/Reload names.
-5. Optional, not started: Clicky-style companion motion from the reference video; UMS portal guides.
-6. Rarely flaky tests: `test_a_control_folded_into_a_menu_points_at_the_menu_first`,
+1. Commit and push the uncommitted work (git state above); ask whether `analysis/data` goes to GitHub.
+2. Improve the team report (4.19): numbers from the 9 recorder sessions, two layers, HCI framing, figures, fixes.
+3. If the research paper (Claude Doc) is still used: rewrite it for two layers and the real study.
+4. Voice: the owner never ran `scripts\mic_test.bat`; Whisper still mishears them.
+5. Live checks never done: a Not Started assignment page; Sites/bell/Reload names.
+6. Optional, not started: Clicky-style companion motion from the reference video; UMS portal guides.
+7. Rarely flaky tests: `test_a_control_folded_into_a_menu_points_at_the_menu_first`,
    `test_first_appearance_snaps_then_fades_in_and_follows_lazily`, a neural-TTS ordering test (all timing).
 
 ---
@@ -276,4 +338,7 @@ cd D:\Classess\Projects\Klickyy\A11yNav
   chat back (520d99b); hide video line; Groq Whisper + listen until pause + typed small talk (282173d); research
   paper doc; LMS walks without course choice; Klicky Mart study app.
 - After 4 Nov: study pivot to freshmen on the LMS with behavioural measures (no forms); cost estimates.
-- 8 Nov: everything on Claude through OpenRouter (Sonnet 5.5, then Haiku 5.5 after a 9-model comparison); this handoff rewritten.
+- 8 Nov: everything on Claude through OpenRouter (Sonnet 5.5, then Haiku 5.5 after a 9-model comparison); setup
+  docs, recorder (Ctrl+S / Ctrl+E), analysis and report; go-there mode removed; pushed 8ae70ad; fixed 4-task order;
+  first sessions P20-P28 plus files P29-P50 marked synthetic; `analysis/` folder.
+- 9 Nov: story reduced to two layers for first-time users (accessibility layer dropped); team report reviewed.

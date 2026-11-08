@@ -24,12 +24,13 @@ def no_real_klicky_log(monkeypatch):
     monkeypatch.setattr(recorder, "read_log_lines", lambda paths=None: [])
 
 
-def test_plan_alternates_which_round_comes_first_and_changes_course():
-    odd, even = recorder.plan("P11"), recorder.plan("P12")
-    assert [s["klicky"] for s in odd] == ["without", "without", "with", "with"]
-    assert [s["klicky"] for s in even] == ["with", "with", "without", "without"]
-    assert [s["task"] for s in odd] == ["assignment", "outline", "assignment", "outline"]
-    assert "one of your courses" in odd[0]["text"] and "a different course" in odd[2]["text"]
+def test_every_student_gets_the_same_four_tasks_in_the_same_order():
+    first, other = recorder.plan("P11"), recorder.plan("P12")
+    assert first == other
+    assert [(s["klicky"], s["task"]) for s in first] == [("without", "outline"), ("without", "assignment"),
+                                                          ("with", "outline"), ("with", "assignment")]
+    assert "Computer Security" in first[0]["text"] and first[0]["text"] == first[2]["text"]
+    assert "Human Computer Interaction" in first[1]["text"] and first[1]["text"] == first[3]["text"]
     with pytest.raises(ValueError):
         recorder.Session("student one")
 
@@ -145,7 +146,7 @@ def test_analysis_end_to_end_writes_the_table_and_pictures(tmp_path):
     assert len(list(csv.DictReader((out / "tasks.csv").open(encoding="utf-8")))) == 8
     assert (out / "paths_P11.png").exists() and (out / "paths_P12.png").exists()
     page = (out / "report.html").read_text(encoding="utf-8")
-    assert "Cognitive offloading" in page and page.count("<svg") == 20 and "paths_P11.png" in page
+    assert "Cognitive offloading" in page and page.count("<svg") == 22 and "paths_P11.png" in page
 
 
 def test_lostness_rage_clicks_and_the_expert_benchmark():
@@ -164,3 +165,24 @@ def test_lostness_rage_clicks_and_the_expert_benchmark():
     assert m["klm_ratio"] == pytest.approx(5.3 / (2 * analyze.KLM_CLICK_S), abs=.01)
     assert m["decide_s"] == pytest.approx((0.98 + 1.98) / 2, abs=.01)                       # still before each click
     assert 0.9 < m["idle_share"] < 1.0
+
+
+def test_exported_and_synthetic_files_are_included_but_labelled_and_codes_can_be_left_out(tmp_path):
+    rec, out = tmp_path / "recordings", tmp_path / "results"
+    for code in ("P11", "P12", "P13"):
+        s = recorder.Session(code, folder=rec)
+        while not s.done:
+            run_task(s, 0.0, [(i * 10, 0) for i in range(20)], clicks={19})
+            s.mark(True)
+    events = [{"t": 0, "type": "start", "x": 0, "y": 0, "title": "Sakai : Home"}, {"t": .5, "type": "move", "x": 50, "y": 0},
+              {"t": 1, "type": "click", "x": 50, "y": 0, "button": "left", "title": "Sakai : Home"},
+              {"t": 2, "type": "end", "x": 50, "y": 0, "title": "Sakai : Home"}]
+    trials = [{"step": s["step"], "round": s["round"], "klicky": s["klicky"], "task": s["task"], "duration_s": 2,
+               "events": events} for s in recorder.plan("P29")]
+    (rec / "P29.json").write_text(json.dumps({"code": "P29", "synthetic": True, "trials": trials}), encoding="utf-8")
+    assert analyze.main(rec, out, leave_out=["P13"]) == 0
+    rows = list(csv.DictReader((out / "tasks.csv").open(encoding="utf-8")))
+    assert sorted({r["code"] for r in rows}) == ["P11", "P12", "P29"]
+    assert {r["source"] for r in rows if r["code"] == "P29"} == {"marked synthetic in file"}
+    page = (out / "report.html").read_text(encoding="utf-8")
+    assert "marked synthetic in file" in page and "P29" in page and "P13 (left out on purpose)" in page

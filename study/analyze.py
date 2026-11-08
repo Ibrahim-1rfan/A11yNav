@@ -8,10 +8,9 @@ log, or when that's missing, while a Klicky window was in front) is reported on 
 
 Writes study/results/tasks.csv (one row per task), study/results/summary.md (the comparison table) and
 study/results/paths_<code>.png (the pointer's path, without Klicky beside with Klicky).
-Usage: python study/analyze.py [folder with the recordings]
+Usage: python study/analyze.py [folder with the recordings] [--leave-out P00 P01]
 """
 import csv
-import itertools
 import json
 import math
 from pathlib import Path
@@ -74,8 +73,24 @@ def load(folder):
     results = {}
     for path in sorted(folder.glob("P*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
+        if "trials" in data:   # a session exported with its events inside the JSON (no CSV)
+            code = data["code"]
+            source = "marked synthetic in file" if data.get("synthetic") else "exported"
+            for trial in data["trials"]:
+                key = (code, trial["step"])
+                tasks.setdefault(key, [{"code": code, "step": trial["step"], "round": trial.get("round"),
+                                        "klicky": trial["klicky"], "task": trial["task"], "t": e["t"], "type": e["type"],
+                                        "x": e["x"], "y": e["y"], "button": e.get("button") or "", "title": e.get("title") or ""}
+                                       for e in trial["events"]])
+                results[key] = {"step": trial["step"], "klicky": trial["klicky"], "task": trial["task"],
+                                "seconds": trial.get("duration_s"), "success": trial.get("success"),
+                                "klicky_busy": trial.get("klicky_busy"), "source": source}
+            continue
+        if "tasks" not in data:
+            print(f"Skipped {path.name}: not a recorder file.")
+            continue
         for task in data["tasks"]:
-            results[(data["code"], task["step"])] = task
+            results[(data["code"], task["step"])] = {**task, "source": "recorder"}
     return tasks, results
 
 
@@ -218,8 +233,15 @@ def wilcoxon(differences):
         i = j + 1
     observed = sum(r for r, x in zip(ranks, d) if x > 0)
     mean = sum(ranks) / 2
-    extreme = sum(1 for signs in itertools.product((0, 1), repeat=n)
-                  if abs(sum(r for r, s in zip(ranks, signs) if s) - mean) >= abs(observed - mean) - 1e-9)
+    # The exact null distribution of the positive-rank sum, built rank by rank (ranks doubled to whole numbers so
+    # tied half-ranks count exactly): the same answer as trying all 2^n sign patterns, in a fraction of the time.
+    ways = {0: 1}
+    for rank in (round(r * 2) for r in ranks):
+        nxt = dict(ways)
+        for total, count in ways.items():
+            nxt[total + rank] = nxt.get(total + rank, 0) + count
+        ways = nxt
+    extreme = sum(count for total, count in ways.items() if abs(total / 2 - mean) >= abs(observed - mean) - 1e-9)
     return extreme / 2 ** n
 
 
@@ -261,11 +283,15 @@ def draw_paths(code, tasks, out):
     return path
 
 
-def main(folder=None, out=None):
+def main(folder=None, out=None, leave_out=()):
+    """leave_out: student codes kept out of the analysis on purpose (e.g. a practice run); the report lists them."""
     folder = Path(folder) if folder else HERE / "recordings"
     out = Path(out) if out else HERE / "results"
     out.mkdir(parents=True, exist_ok=True)
     tasks, results = load(folder)
+    left = sorted(code for code in {c for c, _ in tasks} if code in set(leave_out))
+    tasks = {key: rows for key, rows in tasks.items() if key[0] not in left}
+    results = {key: r for key, r in results.items() if key[0] not in left}
     if not tasks:
         print(f"No recordings found in {folder}.")
         return 1
@@ -273,8 +299,11 @@ def main(folder=None, out=None):
     for (code, step), rows in sorted(tasks.items()):
         result = results.get((code, step), {})
         table.append({"code": code, "step": step, "round": rows[0]["round"], "klicky": rows[0]["klicky"],
-                      "task": rows[0]["task"], "success": result.get("success"),
+                      "task": rows[0]["task"], "success": result.get("success"), "source": result.get("source", "recorder"),
                       **measure(rows, result.get("klicky_busy"), rows[0]["task"])})
+    first = {r["code"]: r["klicky"] for r in sorted(table, key=lambda r: r["step"], reverse=True)}
+    for r in table:   # which condition the student met first: "with" means Klicky before any practice
+        r["order"] = "Klicky first" if first[r["code"]] == "with" else "Klicky second"
     with (out / "tasks.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(table[0]))
         writer.writeheader()
@@ -309,14 +338,14 @@ def main(folder=None, out=None):
         without, with_ = statistics.median(p[0] for p in pairs), statistics.median(p[1] for p in pairs)
         p = wilcoxon([w - wo for wo, w in pairs])
         better = "yes" if (with_ < without if lower_better else with_ > without) else "no" if with_ != without else "same"
-        lines.append(f"| {label} | {without:.2f} | {with_:.2f} | {better} | {'n/a' if p is None else f'{p:.3f}'} |")
+        lines.append(f"| {label} | {without:.2f} | {with_:.2f} | {better} | {'n/a' if p is None else ('< 0.001' if p < 0.001 else f'{p:.3f}')} |")
     (out / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     pictures = [draw_paths(code, [rows for (c, _), rows in tasks.items() if c == code], out) for code in codes]
     import importlib.util
     spec = importlib.util.spec_from_file_location("study_report", HERE / "report.py")
     report = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(report)
-    page = report.write(table, out, pictures, wilcoxon)
+    page = report.write(table, out, pictures, wilcoxon, left_out=left)
     print("\n".join(lines))
     print(f"\nSaved {out / 'tasks.csv'}, {out / 'summary.md'}, {len([p for p in pictures if p])} path pictures "
           f"and the report with all the graphs: {page}")
@@ -324,4 +353,9 @@ def main(folder=None, out=None):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("folder", nargs="?", help="folder with the recordings (default study/recordings)")
+    parser.add_argument("--leave-out", nargs="*", default=[], help="student codes to keep out, e.g. --leave-out P00 P01")
+    args = parser.parse_args()
+    raise SystemExit(main(args.folder, leave_out=args.leave_out))

@@ -17,3 +17,8 @@ keys.env
 *.env
 study/results/
 study/recordings/
+
+# Study sessions and their results stay on this PC (students' LMS use); the code and README in analysis/ are shared
+analysis/data/
+analysis/results/
+analysis.zip

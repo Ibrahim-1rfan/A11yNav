@@ -25,11 +25,13 @@ SAMPLE_MS = 20          # 50 samples a second
 VK_F8, VK_LBUTTON, VK_RBUTTON = 0x77, 0x01, 0x02
 MOD_CONTROL, MOD_NOREPEAT, WM_HOTKEY = 0x0002, 0x4000, 0x0312
 SHORTCUTS = {0x5301: ("start", 0x53), 0x4501: ("end", 0x45)}  # hotkey id: (what it does, key): Ctrl+S, Ctrl+E
-TASKS = (
-    ("assignment", "In {course}, find which assignment is due next, and its due date."),
-    ("outline", "Open the Course Outline of {course}."),
+# The four tasks, the same for every student and always in this order (owner's choice, 8 Nov 2026).
+STEPS = (
+    ("without", "outline", "Open the Course Outline of Computer Security."),
+    ("without", "assignment", "In Human Computer Interaction, find which assignment is due next, and its due date."),
+    ("with", "outline", "Open the Course Outline of Computer Security."),
+    ("with", "assignment", "In Human Computer Interaction, find which assignment is due next, and its due date."),
 )
-COURSES = ("one of your courses (say which)", "a different course")
 FIELDS = ("code", "step", "round", "klicky", "task", "t", "type", "x", "y", "button", "title")
 CODE = re.compile(r"^P\d{1,3}$")
 # Klicky is busy (the student asks, waits or listens) in these dock states; "waiting" is the student's own turn.
@@ -71,13 +73,9 @@ def read_log_lines(paths=None):
 
 
 def plan(code):
-    """The four steps for a student: two tasks without Klicky and two with, in a different course each round.
-    Even numbers start with Klicky, odd numbers without, so practice doesn't favour either side."""
-    number = int(code[1:])
-    rounds = ("with", "without") if number % 2 == 0 else ("without", "with")
-    return [{"step": len(TASKS) * r + i + 1, "round": r + 1, "klicky": klicky, "task": task,
-             "text": text.format(course=COURSES[r])}
-            for r, klicky in enumerate(rounds) for i, (task, text) in enumerate(TASKS)]
+    """The four steps, identical for every student: both tasks without Klicky, then both again with Klicky."""
+    return [{"step": i + 1, "round": 1 if klicky == "without" else 2, "klicky": klicky, "task": task, "text": text}
+            for i, (klicky, task, text) in enumerate(STEPS)]
 
 
 @dataclass

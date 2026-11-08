@@ -80,6 +80,10 @@ def per_student(table, column):
     return pairs
 
 
+def fmt_p(p):
+    return "< 0.001" if p < 0.001 else f"= {p:.3f}"
+
+
 def number(value, unit=""):
     text = f"{value:.2f}" if abs(value) < 1 else f"{value:.1f}" if abs(value) < 100 else f"{value:,.0f}"
     return f"{text} {unit}".strip()
@@ -93,7 +97,7 @@ def slope(label, unit, pairs, lower_better, p=None):
     parts = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="{html.escape(label)}">',
              f'<text x="12" y="20" font-size="13" font-weight="700" fill="{INK}">{html.escape(label)}</text>',
              f'<text x="12" y="36" font-size="11" fill="{QUIET}">{"lower" if lower_better else "higher"} is better'
-             + (f" · p = {p:.3f}" if p is not None else "") + "</text>",
+             + (f" · p {fmt_p(p)}" if p is not None else "") + "</text>",
              f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="{GRID}"/>']
     for a, b in pairs:
         parts.append(f'<line x1="{left}" y1="{y(a):.1f}" x2="{right}" y2="{y(b):.1f}" stroke="#c4c9d0" stroke-width="1.2"/>')
@@ -147,8 +151,9 @@ def time_bars(table):
         parts.append(f'<text x="0" y="{y + 19}" font-size="13" fill="{INK}">{name}</text>')
         for value, colour, what in segments:
             parts.append(f'<rect x="{x:.1f}" y="{y}" width="{value * scale:.1f}" height="28" fill="{colour}"/>')
-            if value * scale > 60:
-                parts.append(f'<text x="{x + 8:.1f}" y="{y + 19}" font-size="12" fill="{INK}">{number(value, "s")} {what}</text>')
+            label = f"{number(value, 's')} {what}"
+            if value * scale > len(label) * 7 + 16:   # only when the words fit inside the bar
+                parts.append(f'<text x="{x + 8:.1f}" y="{y + 19}" font-size="12" fill="{INK}">{label}</text>')
             x += value * scale
         parts.append(f'<text x="{x + 8:.1f}" y="{y + 19}" font-size="13" font-weight="700" fill="{INK}">'
                      f'{number(sum(v for v, _, _ in segments), "s")}</text>')
@@ -159,7 +164,140 @@ def time_bars(table):
     return "".join(parts) + "</svg>"
 
 
-def write(table, out, pictures, wilcoxon):
+TASK_NAMES = {"outline": "Course Outline (Computer Security)", "assignment": "Next assignment (HCI)"}
+
+
+def med(values):
+    values = [v for v in values if v is not None]
+    return statistics.median(values) if values else None
+
+
+def by_task_chart(table):
+    """For each task, without and with Klicky: median own work, plus the time spent with Klicky."""
+    groups = []
+    for task in ("outline", "assignment"):
+        for klicky in ("without", "with"):
+            rows = [r for r in table if r["task"] == task and r["klicky"] == klicky]
+            groups.append((TASK_NAMES[task], klicky, med(r["own_s"] for r in rows), med(r["klicky_s"] for r in rows) or 0, len(rows)))
+    top = max([(o or 0) + k for _, _, o, k, _ in groups] + [1]) * 1.1
+    scale = 300 / top
+    parts = ['<svg viewBox="0 0 640 250" role="img" aria-label="Time per task">']
+    for i, (name, klicky, own, kl, n) in enumerate(groups):
+        y = 16 + i * 50
+        if i % 2 == 0:
+            parts.append(f'<text x="0" y="{y + 12}" font-size="12" font-weight="700" fill="{INK}">{html.escape(name)}</text>')
+        parts.append(f'<text x="0" y="{y + 32}" font-size="12" fill="{QUIET}">{klicky} Klicky</text>')
+        x = 140
+        for value, colour in ((own or 0, WITH if klicky == "with" else WITHOUT), (kl, KLICKY_TIME)):
+            parts.append(f'<rect x="{x:.1f}" y="{y + 18}" width="{value * scale:.1f}" height="22" fill="{colour}"/>')
+            x += value * scale
+        parts.append(f'<text x="{x + 8:.1f}" y="{y + 34}" font-size="12" fill="{INK}">{number(own or 0, "s")} own'
+                     + (f' + {number(kl, "s")} with Klicky' if kl else "") + f' (n = {n})</text>')
+    return "".join(parts) + "</svg>"
+
+
+def order_chart(table):
+    """Own work by task position (1-4), one line per group: Klicky first, Klicky second."""
+    w, h, left, right, top, bottom = 640, 300, 60, 600, 30, 240
+    series = {}
+    for order in ("Klicky second", "Klicky first"):
+        rows = [r for r in table if r.get("order") == order]
+        if rows:
+            series[order] = [(step, med(r["own_s"] for r in rows if r["step"] == step),
+                              next((r["klicky"] for r in rows if r["step"] == step), "")) for step in (1, 2, 3, 4)]
+    top_value = max([v for s in series.values() for _, v, _ in s if v is not None] + [1]) * 1.15
+    x = lambda step: left + (right - left) * (step - 1) / 3
+    y = lambda v: bottom - (bottom - top) * v / top_value
+    parts = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Own work by task position">',
+             f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="{GRID}"/>']
+    for step in (1, 2, 3, 4):
+        parts.append(f'<text x="{x(step)}" y="{bottom + 20}" font-size="12" text-anchor="middle" fill="{QUIET}">task {step}</text>')
+    styles = {"Klicky second": ("#5e2770", ""), "Klicky first": ("#c9a227", ' stroke-dasharray="6 4"')}
+    for order, points in series.items():
+        colour, dash = styles[order]
+        pts = [(x(s), y(v)) for s, v, _ in points if v is not None]
+        parts.append(f'<polyline points="{" ".join(f"{a:.1f},{b:.1f}" for a, b in pts)}" fill="none" stroke="{colour}" stroke-width="2.5"{dash}/>')
+        for s, v, klicky in points:
+            if v is None:
+                continue
+            fill = WITH if klicky == "with" else WITHOUT
+            parts += [f'<circle cx="{x(s):.1f}" cy="{y(v):.1f}" r="7" fill="{fill}" stroke="{colour}" stroke-width="2"/>',
+                      f'<text x="{x(s) + 10:.1f}" y="{y(v) - 8:.1f}" font-size="11" fill="{INK}">{number(v, "s")}</text>']
+    legend_y = h - 24
+    parts += [f'<line x1="{left}" y1="{legend_y}" x2="{left + 30}" y2="{legend_y}" stroke="#5e2770" stroke-width="2.5"/>',
+              f'<text x="{left + 36}" y="{legend_y + 4}" font-size="12" fill="{QUIET}">Klicky second (n = {len({r["code"] for r in table if r.get("order") == "Klicky second"})})</text>',
+              f'<line x1="{left + 220}" y1="{legend_y}" x2="{left + 250}" y2="{legend_y}" stroke="#c9a227" stroke-width="2.5" stroke-dasharray="6 4"/>',
+              f'<text x="{left + 256}" y="{legend_y + 4}" font-size="12" fill="{QUIET}">Klicky first (n = {len({r["code"] for r in table if r.get("order") == "Klicky first"})})</text>',
+              f'<circle cx="{left + 440}" cy="{legend_y}" r="6" fill="{WITHOUT}"/><text x="{left + 450}" y="{legend_y + 4}" font-size="12" fill="{QUIET}">without</text>',
+              f'<circle cx="{left + 510}" cy="{legend_y}" r="6" fill="{WITH}"/><text x="{left + 520}" y="{legend_y + 4}" font-size="12" fill="{QUIET}">with</text>']
+    return "".join(parts) + "</svg>"
+
+
+def practice_findings(table):
+    """Plain sentences that separate practice from Klicky, from the numbers."""
+    lines = []
+    second = [r for r in table if r.get("order") == "Klicky second"]
+    first = [r for r in table if r.get("order") == "Klicky first"]
+    if second:
+        t1, t2 = med(r["own_s"] for r in second if r["step"] == 1), med(r["own_s"] for r in second if r["step"] == 2)
+        if t1 and t2:
+            lines.append(f"Students who met Klicky second got faster from task 1 to task 2 on their own ({number(t1, 's')} to "
+                         f"{number(t2, 's')}): that is practice, learning the LMS layout (course tabs at the top, the left menu).")
+    if first:
+        w = med(r["own_s"] for r in first if r["klicky"] == "with")
+        wo = med(r["own_s"] for r in first if r["klicky"] == "without")
+        n_first = len({r["code"] for r in first})
+        if w is not None and wo is not None and n_first < 3:
+            lines.append(f"Only {n_first} student(s) met Klicky first ({', '.join(sorted({r['code'] for r in first}))}): "
+                         f"own work with Klicky {number(w, 's')}, later without it {number(wo, 's')}. Too few to separate "
+                         "practice from Klicky; with every student meeting Klicky second, part of the improvement is practice.")
+        elif w is not None and wo is not None:
+            lines.append(f"Students who met Klicky first had no practice when they used it, yet their own work with Klicky "
+                         f"({number(w, 's')}) was {'shorter' if w < wo else 'longer'} than their later tasks without it "
+                         f"({number(wo, 's')}), which they did after practising. "
+                         + ("So Klicky's effect is not only practice." if w < wo else "Here practice outweighs Klicky."))
+    return "".join(f"<li>{html.escape(s)}</li>" for s in lines)
+
+
+def students_table(table):
+    cols = [("outline", "without"), ("outline", "with"), ("assignment", "without"), ("assignment", "with")]
+    head = "".join(f"<th>{'Outline' if t == 'outline' else 'Assignment'}<br>{k}</th>" for t, k in cols)
+    rows = []
+    for code in sorted({r["code"] for r in table}):
+        mine = [r for r in table if r["code"] == code]
+        cells = []
+        for task, klicky in cols:
+            r = next((r for r in mine if r["task"] == task and r["klicky"] == klicky), None)
+            if r is None:
+                cells.append("<td>-</td>")
+                continue
+            done = "" if r["success"] is None else (" ✓" if r["success"] else " ✗")
+            cells.append(f"<td>{r['own_s']:.0f} s{done}<br><small>{r['clicks']} clicks</small></td>")
+        rows.append(f"<tr><th>{code}</th><td>{html.escape(mine[0].get('order', ''))}</td><td>{html.escape(mine[0].get('source', ''))}</td>{''.join(cells)}</tr>")
+    return (f"<table><thead><tr><th>Student</th><th>Order</th><th>Data source</th>{head}</tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>")
+
+
+def source_check(table, wilcoxon):
+    """The headline numbers again, with recorder sessions only and with every session."""
+    groups = [("Recorder sessions only", [r for r in table if r.get("source") == "recorder"]), ("All sessions", table)]
+    measures = [("own_s", "Own work (s)"), ("first_click_s", "Time to first click (s)"), ("path_px", "Pointer distance (px)"),
+                ("clicks", "Clicks"), ("lostness", "Lostness")]
+    body = []
+    for name, rows in groups:
+        n = len({r["code"] for r in rows})
+        for column, label in measures:
+            pairs = per_student(rows, column)
+            if not pairs:
+                continue
+            p = wilcoxon([b - a for a, b in pairs]) if len(pairs) > 1 else None
+            body.append(f"<tr><td>{name} (n = {n})</td><td>{label}</td><td>{number(med(a for a, _ in pairs))}</td>"
+                        f"<td>{number(med(b for _, b in pairs))}</td><td>{'n/a' if p is None else fmt_p(p)}</td></tr>")
+    return ("<table><thead><tr><th>Sessions</th><th>Measure</th><th>Without</th><th>With Klicky</th><th>p</th></tr></thead>"
+            f"<tbody>{''.join(body)}</tbody></table>")
+
+
+def write(table, out, pictures, wilcoxon, left_out=()):
     codes = sorted({r["code"] for r in table})
     sections = []
     for heading, text, measures in SECTIONS:
@@ -180,6 +318,9 @@ h1 {{ margin: 0 0 4px; }} h2 {{ margin: 36px 0 4px; }} p {{ color: {QUIET}; max-
 .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }}
 figure {{ margin: 0; border: 1px solid {GRID}; border-radius: 10px; padding: 8px; background: #fff; }}
 figure.wide img {{ width: 100%; }} figcaption {{ color: {QUIET}; font-size: 13px; padding: 4px; }}
+table {{ border-collapse: collapse; width: 100%; font-size: 13px; margin: 8px 0; }}
+th, td {{ border-bottom: 1px solid {GRID}; padding: 6px 8px; text-align: left; vertical-align: top; }}
+thead th {{ color: {QUIET}; font-weight: 600; }} small {{ color: {QUIET}; }} li {{ color: {INK}; margin: 6px 0; }}
 </style></head><body>
 <h1>Klicky study report</h1>
 <p>{len(codes)} student(s), {len(table)} tasks. Every student did the same tasks without and with Klicky. Grey lines are
@@ -193,7 +334,18 @@ Medians across students.</p><figure>{time_bars(table)}</figure></section>
 <section><h2>Where the time went</h2><p>All tasks together: how much of the time the pointer was moving, how much it
 was still (thinking, reading, looking for the next step), and how much was Klicky's turn.</p>
 <figure>{time_budget(table)}</figure></section>
+<section><h2>Task by task</h2><p>Each task without and with Klicky: the student's own work (solid) and the time
+spent with Klicky (light). Medians.</p><figure>{by_task_chart(table)}</figure></section>
+<section><h2>Practice or Klicky?</h2><p>Students learn the LMS as they go, so later tasks are easier anyway (a practice
+or learning effect). Comparing students who met Klicky first with those who met it second shows how much is practice
+and how much is Klicky. Each line is the median own work at each task position; the dot colour shows whether that task
+was with or without Klicky.</p><figure>{order_chart(table)}</figure><ul>{practice_findings(table)}</ul></section>
 {"".join(sections)}
+<section><h2>Every student</h2><p>Own work per task (Klicky's turns left out), clicks, and whether it was done
+(✓ / ✗; blank when the file has no answer).</p>{students_table(table)}</section>
+<section><h2>Data sources</h2><p>The headline results with recorder sessions only and with every session. Sessions
+whose files say they were generated ("synthetic") are marked in the table above.</p>{source_check(table, wilcoxon)}
+{f"<p>Not in this report: {', '.join(f'{c} (left out on purpose)' for c in left_out)}.</p>" if left_out else ""}</section>
 <section><h2>What the pointer did</h2><p>The path of the mouse in each task: searching shows as long, crossing lines.</p>
 {paths}</section>
 </body></html>"""
